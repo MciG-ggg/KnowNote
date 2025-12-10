@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { MoreHorizontal, Paperclip, Send } from 'lucide-react'
+import { MoreHorizontal, Paperclip, Send, Home, Plus } from 'lucide-react'
 
 export default function ChatLayout() {
   const [messages] = useState<string[]>([])
@@ -40,11 +40,22 @@ export default function ChatLayout() {
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
-      {/* 全局顶部拖拽区域 */}
-      <div
-        className="h-10 flex-shrink-0"
-        style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
-      ></div>
+      {/* 全局顶部区域 */}
+      <div className="h-10 flex-shrink-0 flex items-center gap-3" style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}>
+        {/* 左侧空白区域（留给窗口控制按钮） */}
+        <div className="w-16"></div>
+
+        {/* 导航按钮 */}
+        <div className="flex items-center gap-2" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
+          <button className="flex items-center gap-2 px-3 py-1.5 bg-[#2a2a2a] hover:bg-[#333333] rounded-lg transition-colors text-sm h-8">
+            <Home className="w-4 h-4" />
+            <span>首页</span>
+          </button>
+          <button className="flex items-center justify-center w-8 h-8 hover:bg-[#2a2a2a] rounded-lg transition-colors">
+            <Plus className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
 
       {/* 三栏布局 */}
       <div className="flex flex-1 px-3 pb-3 gap-0">
