@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, ReactElement } from 'react'
 
-export default function ProvidersSettings() {
+export default function ProvidersSettings(): ReactElement {
   const [activeProvider, setActiveProvider] = useState<string>('openai')
 
   const providers = [
@@ -85,9 +85,7 @@ export default function ProvidersSettings() {
                     className="w-full bg-transparent outline-none text-gray-100 placeholder-gray-500"
                   />
                 </div>
-                <button className="mt-2 text-xs text-blue-400 hover:text-blue-300">
-                  验证密钥
-                </button>
+                <button className="mt-2 text-xs text-blue-400 hover:text-blue-300">验证密钥</button>
               </div>
 
               <div className="p-4 bg-[#171717] rounded-xl">
@@ -159,9 +157,7 @@ export default function ProvidersSettings() {
           <div className="max-w-4xl">
             <div className="p-6 bg-gradient-to-br from-blue-500/10 to-purple-600/10 rounded-xl border border-blue-400/20">
               <h4 className="text-lg font-medium mb-2 text-gray-100">DeepSeek 已开放</h4>
-              <p className="text-sm text-gray-300 mb-4">
-                支持深度思考、代码生成、数学推理等功能
-              </p>
+              <p className="text-sm text-gray-300 mb-4">支持深度思考、代码生成、数学推理等功能</p>
             </div>
 
             <div className="space-y-4 mt-6">
@@ -174,9 +170,7 @@ export default function ProvidersSettings() {
                     className="w-full bg-transparent outline-none text-gray-100 placeholder-gray-500"
                   />
                 </div>
-                <button className="mt-2 text-xs text-blue-400 hover:text-blue-300">
-                  验证密钥
-                </button>
+                <button className="mt-2 text-xs text-blue-400 hover:text-blue-300">验证密钥</button>
               </div>
 
               <div className="p-4 bg-[#171717] rounded-xl">

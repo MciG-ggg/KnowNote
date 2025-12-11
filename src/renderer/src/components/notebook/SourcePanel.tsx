@@ -1,10 +1,11 @@
 import { MoreHorizontal } from 'lucide-react'
+import { ReactElement } from 'react'
 
 export interface SourcePanelProps {
   onNewChatClick?: () => void
 }
 
-export default function SourcePanel({ onNewChatClick }: SourcePanelProps) {
+export default function SourcePanel({ onNewChatClick }: SourcePanelProps): ReactElement {
   return (
     <div className="flex flex-col bg-[#171717] rounded-xl overflow-hidden h-full">
       {/* 顶部按钮区域 */}

@@ -1,10 +1,10 @@
 import { Globe, Database, HelpCircle } from 'lucide-react'
-import { useState } from 'react'
+import { useState, ReactElement } from 'react'
 import GeneralSettings from './GeneralSettings'
 import ProvidersSettings from './ProvidersSettings'
 import AboutSettings from './AboutSettings'
 
-export default function SettingsWindow() {
+export default function SettingsWindow(): ReactElement {
   const [activeSection, setActiveSection] = useState<string>('general')
 
   const menuItems = [
@@ -25,7 +25,7 @@ export default function SettingsWindow() {
     }
   ]
 
-  const renderContent = () => {
+  const renderContent = (): ReactElement | null => {
     switch (activeSection) {
       case 'general':
         return <GeneralSettings />

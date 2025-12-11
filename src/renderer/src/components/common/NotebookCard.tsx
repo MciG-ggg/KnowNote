@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, ReactElement } from 'react'
 import { MessageSquare, MoreVertical } from 'lucide-react'
-import type { Notebook } from '../types/notebook'
+import type { Notebook } from '../../types/notebook'
 
 interface NotebookCardProps {
   notebook: Notebook
@@ -9,13 +9,18 @@ interface NotebookCardProps {
   onRename: () => void
 }
 
-export default function NotebookCard({ notebook, onClick, onDelete, onRename }: NotebookCardProps) {
+export default function NotebookCard({
+  notebook,
+  onClick,
+  onDelete,
+  onRename
+}: NotebookCardProps): ReactElement {
   const [showMenu, setShowMenu] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
   // 点击外部关闭菜单
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: MouseEvent): void => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setShowMenu(false)
       }
@@ -30,24 +35,24 @@ export default function NotebookCard({ notebook, onClick, onDelete, onRename }: 
     }
   }, [showMenu])
 
-  const handleMenuClick = (e: React.MouseEvent) => {
+  const handleMenuClick = (e: React.MouseEvent): void => {
     e.stopPropagation()
     setShowMenu(!showMenu)
   }
 
-  const handleDelete = (e: React.MouseEvent) => {
+  const handleDelete = (e: React.MouseEvent): void => {
     e.stopPropagation()
     setShowMenu(false)
     onDelete()
   }
 
-  const handleRename = (e: React.MouseEvent) => {
+  const handleRename = (e: React.MouseEvent): void => {
     e.stopPropagation()
     setShowMenu(false)
     onRename()
   }
 
-  const formatDate = (date: Date) => {
+  const formatDate = (date: Date): string => {
     const now = new Date()
     const diff = now.getTime() - date.getTime()
     const days = Math.floor(diff / (1000 * 60 * 60 * 24))

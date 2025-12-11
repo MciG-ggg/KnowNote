@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, ReactElement } from 'react'
 
 interface RenameDialogProps {
   isOpen: boolean
@@ -7,7 +7,12 @@ interface RenameDialogProps {
   onConfirm: (newTitle: string) => void
 }
 
-export default function RenameDialog({ isOpen, currentTitle, onClose, onConfirm }: RenameDialogProps) {
+export default function RenameDialog({
+  isOpen,
+  currentTitle,
+  onClose,
+  onConfirm
+}: RenameDialogProps): ReactElement | null {
   const [title, setTitle] = useState(currentTitle)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -22,7 +27,7 @@ export default function RenameDialog({ isOpen, currentTitle, onClose, onConfirm 
     }
   }, [isOpen])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault()
     if (title.trim() && title !== currentTitle) {
       onConfirm(title.trim())
@@ -30,7 +35,7 @@ export default function RenameDialog({ isOpen, currentTitle, onClose, onConfirm 
     }
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent): void => {
     if (e.key === 'Escape') {
       onClose()
     }

@@ -1,6 +1,7 @@
 import { Settings, ChevronRight } from 'lucide-react'
+import { ReactElement } from 'react'
 
-export default function AboutSettings() {
+export default function AboutSettings(): ReactElement {
   return (
     <div className="space-y-6">
       <div className="text-center py-8">

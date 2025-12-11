@@ -1,6 +1,7 @@
 import { Home, Plus, X, Settings } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useNotebookStore } from '../../store/notebookStore'
+import { ReactElement } from 'react'
 
 interface TopNavigationBarProps {
   onCreateClick: () => void
@@ -10,21 +11,21 @@ interface TopNavigationBarProps {
 export default function TopNavigationBar({
   onCreateClick,
   isHomePage = false
-}: TopNavigationBarProps) {
+}: TopNavigationBarProps): ReactElement {
   const navigate = useNavigate()
   const { currentNotebook, openedNotebooks, removeOpenedNotebook, setCurrentNotebook } =
     useNotebookStore()
 
-  const handleHomeClick = () => {
+  const handleHomeClick = (): void => {
     navigate('/')
   }
 
-  const handleOpenedNotebookClick = (id: string) => {
+  const handleOpenedNotebookClick = (id: string): void => {
     setCurrentNotebook(id)
     navigate(`/notebook/${id}`)
   }
 
-  const handleCloseOpenedNotebook = (id: string) => {
+  const handleCloseOpenedNotebook = (id: string): void => {
     // 如果关闭的是当前笔记本，需要跳转
     if (currentNotebook?.id === id && !isHomePage) {
       // 找到当前笔记本在列表中的索引
@@ -45,7 +46,7 @@ export default function TopNavigationBar({
     removeOpenedNotebook(id)
   }
 
-  const handleSettingsClick = async () => {
+  const handleSettingsClick = async (): Promise<void> => {
     try {
       await window.api.openSettings()
     } catch (error) {
@@ -84,9 +85,7 @@ export default function TopNavigationBar({
               onClick={() => handleOpenedNotebookClick(notebook.id)}
               style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
               className={`flex items-center gap-1 px-3 py-1 rounded-lg text-sm h-7 transition-colors ${
-                isActive && !isHomePage
-                  ? 'bg-[#2a2a2a]'
-                  : 'bg-[#2a2a2a] hover:bg-[#333333]'
+                isActive && !isHomePage ? 'bg-[#2a2a2a]' : 'bg-[#2a2a2a] hover:bg-[#333333]'
               }`}
             >
               <span className="max-w-[200px] truncate">{notebook.title}</span>

@@ -40,12 +40,11 @@ const EmptyMedia = React.forwardRef<
 ))
 EmptyMedia.displayName = 'EmptyMedia'
 
-const EmptyTitle = React.forwardRef<
-  HTMLHeadingElement,
-  React.HTMLAttributes<HTMLHeadingElement>
->(({ className, ...props }, ref) => (
-  <h3 ref={ref} className={cn('text-lg font-semibold', className)} {...props} />
-))
+const EmptyTitle = React.forwardRef<HTMLHeadingElement, React.HTMLAttributes<HTMLHeadingElement>>(
+  ({ className, ...props }, ref) => (
+    <h3 ref={ref} className={cn('text-lg font-semibold', className)} {...props} />
+  )
+)
 EmptyTitle.displayName = 'EmptyTitle'
 
 const EmptyDescription = React.forwardRef<

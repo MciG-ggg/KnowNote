@@ -1,20 +1,20 @@
-import { useState } from 'react'
+import { useState, ReactElement } from 'react'
 import { Send } from 'lucide-react'
 
 export interface ProcessPanelProps {
   messages?: string[]
 }
 
-export default function ProcessPanel({ messages = [] }: ProcessPanelProps) {
+export default function ProcessPanel({ messages = [] }: ProcessPanelProps): ReactElement {
   const [input, setInput] = useState('')
 
-  const handleSend = () => {
+  const handleSend = (): void => {
     if (!input.trim()) return
     // TODO: 实现发送消息逻辑
     setInput('')
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent): void => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       handleSend()

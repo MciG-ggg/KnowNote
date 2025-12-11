@@ -1,3 +1,5 @@
+import { ReactElement } from 'react'
+
 interface DeleteConfirmDialogProps {
   isOpen: boolean
   notebookTitle: string
@@ -10,10 +12,10 @@ export default function DeleteConfirmDialog({
   notebookTitle,
   onClose,
   onConfirm
-}: DeleteConfirmDialogProps) {
+}: DeleteConfirmDialogProps): ReactElement | null {
   if (!isOpen) return null
 
-  const handleConfirm = () => {
+  const handleConfirm = (): void => {
     onConfirm()
     onClose()
   }
@@ -29,7 +31,8 @@ export default function DeleteConfirmDialog({
       >
         <h3 className="text-lg font-semibold text-gray-100 mb-3">删除笔记本</h3>
         <p className="text-sm text-gray-400 mb-6">
-          确定要删除笔记本 <span className="text-gray-200 font-medium">"{notebookTitle}"</span> 吗？
+          确定要删除笔记本{' '}
+          <span className="text-gray-200 font-medium">&quot;{notebookTitle}&quot;</span> 吗？
           <br />
           此操作无法撤销。
         </p>

@@ -1,8 +1,10 @@
+import { ReactElement } from 'react'
+
 export interface DragHandleProps {
   onMouseDown: () => void
 }
 
-export default function DragHandle({ onMouseDown }: DragHandleProps) {
+export default function DragHandle({ onMouseDown }: DragHandleProps): ReactElement {
   return (
     <div
       className="w-3 flex-shrink-0 cursor-col-resize hover:bg-gray-700/30 transition-colors"

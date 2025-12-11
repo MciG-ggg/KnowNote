@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, ReactElement } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BookOpen, Plus } from 'lucide-react'
 import NotebookCard from '../common/NotebookCard'
@@ -15,7 +15,7 @@ import {
   EmptyTitle
 } from '../ui/empty'
 
-export default function NotebookList() {
+export default function NotebookList(): ReactElement {
   const navigate = useNavigate()
   const {
     notebooks,
@@ -31,7 +31,7 @@ export default function NotebookList() {
   const [deleteNotebookId, setDeleteNotebookId] = useState<string | null>(null)
   const [deleteNotebookTitle, setDeleteNotebookTitle] = useState('')
 
-  const handleCreateNotebook = () => {
+  const handleCreateNotebook = (): void => {
     // 颜色池
     const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4']
     const randomColor = colors[Math.floor(Math.random() * colors.length)]
@@ -48,13 +48,13 @@ export default function NotebookList() {
     navigate(`/notebook/${newId}`)
   }
 
-  const handleNotebookClick = (id: string) => {
+  const handleNotebookClick = (id: string): void => {
     addOpenedNotebook(id)
     setCurrentNotebook(id)
     navigate(`/notebook/${id}`)
   }
 
-  const handleOpenDeleteDialog = (id: string) => {
+  const handleOpenDeleteDialog = (id: string): void => {
     const notebook = notebooks.find((nb) => nb.id === id)
     if (notebook) {
       setDeleteNotebookId(id)
@@ -62,7 +62,7 @@ export default function NotebookList() {
     }
   }
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = (): void => {
     if (deleteNotebookId) {
       deleteNotebook(deleteNotebookId)
       removeOpenedNotebook(deleteNotebookId)
@@ -70,11 +70,11 @@ export default function NotebookList() {
     }
   }
 
-  const handleDeleteClose = () => {
+  const handleDeleteClose = (): void => {
     setDeleteNotebookId(null)
   }
 
-  const handleOpenRenameDialog = (id: string) => {
+  const handleOpenRenameDialog = (id: string): void => {
     const notebook = notebooks.find((nb) => nb.id === id)
     if (notebook) {
       setRenameNotebookId(id)
@@ -82,14 +82,14 @@ export default function NotebookList() {
     }
   }
 
-  const handleRenameConfirm = (newTitle: string) => {
+  const handleRenameConfirm = (newTitle: string): void => {
     if (renameNotebookId) {
       updateNotebook(renameNotebookId, { title: newTitle })
       setRenameNotebookId(null)
     }
   }
 
-  const handleRenameClose = () => {
+  const handleRenameClose = (): void => {
     setRenameNotebookId(null)
   }
 

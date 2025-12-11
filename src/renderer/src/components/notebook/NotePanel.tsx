@@ -1,8 +1,10 @@
+import { ReactElement } from 'react'
+
 export interface NotePanelProps {
   title?: string
 }
 
-export default function NotePanel({ title = 'Note' }: NotePanelProps) {
+export default function NotePanel({ title = 'Note' }: NotePanelProps): ReactElement {
   return (
     <div className="flex flex-col bg-[#171717] rounded-xl overflow-hidden h-full">
       {/* 顶部拖拽区域 */}

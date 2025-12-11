@@ -1,4 +1,4 @@
-import { useState, useRef, ReactNode } from 'react'
+import { useState, useRef, useEffect, ReactNode, ReactElement } from 'react'
 import DragHandle from './DragHandle'
 
 export interface ResizableLayoutProps {
@@ -12,23 +12,81 @@ export interface ResizableLayoutProps {
   minCenterWidth?: number
 }
 
+// 黄金比例常量
+const GOLDEN_RATIO = 1.618
+
+// 根据容器宽度计算黄金比例的默认宽度
+const calculateGoldenRatioWidths = (
+  containerWidth: number
+): { leftWidth: number; rightWidth: number } => {
+  const paddingHorizontal = 24 // px-3 的左右 padding
+  const dragHandleWidth = 12 // 每个拖拽条的宽度
+  const availableWidth = containerWidth - paddingHorizontal - dragHandleWidth * 2
+
+  // 使用黄金比例分配：
+  // - 左面板 : 中面板 = 1 : φ
+  // - 右面板 : 中面板 = 1 : φ
+  // 总宽度 = 左 + 中 + 右 = x + φx + x = (2 + φ)x
+  // 因此：
+  // - 左面板占比 = 1 / (2 + φ) ≈ 0.276 (27.6%)
+  // - 中面板占比 = φ / (2 + φ) ≈ 0.447 (44.7%)
+  // - 右面板占比 = 1 / (2 + φ) ≈ 0.276 (27.6%)
+  const totalRatio = 2 + GOLDEN_RATIO // ≈ 3.618
+  const sideRatio = 1 / totalRatio // ≈ 0.276
+
+  const leftWidth = Math.floor(availableWidth * sideRatio)
+  const rightWidth = Math.floor(availableWidth * sideRatio)
+
+  return { leftWidth, rightWidth }
+}
+
 export default function ResizableLayout({
   leftPanel,
   centerPanel,
   rightPanel,
-  defaultLeftWidth = 320,
-  defaultRightWidth = 360,
+  defaultLeftWidth,
+  defaultRightWidth,
   minLeftWidth = 200,
   minRightWidth = 200,
-  minCenterWidth = 200
-}: ResizableLayoutProps) {
-  const [leftWidth, setLeftWidth] = useState(defaultLeftWidth)
-  const [rightWidth, setRightWidth] = useState(defaultRightWidth)
+  minCenterWidth = 300
+}: ResizableLayoutProps): ReactElement {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [isInitialized, setIsInitialized] = useState(false)
+  const [leftWidth, setLeftWidth] = useState(defaultLeftWidth || 320)
+  const [rightWidth, setRightWidth] = useState(defaultRightWidth || 360)
   const [isDraggingLeft, setIsDraggingLeft] = useState(false)
   const [isDraggingRight, setIsDraggingRight] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
 
-  const handleMouseDown = (side: 'left' | 'right') => {
+  // 初始化和窗口大小变化时计算黄金比例宽度
+  useEffect(() => {
+    const updateWidths = (): void => {
+      if (containerRef.current && !isInitialized) {
+        const containerWidth = containerRef.current.getBoundingClientRect().width
+        const { leftWidth: goldenLeftWidth, rightWidth: goldenRightWidth } =
+          calculateGoldenRatioWidths(containerWidth)
+
+        // 如果用户没有提供默认宽度，使用黄金比例计算的值
+        setLeftWidth(defaultLeftWidth || goldenLeftWidth)
+        setRightWidth(defaultRightWidth || goldenRightWidth)
+        setIsInitialized(true)
+      }
+    }
+
+    // 初始化时计算
+    updateWidths()
+
+    // 监听窗口大小变化（可选：如果希望窗口调整时重新计算默认值）
+    const handleResize = (): void => {
+      if (!isInitialized) {
+        updateWidths()
+      }
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [defaultLeftWidth, defaultRightWidth, isInitialized])
+
+  const handleMouseDown = (side: 'left' | 'right'): void => {
     if (side === 'left') {
       setIsDraggingLeft(true)
     } else {
@@ -36,7 +94,7 @@ export default function ResizableLayout({
     }
   }
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleMouseMove = (e: React.MouseEvent): void => {
     if (!containerRef.current) return
 
     const containerRect = containerRef.current.getBoundingClientRect()
@@ -68,7 +126,7 @@ export default function ResizableLayout({
     }
   }
 
-  const handleMouseUp = () => {
+  const handleMouseUp = (): void => {
     setIsDraggingLeft(false)
     setIsDraggingRight(false)
   }

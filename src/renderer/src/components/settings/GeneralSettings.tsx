@@ -1,4 +1,6 @@
-export default function GeneralSettings() {
+import { ReactElement } from 'react'
+
+export default function GeneralSettings(): ReactElement {
   return (
     <div className="space-y-6">
       <div>
