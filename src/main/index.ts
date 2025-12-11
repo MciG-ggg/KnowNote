@@ -1,87 +1,13 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
-import { join } from 'path'
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
+import { app, BrowserWindow, ipcMain } from 'electron'
+import { electronApp, optimizer } from '@electron-toolkit/utils'
+import { initDatabase, runMigrations, closeDatabase } from './db'
+import { ProviderManager } from './providers/ProviderManager'
+import { SessionAutoSwitchService } from './services/SessionAutoSwitchService'
+import { createMainWindow, createSettingsWindow, destroySettingsWindow } from './windows'
+import { registerAllHandlers } from './ipc'
 
-let mainWindow: BrowserWindow | null = null
-let settingsWindow: BrowserWindow | null = null
-
-function createWindow(): void {
-  // Create the browser window.
-  mainWindow = new BrowserWindow({
-    width: 1200,
-    height: 800,
-    minWidth: 1000,
-    minHeight: 700,
-    show: false,
-    autoHideMenuBar: true,
-    titleBarStyle: 'hiddenInset',
-    ...(process.platform === 'linux' ? { icon } : {}),
-    webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
-    }
-  })
-
-  mainWindow.on('ready-to-show', () => {
-    mainWindow?.show()
-  })
-
-  mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
-    return { action: 'deny' }
-  })
-
-  // HMR for renderer base on electron-vite cli.
-  // Load the remote URL for development or the local html file for production.
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
-  } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
-  }
-}
-
-function createSettingsWindow(): void {
-  // 如果设置窗口已经存在，则聚焦并返回
-  if (settingsWindow && !settingsWindow.isDestroyed()) {
-    settingsWindow.focus()
-    return
-  }
-
-  // 创建设置窗口
-  settingsWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
-    minWidth: 600,
-    minHeight: 500,
-    show: false,
-    autoHideMenuBar: true,
-    titleBarStyle: 'hiddenInset',
-    parent: mainWindow || undefined,
-    modal: false,
-    webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
-    }
-  })
-
-  settingsWindow.on('ready-to-show', () => {
-    settingsWindow?.show()
-  })
-
-  settingsWindow.on('closed', () => {
-    settingsWindow = null
-  })
-
-  // 加载设置页面
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    settingsWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}#/settings`)
-  } else {
-    settingsWindow.loadFile(join(__dirname, '../renderer/index.html'), {
-      hash: '/settings'
-    })
-  }
-}
+let providerManager: ProviderManager | null = null
+let sessionAutoSwitchService: SessionAutoSwitchService | null = null
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -97,6 +23,25 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
+  // 初始化数据库
+  console.log('[Main] 初始化数据库...')
+  initDatabase()
+  runMigrations()
+  console.log('[Main] 数据库初始化完成')
+
+  // 初始化 Provider Manager
+  console.log('[Main] 初始化 Provider Manager...')
+  providerManager = new ProviderManager()
+  console.log('[Main] Provider Manager 初始化完成')
+
+  // 初始化 Session 自动切换服务
+  console.log('[Main] 初始化 Session 自动切换服务...')
+  sessionAutoSwitchService = new SessionAutoSwitchService(providerManager)
+  console.log('[Main] Session 自动切换服务初始化完成')
+
+  // 注册所有 IPC Handlers
+  registerAllHandlers(providerManager, sessionAutoSwitchService)
+
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
 
@@ -105,12 +50,13 @@ app.whenReady().then(() => {
     createSettingsWindow()
   })
 
-  createWindow()
+  // 创建主窗口
+  createMainWindow()
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    if (BrowserWindow.getAllWindows().length === 0) createMainWindow()
   })
 })
 
@@ -123,12 +69,11 @@ app.on('window-all-closed', () => {
   }
 })
 
-// 确保在应用退出前关闭所有窗口
+// 确保在应用退出前关闭所有窗口和数据库连接
 app.on('before-quit', () => {
-  if (settingsWindow && !settingsWindow.isDestroyed()) {
-    settingsWindow.destroy()
-  }
-})
+  destroySettingsWindow()
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
+  // 关闭数据库连接
+  console.log('[Main] 关闭数据库连接...')
+  closeDatabase()
+})

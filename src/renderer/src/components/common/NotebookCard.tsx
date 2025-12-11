@@ -102,16 +102,20 @@ export default function NotebookCard({
         )}
       </div>
 
-      {/* 内容区域 */}
-      <div className="mt-2">
-        <h3 className="text-lg font-semibold text-gray-100 mb-2 line-clamp-2">{notebook.title}</h3>
+      {/* 内容区域 - 使用 flex 布局让底部信息靠下 */}
+      <div className="mt-2 flex flex-col h-[calc(100%-1rem)]">
+        <div className="flex-1">
+          <h3 className="text-lg font-semibold text-gray-100 mb-2 line-clamp-2">
+            {notebook.title}
+          </h3>
 
-        {notebook.description && (
-          <p className="text-sm text-gray-400 mb-4 line-clamp-2">{notebook.description}</p>
-        )}
+          {notebook.description && (
+            <p className="text-sm text-gray-400 mb-4 line-clamp-2">{notebook.description}</p>
+          )}
+        </div>
 
-        {/* 底部信息 */}
-        <div className="flex items-center justify-between text-xs text-gray-500 mt-4">
+        {/* 底部信息 - 自动靠底部对齐 */}
+        <div className="flex items-center justify-between text-xs text-gray-500 pt-4 border-t border-gray-800/30">
           <div className="flex items-center gap-1">
             <MessageSquare className="w-3.5 h-3.5" />
             <span>{notebook.chatCount} 条对话</span>

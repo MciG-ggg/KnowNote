@@ -3,7 +3,51 @@ import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
 const api = {
-  openSettings: () => ipcRenderer.invoke('open-settings')
+  // 设置相关
+  openSettings: () => ipcRenderer.invoke('open-settings'),
+
+  // Chat Session 相关
+  createChatSession: (notebookId: string, title: string) =>
+    ipcRenderer.invoke('create-chat-session', notebookId, title),
+  getChatSessions: (notebookId: string) => ipcRenderer.invoke('get-chat-sessions', notebookId),
+  getActiveSession: (notebookId: string) => ipcRenderer.invoke('get-active-session', notebookId),
+  updateSessionTitle: (sessionId: string, title: string) =>
+    ipcRenderer.invoke('update-session-title', sessionId, title),
+  deleteSession: (sessionId: string) => ipcRenderer.invoke('delete-session', sessionId),
+
+  // Chat Message 相关
+  getMessages: (sessionId: string) => ipcRenderer.invoke('get-messages', sessionId),
+  sendMessage: (sessionId: string, content: string) =>
+    ipcRenderer.invoke('send-message', sessionId, content),
+
+  // 流式消息监听
+  onMessageChunk: (callback: (data: any) => void) => {
+    const listener = (_event: any, data: any) => callback(data)
+    ipcRenderer.on('message-chunk', listener)
+    // 返回清理函数
+    return () => ipcRenderer.removeListener('message-chunk', listener)
+  },
+
+  onMessageError: (callback: (data: any) => void) => {
+    const listener = (_event: any, data: any) => callback(data)
+    ipcRenderer.on('message-error', listener)
+    return () => ipcRenderer.removeListener('message-error', listener)
+  },
+
+  // Session 自动切换监听
+  onSessionAutoSwitched: (callback: (data: any) => void) => {
+    const listener = (_event: any, data: any) => callback(data)
+    ipcRenderer.on('session-auto-switched', listener)
+    return () => ipcRenderer.removeListener('session-auto-switched', listener)
+  },
+
+  // Provider 配置相关
+  saveProviderConfig: (config: any) => ipcRenderer.invoke('save-provider-config', config),
+  getProviderConfig: (providerName: string) =>
+    ipcRenderer.invoke('get-provider-config', providerName),
+  getAllProviderConfigs: () => ipcRenderer.invoke('get-all-provider-configs'),
+  validateProviderConfig: (providerName: string, config: any) =>
+    ipcRenderer.invoke('validate-provider-config', providerName, config)
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

@@ -6,7 +6,7 @@ interface NotebookStore {
   currentNotebook: Notebook | null
   openedNotebooks: Notebook[]
 
-  addNotebook: (notebook: Omit<Notebook, 'id' | 'createdAt' | 'updatedAt'>) => string
+  addNotebook: (notebook: Omit<Notebook, 'id' | 'createdAt' | 'updatedAt'>) => Promise<string>
   deleteNotebook: (id: string) => void
   updateNotebook: (id: string, updates: Partial<Notebook>) => void
   setCurrentNotebook: (id: string) => void
@@ -15,40 +15,11 @@ interface NotebookStore {
 }
 
 export const useNotebookStore = create<NotebookStore>()((set) => ({
-  notebooks: [
-    // 初始化模拟数据
-    {
-      id: '1',
-      title: '机器学习笔记',
-      description: '深度学习和神经网络相关内容',
-      coverColor: '#3b82f6',
-      createdAt: new Date('2024-01-15'),
-      updatedAt: new Date('2024-12-10'),
-      chatCount: 24
-    },
-    {
-      id: '2',
-      title: 'React 项目总结',
-      description: 'React 18 新特性和最佳实践',
-      coverColor: '#8b5cf6',
-      createdAt: new Date('2024-02-20'),
-      updatedAt: new Date('2024-12-09'),
-      chatCount: 15
-    },
-    {
-      id: '3',
-      title: '论文阅读笔记',
-      description: 'AI 领域最新论文解读',
-      coverColor: '#ec4899',
-      createdAt: new Date('2024-03-10'),
-      updatedAt: new Date('2024-12-08'),
-      chatCount: 8
-    }
-  ],
+  notebooks: [],
   currentNotebook: null,
   openedNotebooks: [],
 
-  addNotebook: (notebook) => {
+  addNotebook: async (notebook) => {
     const newId = Date.now().toString()
     set((state) => ({
       notebooks: [
@@ -61,6 +32,15 @@ export const useNotebookStore = create<NotebookStore>()((set) => ({
         ...state.notebooks
       ]
     }))
+
+    // 自动创建第一个会话
+    try {
+      await window.api.createChatSession(newId, '新对话')
+      console.log(`[NotebookStore] 已为 notebook ${newId} 创建初始会话`)
+    } catch (error) {
+      console.error('[NotebookStore] 创建初始会话失败:', error)
+    }
+
     return newId
   },
 
@@ -70,11 +50,25 @@ export const useNotebookStore = create<NotebookStore>()((set) => ({
     })),
 
   updateNotebook: (id, updates) =>
-    set((state) => ({
-      notebooks: state.notebooks.map((nb) =>
+    set((state) => {
+      const updatedNotebooks = state.notebooks.map((nb) =>
         nb.id === id ? { ...nb, ...updates, updatedAt: new Date() } : nb
       )
-    })),
+      // 同时更新 openedNotebooks 和 currentNotebook
+      const updatedOpenedNotebooks = state.openedNotebooks.map((nb) =>
+        nb.id === id ? { ...nb, ...updates, updatedAt: new Date() } : nb
+      )
+      const updatedCurrentNotebook =
+        state.currentNotebook?.id === id
+          ? { ...state.currentNotebook, ...updates, updatedAt: new Date() }
+          : state.currentNotebook
+
+      return {
+        notebooks: updatedNotebooks,
+        openedNotebooks: updatedOpenedNotebooks,
+        currentNotebook: updatedCurrentNotebook
+      }
+    }),
 
   setCurrentNotebook: (id) =>
     set((state) => ({

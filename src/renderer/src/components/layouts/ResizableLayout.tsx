@@ -134,20 +134,25 @@ export default function ResizableLayout({
   return (
     <div
       ref={containerRef}
-      className="flex flex-1 px-3 pb-3 gap-0"
+      className="flex flex-1 px-3 pb-3 gap-0 overflow-hidden"
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
       {/* 左侧面板 */}
-      <div style={{ width: `${leftWidth}px`, minWidth: `${minLeftWidth}px` }}>{leftPanel}</div>
+      <div
+        className="h-full overflow-hidden"
+        style={{ width: `${leftWidth}px`, minWidth: `${minLeftWidth}px` }}
+      >
+        {leftPanel}
+      </div>
 
       {/* 左侧拖拽条 */}
       <DragHandle onMouseDown={() => handleMouseDown('left')} />
 
       {/* 中间面板 */}
       <div
-        className="flex-1"
+        className="flex-1 h-full overflow-hidden"
         style={minCenterWidth > 0 ? { minWidth: `${minCenterWidth}px` } : undefined}
       >
         {centerPanel}
@@ -157,7 +162,12 @@ export default function ResizableLayout({
       <DragHandle onMouseDown={() => handleMouseDown('right')} />
 
       {/* 右侧面板 */}
-      <div style={{ width: `${rightWidth}px`, minWidth: `${minRightWidth}px` }}>{rightPanel}</div>
+      <div
+        className="h-full overflow-hidden"
+        style={{ width: `${rightWidth}px`, minWidth: `${minRightWidth}px` }}
+      >
+        {rightPanel}
+      </div>
     </div>
   )
 }
