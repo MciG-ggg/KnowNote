@@ -62,13 +62,13 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
     return (
       <div className="flex justify-end mb-4 group">
         <div className="flex flex-col max-w-[80%]">
-          <div className="bg-blue-600 text-white rounded-2xl px-4 py-3">
+          <div className="bg-primary text-white rounded-2xl px-4 py-3">
             <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
           </div>
           {/* 复制按钮 */}
           <button
             onClick={handleCopy}
-            className="self-end mt-1 px-2 py-1 text-xs text-gray-400 hover:text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1"
+            className="self-end mt-1 px-2 py-1 text-xs text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1"
             title={copied ? '已复制' : '复制'}
           >
             {copied ? (
@@ -107,7 +107,7 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
     <div className="flex justify-start mb-4 group">
       <div className="flex flex-col max-w-[90%]">
         {message.content ? (
-          <div className="markdown-content text-gray-100 px-2">
+          <div className="markdown-content text-foreground px-2">
             <ReactMarkdown
               remarkPlugins={[remarkGfm, remarkMath]}
               rehypePlugins={[rehypeHighlight, rehypeKatex]}
@@ -130,7 +130,7 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
         ) : (
           // 空消息时显示光标
           <div className="flex items-center gap-2 px-2">
-            <span className="text-sm text-gray-400">正在思考</span>
+            <span className="text-sm text-muted-foreground">正在思考</span>
             <span className="inline-block w-2 h-4 bg-gray-400 animate-pulse" />
           </div>
         )}
@@ -138,7 +138,7 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
         {message.content && !isStreaming && (
           <button
             onClick={handleCopy}
-            className="self-start ml-2 mt-1 px-2 py-1 text-xs text-gray-400 hover:text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1"
+            className="self-start ml-2 mt-1 px-2 py-1 text-xs text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1"
             title={copied ? '已复制' : '复制'}
           >
             {copied ? (

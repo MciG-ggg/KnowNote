@@ -98,7 +98,7 @@ export default function TopNavigationBar({
                 className="ml-2 p-1 hover:bg-[#3a3a3a] rounded transition-colors"
                 title="关闭标签"
               >
-                <X className="w-3.5 h-3.5 text-gray-400 hover:text-gray-200" />
+                <X className="w-3.5 h-3.5 text-muted-foreground hover:text-gray-200" />
               </button>
             </button>
           )
@@ -107,7 +107,7 @@ export default function TopNavigationBar({
         <button
           onClick={onCreateClick}
           style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-          className="flex items-center justify-center w-7 h-7 hover:bg-[#2a2a2a] rounded-lg transition-colors"
+          className="flex items-center justify-center w-7 h-7 hover:bg-accent rounded-lg transition-colors"
         >
           <Plus className="w-4 h-4" />
         </button>
@@ -117,7 +117,7 @@ export default function TopNavigationBar({
       <button
         onClick={handleSettingsClick}
         style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-        className="flex items-center justify-center w-7 h-7 hover:bg-[#2a2a2a] rounded-lg transition-colors"
+        className="flex items-center justify-center w-7 h-7 hover:bg-accent rounded-lg transition-colors"
         title="设置"
       >
         <Settings className="w-4 h-4" />

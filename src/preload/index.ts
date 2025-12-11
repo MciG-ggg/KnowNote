@@ -3,8 +3,25 @@ import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
 const api = {
-  // 设置相关
+  // 窗口设置相关
   openSettings: () => ipcRenderer.invoke('open-settings'),
+
+  // 应用设置相关
+  settings: {
+    getAll: () => ipcRenderer.invoke('settings:getAll'),
+    get: (key: string) => ipcRenderer.invoke('settings:get', key),
+    update: (updates: any) => ipcRenderer.invoke('settings:update', updates),
+    set: (key: string, value: any) => ipcRenderer.invoke('settings:set', key, value),
+    reset: () => ipcRenderer.invoke('settings:reset'),
+    // 监听设置变化
+    onSettingsChange: (callback: (newSettings: any, oldSettings: any) => void) => {
+      const listener = (_event: any, newSettings: any, oldSettings: any) =>
+        callback(newSettings, oldSettings)
+      ipcRenderer.on('settings:changed', listener)
+      // 返回清理函数
+      return () => ipcRenderer.removeListener('settings:changed', listener)
+    }
+  },
 
   // Chat Session 相关
   createChatSession: (notebookId: string, title: string) =>

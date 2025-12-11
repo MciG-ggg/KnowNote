@@ -39,7 +39,7 @@ export default function NotebookLayout(): ReactElement {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-[#212121] text-gray-100">
+    <div className="flex flex-col h-screen bg-background text-foreground">
       <TopNavigationBar onCreateClick={handleCreateNotebook} />
 
       <ResizableLayout

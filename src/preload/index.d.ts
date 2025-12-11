@@ -37,12 +37,33 @@ export interface ProviderConfig {
   updatedAt: number
 }
 
+/**
+ * 应用设置接口
+ */
+export interface AppSettings {
+  theme: 'light' | 'dark'
+  language: 'zh-CN' | 'en-US' | 'ja-JP'
+  autoLaunch: boolean
+}
+
 declare global {
   interface Window {
     electron: ElectronAPI
     api: {
-      // 设置相关
+      // 窗口设置相关
       openSettings: () => Promise<void>
+
+      // 应用设置相关
+      settings: {
+        getAll: () => Promise<AppSettings>
+        get: <K extends keyof AppSettings>(key: K) => Promise<AppSettings[K]>
+        update: (updates: Partial<AppSettings>) => Promise<AppSettings>
+        set: <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => Promise<AppSettings[K]>
+        reset: () => Promise<AppSettings>
+        onSettingsChange: (
+          callback: (newSettings: AppSettings, oldSettings: AppSettings) => void
+        ) => () => void
+      }
 
       // Chat Session 相关
       createChatSession: (notebookId: string, title: string) => Promise<ChatSession>

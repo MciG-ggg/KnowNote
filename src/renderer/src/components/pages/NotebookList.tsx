@@ -94,7 +94,7 @@ export default function NotebookList(): ReactElement {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-[#212121] text-gray-100">
+    <div className="flex flex-col h-screen bg-background text-foreground">
       <TopNavigationBar isHomePage={true} onCreateClick={handleCreateNotebook} />
 
       {/* 主内容区域 */}
@@ -105,17 +105,17 @@ export default function NotebookList(): ReactElement {
             <Empty>
               <EmptyHeader>
                 <EmptyMedia variant="icon">
-                  <BookOpen className="w-16 h-16 text-gray-600" />
+                  <BookOpen className="w-16 h-16 text-muted-foreground" />
                 </EmptyMedia>
-                <EmptyTitle className="text-gray-100">还没有笔记本</EmptyTitle>
-                <EmptyDescription className="text-gray-400">
+                <EmptyTitle className="text-foreground">还没有笔记本</EmptyTitle>
+                <EmptyDescription className="text-muted-foreground">
                   开始创建你的第一个笔记本，记录你的想法和灵感
                 </EmptyDescription>
               </EmptyHeader>
               <EmptyContent>
                 <button
                   onClick={handleCreateNotebook}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors text-white font-medium"
+                  className="flex items-center gap-2 px-6 py-2.5 bg-primary hover:bg-primary/90 rounded-lg transition-colors text-white font-medium"
                 >
                   <Plus className="w-4 h-4" />
                   创建第一个笔记本
@@ -128,8 +128,8 @@ export default function NotebookList(): ReactElement {
           <div className="max-w-7xl mx-auto">
             {/* 标题 */}
             <div className="mb-4">
-              <h1 className="text-3xl font-bold text-gray-100 mb-2">我的笔记本</h1>
-              <p className="text-gray-400">共 {notebooks.length} 个笔记本</p>
+              <h1 className="text-3xl font-bold text-foreground mb-2">我的笔记本</h1>
+              <p className="text-muted-foreground">共 {notebooks.length} 个笔记本</p>
             </div>
 
             {/* 笔记本网格 */}
