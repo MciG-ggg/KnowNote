@@ -84,7 +84,7 @@ export default function ProvidersSettings({
   )
 
   return (
-    <div className="flex h-full gap-6">
+    <div className="flex h-full gap-6 overflow-hidden">
       {/* 左侧供应商列表 */}
       <div className="w-48 flex-shrink-0 flex flex-col gap-4">
         {/* 搜索框 */}
@@ -95,7 +95,7 @@ export default function ProvidersSettings({
             placeholder="搜索提供商..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 bg-muted rounded-lg text-sm text-foreground placeholder-muted-foreground outline-none border border-border focus:ring-2 focus:ring-ring"
+            className="w-full pl-9 pr-3 py-2 bg-muted rounded-lg text-sm text-foreground placeholder-muted-foreground outline-none border border-border focus:ring-2 focus:ring-inset focus:ring-ring"
           />
         </div>
 
@@ -128,9 +128,9 @@ export default function ProvidersSettings({
       </div>
 
       {/* 右侧配置区域 */}
-      <div className="flex-1 min-w-[400px] overflow-y-auto">
+      <div className="flex-1 min-w-0 overflow-y-auto">
         {activeProvider === 'deepseek' && (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 w-full">
             {/* 顶部标题和开关 */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -170,7 +170,7 @@ export default function ProvidersSettings({
                     })
                   }
                   placeholder="sk-..."
-                  className="w-full px-3 py-2 bg-muted rounded-lg text-sm text-foreground placeholder-muted-foreground outline-none border border-border focus:ring-2 focus:ring-ring pr-12"
+                  className="w-full px-3 py-2 bg-muted rounded-lg text-sm text-foreground placeholder-muted-foreground outline-none border border-border focus:ring-2 focus:ring-inset focus:ring-ring pr-12"
                 />
                 <button
                   onClick={() => setShowApiKey(!showApiKey)}
@@ -200,7 +200,7 @@ export default function ProvidersSettings({
         )}
 
         {activeProvider === 'openai' && (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 w-full">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <h2 className="text-xl font-semibold text-foreground">OpenAI</h2>
@@ -237,7 +237,7 @@ export default function ProvidersSettings({
                     })
                   }
                   placeholder="sk-..."
-                  className="w-full px-3 py-2 bg-muted rounded-lg text-sm text-foreground placeholder-muted-foreground outline-none border border-border focus:ring-2 focus:ring-ring pr-12"
+                  className="w-full px-3 py-2 bg-muted rounded-lg text-sm text-foreground placeholder-muted-foreground outline-none border border-border focus:ring-2 focus:ring-inset focus:ring-ring pr-12"
                 />
                 <button
                   onClick={() => setShowApiKey(!showApiKey)}

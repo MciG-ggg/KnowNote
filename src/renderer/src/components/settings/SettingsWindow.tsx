@@ -164,11 +164,11 @@ export default function SettingsWindow(): ReactElement {
         </div>
 
         {/* 右侧内容区域 */}
-        <div className="flex-1 min-w-[600px] flex flex-col gap-3">
+        <div className="flex-1 min-w-0 flex flex-col gap-3">
           {/* 设置内容 - Island */}
-          <div className="flex-1 bg-card rounded-xl overflow-hidden">
+          <div className="flex-1 bg-card rounded-xl">
             <div className="h-full overflow-y-auto p-6">
-              <div className="max-w-5xl">{renderContent()}</div>
+              <div className="w-full">{renderContent()}</div>
             </div>
           </div>
 
