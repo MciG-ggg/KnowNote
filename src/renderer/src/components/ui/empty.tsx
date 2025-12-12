@@ -6,7 +6,7 @@ const Empty = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivEleme
     <div
       ref={ref}
       className={cn(
-        'flex h-full flex-col items-center justify-center rounded-lg p-8 text-center',
+        'flex flex-col items-center justify-center rounded-lg p-8 text-center gap-8',
         className
       )}
       {...props}
@@ -57,7 +57,7 @@ EmptyDescription.displayName = 'EmptyDescription'
 
 const EmptyContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn('mt-4 flex flex-col gap-2', className)} {...props} />
+    <div ref={ref} className={cn('flex flex-col gap-2', className)} {...props} />
   )
 )
 EmptyContent.displayName = 'EmptyContent'

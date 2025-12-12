@@ -11,9 +11,6 @@ export default function SourcePanel(): ReactElement {
         <p className="text-sm text-center text-muted-foreground max-w-xs">
           此区域将用于管理文档、检索知识库，为对话提供背景信息。
         </p>
-        <div className="mt-6 px-4 py-2 bg-muted rounded-lg border border-border">
-          <span className="text-xs text-muted-foreground">功能开发中...</span>
-        </div>
       </div>
     </div>
   )

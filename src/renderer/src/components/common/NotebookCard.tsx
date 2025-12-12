@@ -127,7 +127,7 @@ export default function NotebookCard({
         </div>
 
         {/* 底部信息 - 自动靠底部对齐 */}
-        <div className="flex items-center justify-end text-xs text-muted-foreground pt-4 border-t border-border/30">
+        <div className="flex items-center justify-end text-xs text-muted-foreground pt-4">
           <span>{formatDate(notebook.updatedAt)}</span>
         </div>
       </div>

@@ -99,42 +99,42 @@ export default function NotebookList(): ReactElement {
 
       {/* 主内容区域 */}
       <ScrollArea className="flex-1">
-        <div className="px-12 py-8">
-          {notebooks.length === 0 ? (
-            /* 空状态 - 占满整个区域 */
-            <div className="h-full">
-              <Empty>
-                <EmptyHeader>
-                  <EmptyMedia variant="icon">
-                    <BookOpen className="w-16 h-16 text-muted-foreground" />
-                  </EmptyMedia>
-                  <EmptyTitle className="text-foreground">还没有笔记本</EmptyTitle>
-                  <EmptyDescription className="text-muted-foreground">
-                    开始创建你的第一个笔记本，记录你的想法和灵感
-                  </EmptyDescription>
-                </EmptyHeader>
-                <EmptyContent>
-                  <button
-                    onClick={handleCreateNotebook}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-primary hover:bg-primary/90 rounded-lg transition-colors text-primary-foreground font-medium"
-                  >
-                    <Plus className="w-4 h-4" />
-                    创建第一个笔记本
-                  </button>
-                </EmptyContent>
-              </Empty>
-            </div>
-          ) : (
-            /* 有笔记本时显示列表 */
-            <div className="max-w-7xl mx-auto">
+        {notebooks.length === 0 ? (
+          /* 空状态 - 占满整个区域 */
+          <div className="flex items-center justify-center min-h-[calc(100vh-80px)] px-12">
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <BookOpen className="w-16 h-16 text-muted-foreground" />
+                </EmptyMedia>
+                <EmptyTitle className="text-foreground">还没有笔记本</EmptyTitle>
+                <EmptyDescription className="text-muted-foreground">
+                  开始创建你的第一个笔记本，记录你的想法和灵感
+                </EmptyDescription>
+              </EmptyHeader>
+              <EmptyContent>
+                <button
+                  onClick={handleCreateNotebook}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-primary hover:bg-primary/90 rounded-lg transition-colors text-primary-foreground font-medium"
+                >
+                  <Plus className="w-4 h-4" />
+                  创建第一个笔记本
+                </button>
+              </EmptyContent>
+            </Empty>
+          </div>
+        ) : (
+          <div className="px-12 py-8">
+            {/* 有笔记本时显示列表 */}
+            <div className="max-w-7xl mx-auto flex flex-col gap-8">
               {/* 标题 */}
-              <div className="mb-4">
-                <h1 className="text-3xl font-bold text-foreground mb-2">我的笔记本</h1>
+              <div className="flex flex-col gap-2">
+                <h1 className="text-3xl font-bold text-foreground">我的笔记本</h1>
                 <p className="text-muted-foreground">共 {notebooks.length} 个笔记本</p>
               </div>
 
               {/* 笔记本网格 */}
-              <div className="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
                 {notebooks.map((notebook) => (
                   <NotebookCard
                     key={notebook.id}
@@ -146,8 +146,8 @@ export default function NotebookList(): ReactElement {
                 ))}
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </ScrollArea>
 
       {/* 重命名对话框 */}
