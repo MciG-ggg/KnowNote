@@ -65,6 +65,15 @@ export function registerChatHandlers(
       let fullContent = ''
       let usageMetadata: any = null
 
+      // 设置30秒超时（用于检测流式卡死）
+      const timeout = setTimeout(() => {
+        console.error('[send-message] 流式传输超时（30秒）')
+        event.sender.send('message-error', {
+          messageId: assistantMessage.id,
+          error: '消息发送超时，请重试'
+        })
+      }, 30000)
+
       provider.sendMessageStream(
         messages,
         // onChunk
@@ -84,6 +93,7 @@ export function registerChatHandlers(
         },
         // onError
         (error) => {
+          clearTimeout(timeout)
           event.sender.send('message-error', {
             messageId: assistantMessage.id,
             error: error.message
@@ -91,39 +101,54 @@ export function registerChatHandlers(
         },
         // onComplete
         async () => {
-          // 更新数据库中的完整内容
-          queries.updateMessageContent(assistantMessage.id, fullContent)
+          clearTimeout(timeout)
+          try {
+            // 更新数据库中的完整内容
+            queries.updateMessageContent(assistantMessage.id, fullContent)
 
-          // 计算 token 使用量
-          let tokensUsed = 0
-          if (usageMetadata?.usage?.total_tokens) {
-            // 如果 API 返回了精确的 token 数
-            tokensUsed = usageMetadata.usage.total_tokens
-          } else {
-            // 降级：使用估算
-            const userTokens = SessionAutoSwitchService.estimateTokens(content)
-            const assistantTokens = SessionAutoSwitchService.estimateTokens(fullContent)
-            tokensUsed = userTokens + assistantTokens
-          }
+            // 计算 token 使用量
+            let tokensUsed = 0
+            if (usageMetadata?.usage?.total_tokens) {
+              // 如果 API 返回了精确的 token 数
+              tokensUsed = usageMetadata.usage.total_tokens
+            } else {
+              // 降级：使用估算
+              const userTokens = SessionAutoSwitchService.estimateTokens(content)
+              const assistantTokens = SessionAutoSwitchService.estimateTokens(fullContent)
+              tokensUsed = userTokens + assistantTokens
+            }
 
-          console.log(`[send-message] 本次对话使用 tokens: ${tokensUsed}`)
+            console.log(`[send-message] 本次对话使用 tokens: ${tokensUsed}`)
 
-          // 检查是否需要自动切换 session
-          const newSessionId = await sessionAutoSwitchService.recordTokenUsageAndCheckSwitch(
-            sessionId,
-            tokensUsed
-          )
+            // 检查是否需要自动切换 session
+            const newSessionId = await sessionAutoSwitchService.recordTokenUsageAndCheckSwitch(
+              sessionId,
+              tokensUsed
+            )
 
-          if (newSessionId) {
-            // 通知前端切换到新 session
-            event.sender.send('session-auto-switched', {
-              oldSessionId: sessionId,
-              newSessionId: newSessionId
+            if (newSessionId) {
+              // 通知前端切换到新 session
+              event.sender.send('session-auto-switched', {
+                oldSessionId: sessionId,
+                newSessionId: newSessionId
+              })
+            }
+
+            // 发送完成事件，通知前端流式传输已完成
+            event.sender.send('message-complete', {
+              messageId: assistantMessage.id
+            })
+          } catch (error) {
+            console.error('[send-message] 完成回调中发生错误:', error)
+            event.sender.send('message-error', {
+              messageId: assistantMessage.id,
+              error: '处理消息时发生错误'
             })
           }
         }
       )
 
+      // 立即返回 messageId，让前端可以继续操作
       return assistantMessage.id
     }
   )

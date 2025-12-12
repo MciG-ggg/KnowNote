@@ -1,31 +1,8 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
+import type { ChatSession, ChatMessage } from '../shared/types/chat'
 
-/**
- * 聊天会话接口
- */
-export interface ChatSession {
-  id: string
-  notebookId: string
-  title: string
-  summary?: string
-  totalTokens?: number
-  status?: 'active' | 'archived'
-  parentSessionId?: string
-  createdAt: number
-  updatedAt: number
-}
-
-/**
- * 聊天消息接口
- */
-export interface ChatMessage {
-  id: string
-  sessionId: string
-  role: 'user' | 'assistant' | 'system'
-  content: string
-  metadata?: any
-  createdAt: number
-}
+// 重新导出共享类型
+export type { ChatSession, ChatMessage }
 
 /**
  * Provider 配置接口

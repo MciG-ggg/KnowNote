@@ -1,6 +1,26 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
+/**
+ * IPC 调用超时包装函数
+ * @param channel IPC 频道名称
+ * @param timeout 超时时间（毫秒）
+ * @param args 参数
+ * @returns Promise
+ */
+async function invokeWithTimeout<T>(
+  channel: string,
+  timeout: number,
+  ...args: any[]
+): Promise<T> {
+  return Promise.race([
+    ipcRenderer.invoke(channel, ...args),
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`IPC调用超时: ${channel} (${timeout}ms)`)), timeout)
+    )
+  ])
+}
+
 // Custom APIs for renderer
 const api = {
   // 窗口设置相关
@@ -33,9 +53,10 @@ const api = {
   deleteSession: (sessionId: string) => ipcRenderer.invoke('delete-session', sessionId),
 
   // Chat Message 相关
-  getMessages: (sessionId: string) => ipcRenderer.invoke('get-messages', sessionId),
+  getMessages: (sessionId: string) =>
+    invokeWithTimeout('get-messages', 10000, sessionId),
   sendMessage: (sessionId: string, content: string) =>
-    ipcRenderer.invoke('send-message', sessionId, content),
+    invokeWithTimeout('send-message', 60000, sessionId, content), // 60秒超时（流式消息可能较长）
 
   // 流式消息监听
   onMessageChunk: (callback: (data: any) => void) => {
@@ -59,14 +80,15 @@ const api = {
   },
 
   // Provider 配置相关
-  saveProviderConfig: (config: any) => ipcRenderer.invoke('save-provider-config', config),
+  saveProviderConfig: (config: any) =>
+    invokeWithTimeout('save-provider-config', 5000, config),
   getProviderConfig: (providerName: string) =>
     ipcRenderer.invoke('get-provider-config', providerName),
   getAllProviderConfigs: () => ipcRenderer.invoke('get-all-provider-configs'),
   validateProviderConfig: (providerName: string, config: any) =>
-    ipcRenderer.invoke('validate-provider-config', providerName, config),
+    invokeWithTimeout('validate-provider-config', 15000, providerName, config), // 15秒超时（网络验证）
   fetchModels: (providerName: string, apiKey: string) =>
-    ipcRenderer.invoke('fetch-models', providerName, apiKey)
+    invokeWithTimeout('fetch-models', 15000, providerName, apiKey) // 15秒超时（网络请求）
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

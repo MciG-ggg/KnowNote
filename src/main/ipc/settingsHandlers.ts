@@ -1,5 +1,5 @@
 import { ipcMain, BrowserWindow } from 'electron'
-import { settingsManager, AppSettings } from '../config/store'
+import { settingsManager, type AppSettings } from '../config'
 
 /**
  * 向所有窗口广播设置变化

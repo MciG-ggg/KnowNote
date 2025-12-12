@@ -7,6 +7,7 @@ import ProcessPanel from './ProcessPanel'
 import NotePanel from './NotePanel'
 import { useNotebookStore } from '../../store/notebookStore'
 import { useChatStore } from '../../store/chatStore'
+import { NOTEBOOK_COVER_COLORS } from '../../constants/colors'
 
 export default function NotebookLayout(): ReactElement {
   const navigate = useNavigate()
@@ -25,8 +26,8 @@ export default function NotebookLayout(): ReactElement {
   }, [id, addOpenedNotebook, setCurrentNotebook, loadActiveSession])
 
   const handleCreateNotebook = async (): Promise<void> => {
-    const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4']
-    const randomColor = colors[Math.floor(Math.random() * colors.length)]
+    const randomColor =
+      NOTEBOOK_COVER_COLORS[Math.floor(Math.random() * NOTEBOOK_COVER_COLORS.length)]
 
     const newId = await addNotebook({
       title: `新笔记本 ${notebooks.length + 1}`,

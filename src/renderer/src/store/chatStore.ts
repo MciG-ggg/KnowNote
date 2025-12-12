@@ -14,8 +14,8 @@ interface ChatStore {
   // 流式消息状态：按notebookId管理
   streamingMessages: Record<string, string>
 
-  // messageId -> {notebookId, content} 映射，用于切换notebook后仍能清理流式状态和恢复内容
-  messageToNotebook: Record<string, { notebookId: string; content: string }>
+  // messageId -> {notebookId, content, timeoutId} 映射，用于切换notebook后仍能清理流式状态和恢复内容
+  messageToNotebook: Record<string, { notebookId: string; content: string; timeoutId?: number }>
 
   // Actions
   setCurrentSession: (session: ChatSession | null) => void
@@ -161,11 +161,36 @@ export const useChatStore = create<ChatStore>()((set, get) => ({
     get().addMessage(assistantMessage)
     get().setStreamingMessage(notebookId, messageId)
 
-    // 5. 初始化缓存，记录 messageId -> {notebookId, content}
+    // 5. 初始化缓存，记录 messageId -> {notebookId, content}，并设置30秒超时清理
+    const timeoutId = window.setTimeout(() => {
+      console.warn(`[ChatStore] 流式消息超时，清理缓存: ${messageId}`)
+      const state = get()
+      const cached = state.messageToNotebook[messageId]
+
+      if (cached) {
+        // 清除流式状态
+        state.setStreamingMessage(cached.notebookId, null)
+
+        // 更新消息为超时状态
+        const message = state.messages.find((m) => m.id === messageId)
+        if (message) {
+          state.updateMessageContent(
+            messageId,
+            cached.content || '⚠️ 消息接收超时，请重试'
+          )
+        }
+
+        // 清理缓存
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { [messageId]: _removed, ...rest } = state.messageToNotebook
+        useChatStore.setState({ messageToNotebook: rest })
+      }
+    }, 30000) // 30秒超时
+
     set((state) => ({
       messageToNotebook: {
         ...state.messageToNotebook,
-        [messageId]: { notebookId, content: '' }
+        [messageId]: { notebookId, content: '', timeoutId }
       }
     }))
   }
@@ -204,6 +229,11 @@ export function setupChatListeners() {
     if (done) {
       const cached = store.messageToNotebook[messageId]
       if (cached) {
+        // 清除超时定时器
+        if (cached.timeoutId) {
+          window.clearTimeout(cached.timeoutId)
+        }
+
         store.setStreamingMessage(cached.notebookId, null)
 
         // 清理缓存
@@ -224,6 +254,11 @@ export function setupChatListeners() {
     // 更新缓存
     const cached = store.messageToNotebook[messageId]
     if (cached) {
+      // 清除超时定时器
+      if (cached.timeoutId) {
+        window.clearTimeout(cached.timeoutId)
+      }
+
       useChatStore.setState((state) => ({
         messageToNotebook: {
           ...state.messageToNotebook,

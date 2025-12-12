@@ -2,7 +2,7 @@ import type { LLMProvider } from './types'
 import { OpenAIProvider } from './OpenAIProvider'
 import { OllamaProvider } from './OllamaProvider'
 import { DeepSeekProvider } from './DeepSeekProvider'
-import { settingsManager, providersManager } from '../config/store'
+import { settingsManager, providersManager } from '../config'
 
 /**
  * Provider Manager

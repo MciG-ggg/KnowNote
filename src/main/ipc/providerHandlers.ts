@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron'
 import { ProviderManager } from '../providers/ProviderManager'
-import { providersManager } from '../config/store'
+import { providersManager } from '../config'
 
 /**
  * 注册 Provider 配置相关的 IPC Handlers

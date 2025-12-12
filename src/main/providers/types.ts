@@ -3,30 +3,10 @@
  * 所有 AI Provider 必须实现此接口
  */
 
-/**
- * 聊天消息格式
- */
-export interface ChatMessage {
-  role: 'user' | 'assistant' | 'system'
-  content: string
-}
+import type { APIMessage, StreamChunk } from '../../shared/types/chat'
 
-/**
- * 流式响应片段
- */
-export interface StreamChunk {
-  content: string
-  done: boolean
-  metadata?: {
-    model?: string
-    finishReason?: string
-    usage?: {
-      promptTokens?: number
-      completionTokens?: number
-      totalTokens?: number
-    }
-  }
-}
+// 重新导出共享类型，方便其他地方使用
+export type { APIMessage as ChatMessage, StreamChunk }
 
 /**
  * Provider 配置
@@ -63,7 +43,7 @@ export interface LLMProvider {
    * @param onComplete - 完成时的回调
    */
   sendMessageStream(
-    messages: ChatMessage[],
+    messages: APIMessage[],
     onChunk: (chunk: StreamChunk) => void,
     onError: (error: Error) => void,
     onComplete: () => void
