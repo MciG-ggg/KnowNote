@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron'
+import { ipcMain, BrowserWindow } from 'electron'
 import { ProviderManager } from '../providers/ProviderManager'
 import { providersManager } from '../config'
 
@@ -9,6 +9,10 @@ export function registerProviderHandlers(providerManager: ProviderManager) {
   // 保存提供商配置（直接使用 Electron Store，立即生效）
   ipcMain.handle('save-provider-config', async (_event, config: any) => {
     await providersManager.saveProviderConfig(config.providerName, config.config, config.enabled)
+    // 广播 Provider 配置变更事件到所有窗口
+    BrowserWindow.getAllWindows().forEach((win) => {
+      win.webContents.send('provider-config-changed')
+    })
   })
 
   // 获取单个提供商配置（从 Electron Store 读取）

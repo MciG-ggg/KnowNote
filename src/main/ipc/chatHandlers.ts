@@ -65,15 +65,6 @@ export function registerChatHandlers(
       let fullContent = ''
       let usageMetadata: any = null
 
-      // 设置30秒超时（用于检测流式卡死）
-      const timeout = setTimeout(() => {
-        console.error('[send-message] 流式传输超时（30秒）')
-        event.sender.send('message-error', {
-          messageId: assistantMessage.id,
-          error: '消息发送超时，请重试'
-        })
-      }, 30000)
-
       provider.sendMessageStream(
         messages,
         // onChunk
@@ -93,7 +84,6 @@ export function registerChatHandlers(
         },
         // onError
         (error) => {
-          clearTimeout(timeout)
           event.sender.send('message-error', {
             messageId: assistantMessage.id,
             error: error.message
@@ -101,7 +91,6 @@ export function registerChatHandlers(
         },
         // onComplete
         async () => {
-          clearTimeout(timeout)
           try {
             // 更新数据库中的完整内容
             queries.updateMessageContent(assistantMessage.id, fullContent)

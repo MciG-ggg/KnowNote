@@ -74,6 +74,7 @@ declare global {
         providerName: string,
         apiKey: string
       ) => Promise<{ id: string; object: string; owned_by?: string; created?: number }[]>
+      onProviderConfigChanged: (callback: () => void) => () => void
     }
   }
 }

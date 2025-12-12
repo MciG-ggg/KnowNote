@@ -35,7 +35,7 @@ export default function MessageList({ messages }: MessageListProps): ReactElemen
 
   // 消息列表
   return (
-    <div className="h-full overflow-y-auto px-4 py-6 pb-32 message-list-scroll">
+    <div className="h-full overflow-y-auto px-4 py-6 pb-32 message-list-scroll message-list-fade">
       <div className="max-w-4xl mx-auto">
         {messages.map((message) => (
           <MessageItem key={message.id} message={message} />

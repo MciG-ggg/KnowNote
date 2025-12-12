@@ -82,7 +82,14 @@ const api = {
   validateProviderConfig: (providerName: string, config: any) =>
     invokeWithTimeout('validate-provider-config', 15000, providerName, config), // 15秒超时（网络验证）
   fetchModels: (providerName: string, apiKey: string) =>
-    invokeWithTimeout('fetch-models', 15000, providerName, apiKey) // 15秒超时（网络请求）
+    invokeWithTimeout('fetch-models', 15000, providerName, apiKey), // 15秒超时（网络请求）
+
+  // Provider 配置变更监听
+  onProviderConfigChanged: (callback: () => void) => {
+    const listener = () => callback()
+    ipcRenderer.on('provider-config-changed', listener)
+    return () => ipcRenderer.removeListener('provider-config-changed', listener)
+  }
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to
