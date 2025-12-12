@@ -143,6 +143,8 @@ export default function NoteEditor({ content, onChange }: NoteEditorProps): Reac
           background: transparent;
           min-height: 100%;
           outline: none;
+          font-size: 0.875rem;
+          line-height: 1.75;
         }
 
         .note-editor-wrapper .ProseMirror p {
@@ -154,39 +156,39 @@ export default function NoteEditor({ content, onChange }: NoteEditorProps): Reac
         .note-editor-wrapper .ProseMirror h2,
         .note-editor-wrapper .ProseMirror h3 {
           margin: 1rem 0 0.5rem;
-          font-weight: 600;
-          line-height: 1.25;
+          font-weight: 700;
+          line-height: 1.4;
           color: hsl(var(--foreground));
         }
 
         .note-editor-wrapper .ProseMirror h1 {
-          font-size: 1.875rem;
+          font-size: 1.25rem;
         }
 
         .note-editor-wrapper .ProseMirror h2 {
-          font-size: 1.5rem;
+          font-size: 1.125rem;
         }
 
         .note-editor-wrapper .ProseMirror h3 {
-          font-size: 1.25rem;
+          font-size: 1rem;
         }
 
         .note-editor-wrapper .ProseMirror code {
           background-color: hsl(var(--muted));
-          color: hsl(var(--foreground));
-          padding: 0.125rem 0.25rem;
+          color: hsl(var(--primary));
+          padding: 0.125rem 0.375rem;
           border-radius: 0.25rem;
-          font-size: 0.875em;
-          font-family: 'Courier New', monospace;
+          font-size: 0.75rem;
+          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Courier New', monospace;
         }
 
         .note-editor-wrapper .ProseMirror pre {
           background-color: hsl(var(--muted));
           color: hsl(var(--foreground));
-          padding: 0.75rem 1rem;
-          border-radius: 0.375rem;
+          padding: 1rem;
+          border-radius: 0.5rem;
           overflow-x: auto;
-          margin: 0.75rem 0;
+          margin: 1rem 0;
         }
 
         .note-editor-wrapper .ProseMirror pre code {
