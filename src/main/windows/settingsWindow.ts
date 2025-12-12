@@ -1,6 +1,7 @@
 import { BrowserWindow } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
+import { settingsManager } from '../config'
 
 let settingsWindow: BrowserWindow | null = null
 
@@ -14,6 +15,10 @@ export function createSettingsWindow(): void {
     return
   }
 
+  // 根据用户主题设置背景色，避免窗口调整大小时出现白边
+  const theme = settingsManager.getSettingSync('theme')
+  const backgroundColor = theme === 'dark' ? '#282c34' : '#fafafa'
+
   // 创建设置窗口
   settingsWindow = new BrowserWindow({
     width: 1000,
@@ -23,6 +28,7 @@ export function createSettingsWindow(): void {
     show: false,
     autoHideMenuBar: true,
     titleBarStyle: 'hiddenInset',
+    backgroundColor,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
@@ -35,6 +41,14 @@ export function createSettingsWindow(): void {
 
   settingsWindow.on('closed', () => {
     settingsWindow = null
+  })
+
+  // 监听主题变化，动态更新窗口背景色
+  settingsManager.onSettingsChangeSync((newSettings) => {
+    if (settingsWindow && !settingsWindow.isDestroyed()) {
+      const newBackgroundColor = newSettings.theme === 'dark' ? '#282c34' : '#fafafa'
+      settingsWindow.setBackgroundColor(newBackgroundColor)
+    }
   })
 
   // 加载设置页面

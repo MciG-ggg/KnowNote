@@ -1,12 +1,13 @@
-import { Globe, Database, HelpCircle, Check, X } from 'lucide-react'
+import { Globe, Database, HelpCircle } from 'lucide-react'
 import { useState, useEffect, useMemo, ReactElement } from 'react'
 import GeneralSettings from './GeneralSettings'
 import ProvidersSettings from './ProvidersSettings'
 import AboutSettings from './AboutSettings'
+import SettingsActionBar from './SettingsActionBar'
 
 interface AppSettings {
   theme: 'light' | 'dark'
-  language: 'zh-CN' | 'en-US' | 'ja-JP'
+  language: 'zh-CN' | 'en-US'
   autoLaunch: boolean
   defaultModel?: string
 }
@@ -171,41 +172,16 @@ export default function SettingsWindow(): ReactElement {
         {/* 右侧内容区域 */}
         <div className="flex-1 min-w-0 flex flex-col gap-3">
           {/* 设置内容 - Island */}
-          <div className="flex-1 bg-card rounded-xl">
-            <div className="h-full overflow-y-auto p-6">
-              <div className="w-full">{renderContent()}</div>
-            </div>
+          <div className="flex-1 min-h-0 bg-card rounded-xl overflow-hidden">
+            <div className="h-full overflow-y-auto p-6">{renderContent()}</div>
           </div>
 
           {/* 底部操作按钮 - Island */}
-          <div className="bg-card rounded-xl p-4">
-            <div className="flex items-center justify-end gap-3">
-              <button
-                onClick={handleCancel}
-                disabled={!hasChanges}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                  hasChanges
-                    ? 'bg-secondary text-secondary-foreground hover:bg-secondary/80 cursor-pointer'
-                    : 'bg-secondary/50 text-secondary-foreground/50 cursor-not-allowed'
-                }`}
-              >
-                <X className="w-4 h-4" />
-                <span className="text-sm font-medium">取消</span>
-              </button>
-              <button
-                onClick={handleConfirm}
-                disabled={!hasChanges}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-                  hasChanges
-                    ? 'bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer shadow-sm'
-                    : 'bg-primary/50 text-primary-foreground/50 cursor-not-allowed'
-                }`}
-              >
-                <Check className="w-4 h-4" />
-                <span className="text-sm font-medium">保存</span>
-              </button>
-            </div>
-          </div>
+          <SettingsActionBar
+            hasChanges={hasChanges}
+            onCancel={handleCancel}
+            onConfirm={handleConfirm}
+          />
         </div>
       </div>
     </div>

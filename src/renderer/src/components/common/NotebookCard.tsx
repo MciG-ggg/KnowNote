@@ -9,6 +9,16 @@ interface NotebookCardProps {
   onRename: () => void
 }
 
+// 主题图表颜色映射
+const chartColors = ['bg-chart-1', 'bg-chart-2', 'bg-chart-3', 'bg-chart-4', 'bg-chart-5']
+
+// 根据笔记本 ID 获取颜色类名
+const getColorClass = (id: string): string => {
+  // 使用 ID 的字符码总和来确定颜色索引
+  const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+  return chartColors[hash % 5]
+}
+
 export default function NotebookCard({
   notebook,
   onClick,
@@ -17,6 +27,9 @@ export default function NotebookCard({
 }: NotebookCardProps): ReactElement {
   const [showMenu, setShowMenu] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+
+  // 获取笔记本颜色
+  const colorClass = getColorClass(notebook.id)
 
   // 点击外部关闭菜单
   useEffect(() => {
@@ -68,11 +81,8 @@ export default function NotebookCard({
       onClick={onClick}
       className="group relative bg-card rounded-2xl p-8 min-h-[200px] cursor-pointer transition-all hover:bg-card/90 hover:scale-[1.02] border border-border/50 hover:border-border overflow-hidden"
     >
-      {/* 顶部彩色装饰条 */}
-      <div
-        className="absolute top-0 left-0 right-0 h-1"
-        style={{ backgroundColor: notebook.coverColor }}
-      />
+      {/* 顶部彩色装饰条 - 使用主题图表颜色 */}
+      <div className={`absolute top-0 left-0 right-0 h-1 ${colorClass}`} />
 
       {/* 右上角菜单按钮 */}
       <div className="absolute top-4 right-4" ref={menuRef}>
@@ -126,10 +136,9 @@ export default function NotebookCard({
         </div>
       </div>
 
-      {/* Hover 效果光晕 */}
+      {/* Hover 效果光晕 - 使用主题图表颜色 */}
       <div
-        className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity pointer-events-none"
-        style={{ backgroundColor: notebook.coverColor }}
+        className={`absolute inset-0 rounded-2xl ${colorClass} opacity-0 group-hover:opacity-10 transition-opacity pointer-events-none`}
       />
     </div>
   )

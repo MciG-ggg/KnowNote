@@ -2,6 +2,7 @@ import { BrowserWindow, shell } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 import icon from '../../../resources/icon.png?asset'
+import { settingsManager } from '../config'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -9,6 +10,10 @@ let mainWindow: BrowserWindow | null = null
  * 创建主窗口
  */
 export function createMainWindow(): BrowserWindow {
+  // 根据用户主题设置背景色，避免窗口调整大小时出现白边
+  const theme = settingsManager.getSettingSync('theme')
+  const backgroundColor = theme === 'dark' ? '#282c34' : '#fafafa'
+
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -17,6 +22,7 @@ export function createMainWindow(): BrowserWindow {
     show: false,
     autoHideMenuBar: true,
     titleBarStyle: 'hiddenInset',
+    backgroundColor,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -31,6 +37,14 @@ export function createMainWindow(): BrowserWindow {
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }
+  })
+
+  // 监听主题变化，动态更新窗口背景色
+  settingsManager.onSettingsChangeSync((newSettings) => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      const newBackgroundColor = newSettings.theme === 'dark' ? '#282c34' : '#fafafa'
+      mainWindow.setBackgroundColor(newBackgroundColor)
+    }
   })
 
   // HMR for renderer base on electron-vite cli.

@@ -19,7 +19,7 @@ export interface ProviderConfig {
  */
 export interface AppSettings {
   theme: 'light' | 'dark'
-  language: 'zh-CN' | 'en-US' | 'ja-JP'
+  language: 'zh-CN' | 'en-US'
   autoLaunch: boolean
   defaultModel?: string
 }

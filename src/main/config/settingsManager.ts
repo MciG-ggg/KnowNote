@@ -16,9 +16,25 @@ const defaultSettings: AppSettings = {
  */
 export class SettingsManager {
   private getStore: () => Promise<Store<any>>
+  private storeCache: Store<any> | null = null
 
   constructor(getStore: () => Promise<Store<any>>) {
     this.getStore = getStore
+    // 立即初始化 store 缓存
+    getStore().then((store) => {
+      this.storeCache = store
+    })
+  }
+
+  /**
+   * 同步获取单个设置（仅当 store 已初始化时可用，否则返回默认值）
+   */
+  getSettingSync<K extends keyof AppSettings>(key: K): AppSettings[K] {
+    if (!this.storeCache) {
+      return defaultSettings[key]
+    }
+    const settings = this.storeCache.get('settings', defaultSettings)
+    return settings[key]
   }
 
   /**
@@ -60,6 +76,30 @@ export class SettingsManager {
   async resetSettings(): Promise<void> {
     const store = await this.getStore()
     store.set('settings', defaultSettings)
+  }
+
+  /**
+   * 监听设置变化（同步版本，仅当 store 已初始化时生效）
+   */
+  onSettingsChangeSync(
+    callback: (newSettings: AppSettings, oldSettings: AppSettings) => void
+  ): void {
+    if (this.storeCache) {
+      this.storeCache.onDidChange('settings', (newValue, oldValue) => {
+        if (newValue && oldValue) {
+          callback(newValue, oldValue)
+        }
+      })
+    } else {
+      // Store 未初始化时，延迟注册监听器
+      this.getStore().then((store) => {
+        store.onDidChange('settings', (newValue, oldValue) => {
+          if (newValue && oldValue) {
+            callback(newValue, oldValue)
+          }
+        })
+      })
+    }
   }
 
   /**
