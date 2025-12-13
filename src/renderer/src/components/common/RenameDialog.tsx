@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, ReactElement } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog'
 
 interface RenameDialogProps {
   isOpen: boolean
@@ -18,45 +19,40 @@ export default function RenameDialog({
   const [title, setTitle] = useState(currentTitle)
   const inputRef = useRef<HTMLInputElement>(null)
 
+  // 同步 currentTitle 变化
   useEffect(() => {
     setTitle(currentTitle)
   }, [currentTitle])
 
+  // 自动聚焦并选中文本
   useEffect(() => {
     if (isOpen && inputRef.current) {
-      inputRef.current.focus()
-      inputRef.current.select()
+      // 使用 setTimeout 确保 Dialog 动画完成后再聚焦
+      setTimeout(() => {
+        inputRef.current?.focus()
+        inputRef.current?.select()
+      }, 50)
     }
   }, [isOpen])
 
   const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault()
-    if (title.trim() && title !== currentTitle) {
-      onConfirm(title.trim())
+    const trimmedTitle = title.trim()
+    if (trimmedTitle && trimmedTitle !== currentTitle) {
+      onConfirm(trimmedTitle)
       onClose()
     }
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent): void => {
-    if (e.key === 'Escape') {
-      onClose()
-    }
-  }
-
-  if (!isOpen) return null
+  // 判断是否可以提交
+  const canSubmit = title.trim() && title.trim() !== currentTitle
 
   return (
-    <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50"
-      onClick={onClose}
-    >
-      <div
-        className="bg-card rounded-2xl p-8 w-[440px] border border-border shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h3 className="text-xl font-semibold text-foreground mb-6">
-          {t('notebook:renameNotebook')}
-        </h3>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[440px]">
+        <DialogHeader>
+          <DialogTitle>{t('notebook:renameNotebook')}</DialogTitle>
+        </DialogHeader>
 
         <form onSubmit={handleSubmit}>
           <input
@@ -64,12 +60,11 @@ export default function RenameDialog({
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            onKeyDown={handleKeyDown}
             className="w-full bg-card border border-border rounded-lg px-4 py-3 text-foreground text-base focus:outline-none focus:ring-2 focus:ring-ring transition-colors placeholder-muted-foreground"
             placeholder={t('notebook:enterNotebookName')}
           />
 
-          <div className="flex justify-end gap-4 mt-8">
+          <DialogFooter>
             <button
               type="button"
               onClick={onClose}
@@ -79,14 +74,14 @@ export default function RenameDialog({
             </button>
             <button
               type="submit"
-              disabled={!title.trim() || title === currentTitle}
+              disabled={!canSubmit}
               className="px-6 py-2.5 bg-primary hover:bg-primary/90 disabled:bg-secondary disabled:cursor-not-allowed disabled:text-muted-foreground rounded-lg transition-colors text-primary-foreground text-sm font-medium"
             >
               {t('common:confirm')}
             </button>
-          </div>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }

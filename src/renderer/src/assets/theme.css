@@ -238,6 +238,11 @@
   --shadow-lg: var(--shadow-lg);
   --shadow-xl: var(--shadow-xl);
   --shadow-2xl: var(--shadow-2xl);
+
+  /* z-index 层级系统 */
+  --z-dropdown: 50;
+  --z-modal: 100;
+  --z-toast: 200;
 }
 
 /* ============================================
@@ -260,6 +265,11 @@
    - shadow-sm
    - shadow-md
    - shadow-lg
+
+   z-index 层级：
+   - z-dropdown  (50)
+   - z-modal     (100)
+   - z-toast     (200)
 
    图表：
    - bg-chart-1

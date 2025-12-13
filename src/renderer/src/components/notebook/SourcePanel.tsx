@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback, ReactElement } from 'react'
 import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Plus, FileText, Globe, FileUp, Loader2, StickyNote, X } from 'lucide-react'
+import { Plus, FileText, Globe, FileUp, Loader2, StickyNote } from 'lucide-react'
 import { useKnowledgeStore, setupKnowledgeListeners } from '../../store/knowledgeStore'
 import { useNoteStore } from '../../store/noteStore'
 import { ScrollArea } from '../ui/scroll-area'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog'
 import DocumentList from './source/DocumentList'
 
 // 添加来源类型
@@ -35,8 +36,6 @@ function AddSourceModal({
   const [url, setUrl] = useState('')
   const [selectedNoteId, setSelectedNoteId] = useState('')
 
-  if (!isOpen) return null
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (type === 'url' && url) {
@@ -48,23 +47,26 @@ function AddSourceModal({
     }
   }
 
+  // 判断是否可以提交
+  const canSubmit =
+    !isLoading &&
+    ((type === 'url' && url.trim()) ||
+      (type === 'text' && title.trim() && content.trim()) ||
+      (type === 'note' && selectedNoteId))
+
+  const getTitle = () => {
+    if (type === 'url') return t('importUrl')
+    if (type === 'text') return t('pasteText')
+    if (type === 'note') return t('importNote')
+    return ''
+  }
+
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-card rounded-xl p-6 w-[480px] max-w-[90vw] shadow-lg">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium">
-            {type === 'url' && t('importUrl')}
-            {type === 'text' && t('pasteText')}
-            {type === 'note' && t('importNote')}
-          </h3>
-          <button
-            onClick={onClose}
-            className="p-1 hover:bg-muted rounded-lg transition-colors"
-            disabled={isLoading}
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
+    <Dialog open={isOpen} onOpenChange={isLoading ? undefined : onClose}>
+      <DialogContent className="sm:max-w-[520px]">
+        <DialogHeader>
+          <DialogTitle>{getTitle()}</DialogTitle>
+        </DialogHeader>
 
         <form onSubmit={handleSubmit}>
           {type === 'url' && (
@@ -73,39 +75,44 @@ function AddSourceModal({
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder={t('urlPlaceholder')}
-              className="w-full px-3 py-2 rounded-lg bg-muted border border-border outline-none focus:ring-2 focus:ring-primary/50"
+              className="w-full bg-card border border-border rounded-lg px-4 py-3 text-foreground text-base focus:outline-none focus:ring-2 focus:ring-ring transition-colors placeholder-muted-foreground"
               required
               autoFocus
+              disabled={isLoading}
             />
           )}
 
           {type === 'text' && (
-            <>
+            <div className="space-y-4">
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder={t('documentTitle')}
-                className="w-full px-3 py-2 rounded-lg bg-muted border border-border outline-none focus:ring-2 focus:ring-primary/50 mb-3"
+                className="w-full bg-card border border-border rounded-lg px-4 py-3 text-foreground text-base focus:outline-none focus:ring-2 focus:ring-ring transition-colors placeholder-muted-foreground"
                 required
                 autoFocus
+                disabled={isLoading}
               />
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder={t('textPlaceholder')}
-                className="w-full px-3 py-2 rounded-lg bg-muted border border-border outline-none focus:ring-2 focus:ring-primary/50 min-h-[200px] resize-none"
+                className="w-full bg-card border border-border rounded-lg px-4 py-3 text-foreground text-base focus:outline-none focus:ring-2 focus:ring-ring transition-colors placeholder-muted-foreground min-h-60 resize-y"
                 required
+                disabled={isLoading}
               />
-            </>
+            </div>
           )}
 
           {type === 'note' && (
             <select
               value={selectedNoteId}
               onChange={(e) => setSelectedNoteId(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-muted border border-border outline-none focus:ring-2 focus:ring-primary/50"
+              className="w-full bg-card border border-border rounded-lg px-4 py-3 text-foreground text-base focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
               required
+              autoFocus
+              disabled={isLoading}
             >
               <option value="">{t('selectSession')}</option>
               {notes.map((note) => (
@@ -116,27 +123,27 @@ function AddSourceModal({
             </select>
           )}
 
-          <div className="flex justify-end gap-2 mt-4">
+          <DialogFooter>
             <button
               type="button"
               onClick={onClose}
               disabled={isLoading}
-              className="px-4 py-2 rounded-lg hover:bg-muted transition-colors"
+              className="px-6 py-2.5 bg-secondary hover:bg-secondary/80 disabled:bg-secondary/50 disabled:cursor-not-allowed rounded-lg transition-colors text-secondary-foreground text-sm font-medium"
             >
               {t('cancel')}
             </button>
             <button
               type="submit"
-              disabled={isLoading}
-              className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex items-center gap-2"
+              disabled={!canSubmit}
+              className="px-6 py-2.5 bg-primary hover:bg-primary/90 disabled:bg-secondary disabled:cursor-not-allowed disabled:text-muted-foreground rounded-lg transition-colors text-primary-foreground text-sm font-medium flex items-center gap-2"
             >
               {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
               {isLoading ? t('processing') : t('add')}
             </button>
-          </div>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -168,6 +175,7 @@ export default function SourcePanel(): ReactElement {
   const { id: notebookId } = useParams()
   const [showAddMenu, setShowAddMenu] = useState(false)
   const [modalType, setModalType] = useState<AddSourceType | null>(null)
+  const [defaultEmbeddingModel, setDefaultEmbeddingModel] = useState<string | undefined>(undefined)
 
   const {
     documents,
@@ -184,6 +192,22 @@ export default function SourcePanel(): ReactElement {
   } = useKnowledgeStore()
 
   const { notes, loadNotes } = useNoteStore()
+
+  // 加载默认嵌入模型设置
+  useEffect(() => {
+    const loadEmbeddingModel = async () => {
+      const model = await window.api.settings.get('defaultEmbeddingModel')
+      setDefaultEmbeddingModel(model)
+    }
+    loadEmbeddingModel()
+
+    // 监听设置变化
+    const unsubscribe = window.api.settings.onSettingsChange((newSettings) => {
+      setDefaultEmbeddingModel(newSettings.defaultEmbeddingModel)
+    })
+
+    return unsubscribe
+  }, [])
 
   // 设置监听器
   useEffect(() => {
@@ -203,27 +227,50 @@ export default function SourcePanel(): ReactElement {
   // 处理文件上传
   const handleFileUpload = useCallback(async () => {
     if (!notebookId) return
+
+    // 检查是否配置了默认嵌入模型
+    if (!defaultEmbeddingModel) {
+      alert(t('noEmbeddingModelConfigured'))
+      return
+    }
+
     const files = await selectFiles()
     for (const filePath of files) {
       await addDocumentFromFile(notebookId, filePath)
     }
     setShowAddMenu(false)
-  }, [notebookId, selectFiles, addDocumentFromFile])
+  }, [notebookId, defaultEmbeddingModel, selectFiles, addDocumentFromFile, t])
 
   // 处理 URL 导入
   const handleUrlImport = useCallback(
     async (data: { url?: string }) => {
       if (!notebookId || !data.url) return
+
+      // 检查是否配置了默认嵌入模型
+      if (!defaultEmbeddingModel) {
+        alert(t('noEmbeddingModelConfigured'))
+        setModalType(null)
+        return
+      }
+
       await addDocumentFromUrl(notebookId, data.url)
       setModalType(null)
     },
-    [notebookId, addDocumentFromUrl]
+    [notebookId, defaultEmbeddingModel, addDocumentFromUrl, t]
   )
 
   // 处理文本粘贴
   const handleTextPaste = useCallback(
     async (data: { title?: string; content?: string }) => {
       if (!notebookId || !data.title || !data.content) return
+
+      // 检查是否配置了默认嵌入模型
+      if (!defaultEmbeddingModel) {
+        alert(t('noEmbeddingModelConfigured'))
+        setModalType(null)
+        return
+      }
+
       await addDocument(notebookId, {
         title: data.title,
         type: 'text',
@@ -231,17 +278,25 @@ export default function SourcePanel(): ReactElement {
       })
       setModalType(null)
     },
-    [notebookId, addDocument]
+    [notebookId, defaultEmbeddingModel, addDocument, t]
   )
 
   // 处理笔记导入
   const handleNoteImport = useCallback(
     async (data: { noteId?: string }) => {
       if (!notebookId || !data.noteId) return
+
+      // 检查是否配置了默认嵌入模型
+      if (!defaultEmbeddingModel) {
+        alert(t('noEmbeddingModelConfigured'))
+        setModalType(null)
+        return
+      }
+
       await addNoteToKnowledge(notebookId, data.noteId)
       setModalType(null)
     },
-    [notebookId, addNoteToKnowledge]
+    [notebookId, defaultEmbeddingModel, addNoteToKnowledge, t]
   )
 
   // 处理删除文档

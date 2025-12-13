@@ -96,5 +96,6 @@
   "textPlaceholder": "Paste or type text content",
   "add": "Add",
   "cancel": "Cancel",
-  "processing": "Processing..."
+  "processing": "Processing...",
+  "noEmbeddingModelConfigured": "Please configure a default embedding model in settings first"
 }
