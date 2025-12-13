@@ -1,5 +1,6 @@
 import { Globe, Database, HelpCircle } from 'lucide-react'
 import { useState, useEffect, useMemo, ReactElement } from 'react'
+import { useTranslation } from 'react-i18next'
 import GeneralSettings from './GeneralSettings'
 import ProvidersSettings from './ProvidersSettings'
 import AboutSettings from './AboutSettings'
@@ -21,6 +22,7 @@ interface ProviderConfig {
 }
 
 export default function SettingsWindow(): ReactElement {
+  const { t } = useTranslation('settings')
   const [activeSection, setActiveSection] = useState<string>('general')
   const [originalSettings, setOriginalSettings] = useState<AppSettings | null>(null)
   const [pendingSettings, setPendingSettings] = useState<AppSettings | null>(null)
@@ -56,17 +58,17 @@ export default function SettingsWindow(): ReactElement {
     {
       id: 'general',
       icon: Globe,
-      label: '通用'
+      label: t('generalSettings')
     },
     {
       id: 'provider',
       icon: Database,
-      label: '提供商'
+      label: t('aiProviders')
     },
     {
       id: 'about',
       icon: HelpCircle,
-      label: '关于'
+      label: t('about')
     }
   ]
 
@@ -140,7 +142,7 @@ export default function SettingsWindow(): ReactElement {
         className="absolute top-0 left-0 right-0 h-10 z-10 flex items-center justify-center bg-background"
         style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
       >
-        <span className="text-sm text-muted-foreground font-medium">设置</span>
+        <span className="text-sm text-muted-foreground font-medium">{t('settings')}</span>
       </div>
 
       {/* Island风格布局容器 */}

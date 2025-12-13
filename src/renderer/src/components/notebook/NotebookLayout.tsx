@@ -1,5 +1,6 @@
 import { useEffect, ReactElement } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import TopNavigationBar from '../common/TopNavigationBar'
 import ResizableLayout from '../layouts/ResizableLayout'
 import SourcePanel from './SourcePanel'
@@ -9,6 +10,7 @@ import { useNotebookStore } from '../../store/notebookStore'
 import { useChatStore } from '../../store/chatStore'
 
 export default function NotebookLayout(): ReactElement {
+  const { t } = useTranslation('ui')
   const navigate = useNavigate()
   const { id } = useParams()
   const { notebooks, addNotebook, addOpenedNotebook, setCurrentNotebook } = useNotebookStore()
@@ -30,8 +32,8 @@ export default function NotebookLayout(): ReactElement {
     const randomIcon = icons[Math.floor(Math.random() * icons.length)]
 
     const newId = await addNotebook({
-      title: `新笔记本 ${notebooks.length + 1}`,
-      description: '开始你的笔记之旅',
+      title: t('newNotebook', { index: notebooks.length + 1 }),
+      description: t('notebookDescription'),
       icon: randomIcon
     })
 

@@ -1,5 +1,6 @@
 import { Home, Plus, X, Settings } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useNotebookStore } from '../../store/notebookStore'
 import { ReactElement } from 'react'
 
@@ -12,6 +13,7 @@ export default function TopNavigationBar({
   onCreateClick,
   isHomePage = false
 }: TopNavigationBarProps): ReactElement {
+  const { t } = useTranslation('ui')
   const navigate = useNavigate()
   const { currentNotebook, openedNotebooks, removeOpenedNotebook, setCurrentNotebook } =
     useNotebookStore()
@@ -73,7 +75,7 @@ export default function TopNavigationBar({
           }`}
         >
           <Home className="w-4 h-4" />
-          <span>首页</span>
+          <span>{t('home')}</span>
         </button>
 
         {/* 打开的笔记本标签 - 所有页面都显示 */}
@@ -96,7 +98,7 @@ export default function TopNavigationBar({
                 }}
                 style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
                 className="ml-2 p-1 hover:bg-accent rounded transition-colors"
-                title="关闭标签"
+                title={t('closeTab')}
               >
                 <X className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground" />
               </button>
@@ -118,7 +120,7 @@ export default function TopNavigationBar({
         onClick={handleSettingsClick}
         style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
         className="flex items-center justify-center w-7 h-7 hover:bg-accent rounded-lg transition-colors"
-        title="设置"
+        title={t('settings')}
       >
         <Settings className="w-4 h-4" />
       </button>

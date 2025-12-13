@@ -1,6 +1,8 @@
 import { ReactElement, useEffect, useState, useMemo } from 'react'
 import { Sun, Moon, ChevronDown } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import SettingItem from './SettingItem'
+import { useI18nStore } from '../../store/i18nStore'
 
 interface AppSettings {
   theme: 'light' | 'dark'
@@ -32,6 +34,8 @@ export default function GeneralSettings({
   onSettingsChange,
   providers
 }: GeneralSettingsProps): ReactElement {
+  const { t } = useTranslation('settings')
+  const { changeLanguage } = useI18nStore()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false)
   const currentLanguage = languages.find((lang) => lang.value === settings.language) || languages[0]
@@ -91,7 +95,7 @@ export default function GeneralSettings({
   return (
     <div className="max-w-2xl flex flex-col gap-4">
       {/* 主题模式设置 */}
-      <SettingItem title="主题模式" description="选择应用的外观主题">
+      <SettingItem title={t('themeMode')} description={t('selectTheme')}>
         <div className="flex items-center gap-2">
           <button
             onClick={() => onSettingsChange({ theme: 'light' })}
@@ -102,7 +106,7 @@ export default function GeneralSettings({
             }`}
           >
             <Sun className="w-3.5 h-3.5" />
-            <span className="text-xs font-medium">浅色</span>
+            <span className="text-xs font-medium">{t('light')}</span>
           </button>
           <button
             onClick={() => onSettingsChange({ theme: 'dark' })}
@@ -113,13 +117,13 @@ export default function GeneralSettings({
             }`}
           >
             <Moon className="w-3.5 h-3.5" />
-            <span className="text-xs font-medium">深色</span>
+            <span className="text-xs font-medium">{t('dark')}</span>
           </button>
         </div>
       </SettingItem>
 
       {/* 开机自启动设置 */}
-      <SettingItem title="开机自启动" description="系统启动时自动运行应用">
+      <SettingItem title={t('autoLaunch')} description={t('autoLaunchDesc')}>
         <button
           onClick={() => onSettingsChange({ autoLaunch: !settings.autoLaunch })}
           className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 ${
@@ -135,7 +139,7 @@ export default function GeneralSettings({
       </SettingItem>
 
       {/* 语言设置 */}
-      <SettingItem title="语言设置" description="选择应用界面语言">
+      <SettingItem title={t('language')} description={t('languageDesc')}>
         <div className="relative language-dropdown w-56">
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -159,7 +163,9 @@ export default function GeneralSettings({
                   <button
                     key={language.value}
                     onClick={() => {
-                      onSettingsChange({ language: language.value as AppSettings['language'] })
+                      const newLang = language.value as AppSettings['language']
+                      onSettingsChange({ language: newLang })
+                      changeLanguage(newLang)
                       setIsDropdownOpen(false)
                     }}
                     className={`w-full flex items-center justify-between px-3 py-2 hover:bg-accent transition-colors ${
@@ -185,12 +191,8 @@ export default function GeneralSettings({
 
       {/* 默认模型设置 */}
       <SettingItem
-        title="默认模型"
-        description={
-          availableModels.length > 0
-            ? '选择新对话时使用的默认模型'
-            : '没有可用的模型，请前往提供商页面启用供应商并选择模型'
-        }
+        title={t('defaultModel')}
+        description={availableModels.length > 0 ? t('defaultModelDesc') : t('noAvailableModel')}
       >
         {availableModels.length > 0 ? (
           <div className="relative model-dropdown w-56">
@@ -200,7 +202,7 @@ export default function GeneralSettings({
             >
               <div className="flex-1 text-left">
                 <div className="text-sm font-medium text-foreground">
-                  {currentModel ? currentModel.label : '请选择默认模型'}
+                  {currentModel ? currentModel.label : t('pleaseSelectModel')}
                 </div>
                 {currentModel && (
                   <div className="text-xs text-muted-foreground capitalize">
@@ -247,7 +249,7 @@ export default function GeneralSettings({
             )}
           </div>
         ) : (
-          <div className="text-sm text-muted-foreground">请前往提供商页面启用供应商并选择模型</div>
+          <div className="text-sm text-muted-foreground">{t('noAvailableModel')}</div>
         )}
       </SettingItem>
     </div>

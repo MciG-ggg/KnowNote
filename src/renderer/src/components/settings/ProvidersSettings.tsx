@@ -1,5 +1,6 @@
 import { useState, ReactElement } from 'react'
 import { Search } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import ProviderConfigPanel from './ProviderConfigPanel'
 import { ScrollArea } from '../ui/scroll-area'
 
@@ -26,6 +27,7 @@ export default function ProvidersSettings({
   providers,
   onProvidersChange
 }: ProvidersSettingsProps): ReactElement {
+  const { t } = useTranslation('settings')
   const [activeProvider, setActiveProvider] = useState<string>('deepseek')
   const [searchQuery, setSearchQuery] = useState('')
   const [models, setModels] = useState<Record<string, Model[]>>({})
@@ -77,7 +79,7 @@ export default function ProvidersSettings({
     const apiKey = provider.config.apiKey
 
     if (!apiKey) {
-      alert('Please enter API Key first')
+      alert(t('enterApiKey'))
       return
     }
 
@@ -88,9 +90,7 @@ export default function ProvidersSettings({
       setModels((prev) => ({ ...prev, [providerName]: modelList }))
     } catch (error) {
       console.error('Failed to fetch model list:', error)
-      alert(
-        `Failed to fetch model list: ${error instanceof Error ? error.message : 'Unknown error'}`
-      )
+      alert(`${t('fetchModelFailed')}${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setFetchingModels((prev) => ({ ...prev, [providerName]: false }))
     }
@@ -102,15 +102,15 @@ export default function ProvidersSettings({
   const providerList = [
     {
       id: 'deepseek',
-      name: 'DeepSeek',
-      description: 'DeepSeek AI models with reasoning capabilities',
+      name: t('deepseekName'),
+      description: t('deepseekDesc'),
       platformUrl: 'https://platform.deepseek.com',
       enabled: deepseekProvider.enabled
     },
     {
       id: 'openai',
-      name: 'OpenAI',
-      description: 'OpenAI GPT models including GPT-4 and GPT-3.5',
+      name: t('openaiName'),
+      description: t('openaiDesc'),
       platformUrl: 'https://platform.openai.com',
       enabled: openaiProvider.enabled
     }
@@ -129,7 +129,7 @@ export default function ProvidersSettings({
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder="搜索提供商..."
+            placeholder={t('searchProvider')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-9 pr-3 py-2 bg-muted rounded-lg text-sm text-foreground placeholder-muted-foreground outline-none border border-border focus:ring-2 focus:ring-inset focus:ring-ring"
@@ -160,7 +160,7 @@ export default function ProvidersSettings({
 
         {/* 添加自定义提供商按钮 */}
         <button className="w-full py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl text-sm font-medium transition-colors">
-          Add Custom Provider
+          {t('addCustomProvider')}
         </button>
       </div>
 
@@ -168,8 +168,8 @@ export default function ProvidersSettings({
       <ScrollArea className="flex-1 min-w-0">
         {activeProvider === 'deepseek' && (
           <ProviderConfigPanel
-            displayName="DeepSeek"
-            description="DeepSeek AI models with reasoning capabilities"
+            displayName={t('deepseekName')}
+            description={t('deepseekDesc')}
             platformUrl="https://platform.deepseek.com"
             provider={deepseekProvider}
             models={models.deepseek || []}
@@ -182,8 +182,8 @@ export default function ProvidersSettings({
 
         {activeProvider === 'openai' && (
           <ProviderConfigPanel
-            displayName="OpenAI"
-            description="OpenAI GPT models including GPT-4 and GPT-3.5"
+            displayName={t('openaiName')}
+            description={t('openaiDesc')}
             platformUrl="https://platform.openai.com"
             provider={openaiProvider}
             models={models.openai || []}

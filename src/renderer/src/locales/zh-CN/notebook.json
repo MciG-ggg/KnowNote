@@ -1,0 +1,18 @@
+{
+  "renameNotebook": "重命名笔记本",
+  "deleteNotebook": "删除笔记本",
+  "enterNotebookName": "请输入笔记本名称",
+  "deleteConfirm": "确定要删除笔记本 \"{{name}}\" 吗？\n此操作无法撤销。",
+  "notes": "笔记",
+  "createNote": "创建笔记",
+  "newNote": "新笔记",
+  "newNoteContent": "# 新笔记\n\n开始编辑...",
+  "noteTitle": "笔记标题",
+  "backToList": "返回列表",
+  "save": "保存",
+  "delete": "删除",
+  "confirmDeleteNote": "确定要删除这个笔记吗？",
+  "noNotesYet": "暂无笔记",
+  "noNotesYetDesc": "点击右上角的\"+\"按钮创建笔记",
+  "deleteNote": "删除笔记"
+}

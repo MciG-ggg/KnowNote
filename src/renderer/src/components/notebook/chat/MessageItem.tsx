@@ -5,6 +5,7 @@ import remarkMath from 'remark-math'
 import rehypeHighlight from 'rehype-highlight'
 import rehypeKatex from 'rehype-katex'
 import { BookPlus } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { ChatMessage } from '../../../types/notebook'
 import ReasoningContent from './ReasoningContent'
 import { useNoteStore } from '../../../store/noteStore'
@@ -18,6 +19,7 @@ interface MessageItemProps {
 }
 
 export default function MessageItem({ message }: MessageItemProps): ReactElement {
+  const { t } = useTranslation(['common', 'chat'])
   const isUser = message.role === 'user'
   const isSystem = message.role === 'system'
   const isStreaming = message.isStreaming || false
@@ -90,7 +92,7 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
           <button
             onClick={handleCopy}
             className="self-end mt-1 px-2 py-1 text-xs text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1"
-            title={copied ? '已复制' : '复制'}
+            title={copied ? t('common:copied') : t('common:copy')}
           >
             {copied ? (
               <>
@@ -102,7 +104,7 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                <span>已复制</span>
+                <span>{t('common:copied')}</span>
               </>
             ) : (
               <>
@@ -114,7 +116,7 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
                     d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
                   />
                 </svg>
-                <span>复制</span>
+                <span>{t('common:copy')}</span>
               </>
             )}
           </button>
@@ -159,7 +161,7 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
         ) : (
           // Show cursor when message is empty
           <div className="flex items-center gap-2 px-2">
-            <span className="text-sm text-muted-foreground">正在思考</span>
+            <span className="text-sm text-muted-foreground">{t('chat:thinking')}</span>
             <span className="inline-block w-2 h-4 bg-muted-foreground animate-pulse" />
           </div>
         )}
@@ -170,7 +172,7 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
             <button
               onClick={handleCopy}
               className="px-2 py-1 text-xs text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1"
-              title={copied ? '已复制' : '复制'}
+              title={copied ? t('common:copied') : t('common:copy')}
             >
               {copied ? (
                 <>
@@ -182,7 +184,7 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
                       d="M5 13l4 4L19 7"
                     />
                   </svg>
-                  <span>已复制</span>
+                  <span>{t('common:copied')}</span>
                 </>
               ) : (
                 <>
@@ -194,7 +196,7 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
                       d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
                     />
                   </svg>
-                  <span>复制</span>
+                  <span>{t('common:copy')}</span>
                 </>
               )}
             </button>
@@ -203,7 +205,7 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
             <button
               onClick={handleAddToNote}
               className="px-2 py-1 text-xs text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1"
-              title={addedToNote ? '已添加到笔记' : '添加到笔记'}
+              title={addedToNote ? t('chat:addedToNote') : t('chat:addToNote')}
             >
               {addedToNote ? (
                 <>
@@ -215,12 +217,12 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
                       d="M5 13l4 4L19 7"
                     />
                   </svg>
-                  <span>已添加</span>
+                  <span>{t('chat:added')}</span>
                 </>
               ) : (
                 <>
                   <BookPlus className="w-3 h-3" />
-                  <span>添加到笔记</span>
+                  <span>{t('chat:addToNote')}</span>
                 </>
               )}
             </button>

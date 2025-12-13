@@ -1,10 +1,12 @@
 import { useState, useEffect, ReactElement } from 'react'
 import { Send } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useChatStore } from '../../store/chatStore'
 import { useNotebookStore } from '../../store/notebookStore'
 import MessageList from './chat/MessageList'
 
 export default function ProcessPanel(): ReactElement {
+  const { t } = useTranslation('ui')
   const [input, setInput] = useState('')
   const [hasProvider, setHasProvider] = useState(true)
   const { currentSession, messages, isNotebookStreaming, sendMessage } = useChatStore()
@@ -125,13 +127,13 @@ export default function ProcessPanel(): ReactElement {
               onClick={handleStartEditTitle}
               className="text-sm font-medium hover:text-primary transition-colors"
               style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-              title="点击编辑标题"
+              title={t('clickToEditTitle')}
             >
               {currentNotebook.title}
             </button>
           )
         ) : (
-          <span className="text-sm text-muted-foreground">请选择或创建笔记本</span>
+          <span className="text-sm text-muted-foreground">{t('selectOrCreateNotebook')}</span>
         )}
       </div>
 
@@ -150,10 +152,10 @@ export default function ProcessPanel(): ReactElement {
             onKeyDown={handleKeyDown}
             placeholder={
               !currentSession
-                ? '请先选择会话'
+                ? t('selectSession')
                 : !hasProvider
-                  ? '未配置 AI Provider，请在设置中配置'
-                  : '输入消息... (Shift+Enter 换行)'
+                  ? t('noProviderConfigured')
+                  : t('inputMessage')
             }
             disabled={!currentSession || isCurrentNotebookStreaming || !hasProvider}
             rows={3}
@@ -165,11 +167,7 @@ export default function ProcessPanel(): ReactElement {
             onClick={handleSend}
             disabled={!canSend}
             title={
-              !hasProvider
-                ? '未配置 AI Provider，请在设置中配置'
-                : !currentSession
-                  ? '请先选择会话'
-                  : ''
+              !hasProvider ? t('noProviderConfigured') : !currentSession ? t('selectSession') : ''
             }
             className="absolute right-2 bottom-3 p-2 bg-primary hover:bg-primary/90 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary"
           >

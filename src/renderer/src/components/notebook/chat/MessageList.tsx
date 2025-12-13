@@ -1,5 +1,6 @@
 import { ReactElement, useEffect, useRef } from 'react'
 import { MessageSquare } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { ChatMessage } from '../../../types/notebook'
 import MessageItem from './MessageItem'
 import { ScrollArea } from '../../ui/scroll-area'
@@ -11,6 +12,7 @@ interface MessageListProps {
 
 export default function MessageList({ messages }: MessageListProps): ReactElement {
   const bottomRef = useRef<HTMLDivElement>(null)
+  const { t } = useTranslation()
 
   // 自动滚动到底部
   useEffect(() => {
@@ -27,8 +29,8 @@ export default function MessageList({ messages }: MessageListProps): ReactElemen
           <div className="flex flex-col items-center gap-4 text-muted-foreground">
             <MessageSquare className="w-16 h-16 opacity-20" />
             <div className="text-center">
-              <p className="text-lg font-medium mb-1">开始新对话</p>
-              <p className="text-sm">在下方输入框中输入消息开始聊天</p>
+              <p className="text-lg font-medium mb-1">{t('ui:newChat')}</p>
+              <p className="text-sm">{t('ui:noMessages')}</p>
             </div>
           </div>
         </div>

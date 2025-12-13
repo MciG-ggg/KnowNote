@@ -1,5 +1,6 @@
 import { ReactElement } from 'react'
 import { Check, X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface SettingsActionBarProps {
   hasChanges: boolean
@@ -12,6 +13,7 @@ export default function SettingsActionBar({
   onCancel,
   onConfirm
 }: SettingsActionBarProps): ReactElement {
+  const { t } = useTranslation('common')
   return (
     <div className="bg-card rounded-xl p-4 flex-shrink-0">
       <div className="flex items-center justify-end gap-3">
@@ -25,7 +27,7 @@ export default function SettingsActionBar({
           }`}
         >
           <X className="w-4 h-4" />
-          <span className="text-sm font-medium">取消</span>
+          <span className="text-sm font-medium">{t('cancel')}</span>
         </button>
         <button
           onClick={onConfirm}
@@ -37,7 +39,7 @@ export default function SettingsActionBar({
           }`}
         >
           <Check className="w-4 h-4" />
-          <span className="text-sm font-medium">保存</span>
+          <span className="text-sm font-medium">{t('save')}</span>
         </button>
       </div>
     </div>

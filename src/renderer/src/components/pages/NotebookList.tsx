@@ -1,6 +1,7 @@
 import { useState, ReactElement } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BookOpen, Plus } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import NotebookCard from '../common/NotebookCard'
 import TopNavigationBar from '../common/TopNavigationBar'
 import RenameDialog from '../common/RenameDialog'
@@ -17,6 +18,7 @@ import {
 } from '../ui/empty'
 
 export default function NotebookList(): ReactElement {
+  const { t } = useTranslation('ui')
   const navigate = useNavigate()
   const {
     notebooks,
@@ -38,8 +40,8 @@ export default function NotebookList(): ReactElement {
     const randomIcon = icons[Math.floor(Math.random() * icons.length)]
 
     const newId = await addNotebook({
-      title: `新笔记本 ${notebooks.length + 1}`,
-      description: '开始你的笔记之旅',
+      title: t('newNotebook', { index: notebooks.length + 1 }),
+      description: t('notebookDescription'),
       icon: randomIcon
     })
 
@@ -107,9 +109,9 @@ export default function NotebookList(): ReactElement {
                 <EmptyMedia variant="icon">
                   <BookOpen className="w-16 h-16 text-muted-foreground" />
                 </EmptyMedia>
-                <EmptyTitle className="text-foreground">还没有笔记本</EmptyTitle>
+                <EmptyTitle className="text-foreground">{t('noNotebooks')}</EmptyTitle>
                 <EmptyDescription className="text-muted-foreground">
-                  开始创建你的第一个笔记本，记录你的想法和灵感
+                  {t('noNotebooksDesc')}
                 </EmptyDescription>
               </EmptyHeader>
               <EmptyContent>
@@ -118,7 +120,7 @@ export default function NotebookList(): ReactElement {
                   className="flex items-center gap-2 px-6 py-2.5 bg-primary hover:bg-primary/90 rounded-lg transition-colors text-primary-foreground font-medium"
                 >
                   <Plus className="w-4 h-4" />
-                  创建第一个笔记本
+                  {t('createFirstNotebook')}
                 </button>
               </EmptyContent>
             </Empty>
@@ -129,8 +131,10 @@ export default function NotebookList(): ReactElement {
             <div className="max-w-7xl mx-auto flex flex-col gap-8">
               {/* 标题 */}
               <div className="flex flex-col gap-2">
-                <h1 className="text-3xl font-bold text-foreground">我的笔记本</h1>
-                <p className="text-muted-foreground">共 {notebooks.length} 个笔记本</p>
+                <h1 className="text-3xl font-bold text-foreground">{t('myNotebooks')}</h1>
+                <p className="text-muted-foreground">
+                  {t('totalNotebooks', { count: notebooks.length })}
+                </p>
               </div>
 
               {/* 笔记本网格 */}

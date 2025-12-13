@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, ReactElement } from 'react'
 import { MoreVertical } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { Notebook } from '../../types/notebook'
 
 interface NotebookCardProps {
@@ -25,6 +26,7 @@ export default function NotebookCard({
   onDelete,
   onRename
 }: NotebookCardProps): ReactElement {
+  const { t, i18n } = useTranslation('ui')
   const [showMenu, setShowMenu] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -70,10 +72,13 @@ export default function NotebookCard({
     const diff = now.getTime() - date.getTime()
     const days = Math.floor(diff / (1000 * 60 * 60 * 24))
 
-    if (days === 0) return '今天'
-    if (days === 1) return '昨天'
-    if (days < 7) return `${days} 天前`
-    return date.toLocaleDateString('zh-CN')
+    if (days === 0) return t('today')
+    if (days === 1) return t('yesterday')
+    if (days < 7) return t('daysAgo', { days })
+
+    // 使用当前语言格式化日期
+    const locale = i18n.language === 'zh-CN' ? 'zh-CN' : 'en-US'
+    return date.toLocaleDateString(locale)
   }
 
   return (
@@ -100,13 +105,13 @@ export default function NotebookCard({
               onClick={handleRename}
               className="w-full px-4 py-2.5 text-left text-sm text-foreground hover:bg-accent transition-colors"
             >
-              重命名笔记本
+              {t('renameNotebook')}
             </button>
             <button
               onClick={handleDelete}
               className="w-full px-4 py-2.5 text-left text-sm text-destructive hover:bg-accent transition-colors"
             >
-              删除笔记本
+              {t('deleteNotebook')}
             </button>
           </div>
         )}

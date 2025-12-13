@@ -1,4 +1,5 @@
 import { ReactElement } from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface DeleteConfirmDialogProps {
   isOpen: boolean
@@ -13,6 +14,7 @@ export default function DeleteConfirmDialog({
   onClose,
   onConfirm
 }: DeleteConfirmDialogProps): ReactElement | null {
+  const { t } = useTranslation(['common', 'notebook'])
   if (!isOpen) return null
 
   const handleConfirm = (): void => {
@@ -29,12 +31,11 @@ export default function DeleteConfirmDialog({
         className="bg-card rounded-2xl p-6 w-[420px] border border-border shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="text-lg font-semibold text-foreground mb-3">删除笔记本</h3>
+        <h3 className="text-lg font-semibold text-foreground mb-3">
+          {t('notebook:deleteNotebook')}
+        </h3>
         <p className="text-sm text-muted-foreground mb-6">
-          确定要删除笔记本{' '}
-          <span className="text-foreground font-medium">&quot;{notebookTitle}&quot;</span> 吗？
-          <br />
-          此操作无法撤销。
+          {t('notebook:deleteConfirm', { name: notebookTitle })}
         </p>
 
         <div className="flex justify-end gap-3">
@@ -43,14 +44,14 @@ export default function DeleteConfirmDialog({
             onClick={onClose}
             className="px-5 py-2 bg-secondary hover:bg-secondary/80 rounded-lg transition-colors text-secondary-foreground text-sm"
           >
-            取消
+            {t('common:cancel')}
           </button>
           <button
             type="button"
             onClick={handleConfirm}
             className="px-5 py-2 bg-destructive hover:bg-destructive/90 rounded-lg transition-colors text-destructive-foreground text-sm"
           >
-            删除
+            {t('common:delete')}
           </button>
         </div>
       </div>

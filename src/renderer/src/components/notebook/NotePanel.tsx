@@ -1,5 +1,6 @@
 import { ReactElement, useEffect, useState } from 'react'
 import { Plus, Save, Trash2, ArrowLeft } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import { useNoteStore } from '../../store/noteStore'
 import NoteEditor from './note/NoteEditor'
@@ -17,6 +18,7 @@ interface NoteEditorPanelProps {
 }
 
 function NoteEditorPanel({ note, isSaving, onSave, onDelete, onBack }: NoteEditorPanelProps) {
+  const { t } = useTranslation('notebook')
   const [editTitle, setEditTitle] = useState(note.title)
   const [editContent, setEditContent] = useState(note.content)
 
@@ -36,7 +38,7 @@ function NoteEditorPanel({ note, isSaving, onSave, onDelete, onBack }: NoteEdito
             onClick={onBack}
             className="p-1.5 hover:bg-muted rounded-lg transition-colors flex-shrink-0"
             style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-            title="返回列表"
+            title={t('backToList')}
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
@@ -46,7 +48,7 @@ function NoteEditorPanel({ note, isSaving, onSave, onDelete, onBack }: NoteEdito
             onChange={(e) => setEditTitle(e.target.value)}
             className="flex-1 min-w-0 bg-transparent text-sm font-medium outline-none"
             style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-            placeholder="笔记标题"
+            placeholder={t('noteTitle')}
           />
         </div>
         <div
@@ -57,14 +59,14 @@ function NoteEditorPanel({ note, isSaving, onSave, onDelete, onBack }: NoteEdito
             onClick={handleSave}
             disabled={isSaving}
             className="p-1.5 hover:bg-muted rounded-lg transition-colors disabled:opacity-50"
-            title="保存"
+            title={t('save')}
           >
             <Save className="w-4 h-4" />
           </button>
           <button
             onClick={onDelete}
             className="p-1.5 hover:bg-destructive/10 text-destructive rounded-lg transition-colors"
-            title="删除"
+            title={t('delete')}
           >
             <Trash2 className="w-4 h-4" />
           </button>
@@ -80,6 +82,7 @@ function NoteEditorPanel({ note, isSaving, onSave, onDelete, onBack }: NoteEdito
 }
 
 export default function NotePanel(): ReactElement {
+  const { t } = useTranslation('notebook')
   const { id: notebookId } = useParams()
   const {
     notes,
@@ -103,7 +106,7 @@ export default function NotePanel(): ReactElement {
   // 创建新笔记
   const handleCreateNote = async () => {
     if (!notebookId) return
-    await createNote(notebookId, '# 新笔记\n\n开始编辑...', '新笔记')
+    await createNote(notebookId, t('newNoteContent'), t('newNote'))
   }
 
   // 保存笔记
@@ -115,7 +118,7 @@ export default function NotePanel(): ReactElement {
   // 删除笔记
   const handleDelete = async () => {
     if (!currentNote) return
-    if (confirm('确定要删除这个笔记吗？')) {
+    if (confirm(t('confirmDeleteNote'))) {
       await deleteNote(currentNote.id)
     }
   }
@@ -145,12 +148,12 @@ export default function NotePanel(): ReactElement {
             className="h-14 flex items-center justify-between px-4 border-b border-border/50"
             style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
           >
-            <span className="text-sm text-foreground">笔记</span>
+            <span className="text-sm text-foreground">{t('notes')}</span>
             <button
               onClick={handleCreateNote}
               className="p-1.5 hover:bg-muted rounded-lg transition-colors"
               style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-              title="创建笔记"
+              title={t('createNote')}
             >
               <Plus className="w-4 h-4" />
             </button>

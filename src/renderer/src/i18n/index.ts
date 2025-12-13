@@ -1,0 +1,57 @@
+import i18n from 'i18next'
+import { initReactI18next } from 'react-i18next'
+import LanguageDetector from 'i18next-browser-languagedetector'
+
+// Import language resources
+import zhCNCommon from '../locales/zh-CN/common.json'
+import zhCNChat from '../locales/zh-CN/chat.json'
+import zhCNUi from '../locales/zh-CN/ui.json'
+import zhCNNotebook from '../locales/zh-CN/notebook.json'
+import zhCNSettings from '../locales/zh-CN/settings.json'
+
+import enUSCommon from '../locales/en-US/common.json'
+import enUSChat from '../locales/en-US/chat.json'
+import enUSUi from '../locales/en-US/ui.json'
+import enUSNotebook from '../locales/en-US/notebook.json'
+import enUSSettings from '../locales/en-US/settings.json'
+
+// Configure i18n
+i18n
+  .use(LanguageDetector)
+  .use(initReactI18next)
+  .init({
+    fallbackLng: 'zh-CN',
+    debug: process.env.NODE_ENV === 'development',
+
+    interpolation: {
+      escapeValue: false // React already escapes
+    },
+
+    resources: {
+      'zh-CN': {
+        common: zhCNCommon,
+        chat: zhCNChat,
+        ui: zhCNUi,
+        notebook: zhCNNotebook,
+        settings: zhCNSettings
+      },
+      'en-US': {
+        common: enUSCommon,
+        chat: enUSChat,
+        ui: enUSUi,
+        notebook: enUSNotebook,
+        settings: enUSSettings
+      }
+    },
+
+    detection: {
+      order: ['localStorage', 'navigator', 'htmlTag'],
+      caches: ['localStorage'],
+      lookupLocalStorage: 'i18nextLng'
+    },
+
+    // Default namespace
+    defaultNS: 'common'
+  })
+
+export default i18n

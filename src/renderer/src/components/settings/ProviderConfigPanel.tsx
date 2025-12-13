@@ -1,5 +1,6 @@
 import { ReactElement, useState } from 'react'
 import { Search, Eye, EyeOff, ExternalLink, Download, Loader2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface ProviderConfig {
   providerName: string
@@ -38,6 +39,7 @@ export default function ProviderConfigPanel({
   onEnabledChange,
   onFetchModels
 }: ProviderConfigPanelProps): ReactElement {
+  const { t } = useTranslation('settings')
   const [showApiKey, setShowApiKey] = useState(false)
   const [modelSearchQuery, setModelSearchQuery] = useState('')
 
@@ -64,7 +66,7 @@ export default function ProviderConfigPanel({
           <h2 className="text-xl font-semibold text-foreground">{displayName}</h2>
           {provider.enabled && (
             <span className="px-2.5 py-0.5 bg-primary/20 text-primary text-xs font-medium rounded-full border border-primary/30">
-              Active
+              {t('active')}
             </span>
           )}
         </div>
@@ -84,7 +86,7 @@ export default function ProviderConfigPanel({
 
       {/* API Key */}
       <div className="flex flex-col gap-2">
-        <h3 className="text-sm font-medium text-foreground">API Key</h3>
+        <h3 className="text-sm font-medium text-foreground">{t('apiKey')}</h3>
         <div className="relative">
           <input
             type={showApiKey ? 'text' : 'password'}
@@ -105,14 +107,14 @@ export default function ProviderConfigPanel({
           </button>
         </div>
         <div className="flex items-center gap-1 text-sm text-muted-foreground">
-          <span>Get your API key from</span>
+          <span>{t('getApiKeyFrom')}</span>
           <a
             href={platformUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary hover:text-primary/80 inline-flex items-center gap-1"
           >
-            {displayName} Platform
+            {displayName} {t('platform')}
             <ExternalLink className="w-3 h-3" />
           </a>
         </div>
@@ -121,7 +123,7 @@ export default function ProviderConfigPanel({
       {/* Models */}
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium text-foreground">Models</h3>
+          <h3 className="text-sm font-medium text-foreground">{t('models')}</h3>
           <button
             onClick={onFetchModels}
             disabled={isFetching}
@@ -130,12 +132,12 @@ export default function ProviderConfigPanel({
             {isFetching ? (
               <>
                 <Loader2 className="w-3 h-3 animate-spin" />
-                <span>获取中...</span>
+                <span>{t('fetching')}</span>
               </>
             ) : (
               <>
                 <Download className="w-3 h-3" />
-                <span>Fetch Models</span>
+                <span>{t('fetchModels')}</span>
               </>
             )}
           </button>
@@ -147,7 +149,7 @@ export default function ProviderConfigPanel({
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="搜索模型..."
+                placeholder={t('searchModels')}
                 value={modelSearchQuery}
                 onChange={(e) => setModelSearchQuery(e.target.value)}
                 className="w-full pl-9 pr-3 py-2 bg-muted rounded-lg text-sm text-foreground placeholder-muted-foreground outline-none border border-border focus:ring-2 focus:ring-inset focus:ring-ring"
@@ -155,7 +157,9 @@ export default function ProviderConfigPanel({
             </div>
 
             <div className="max-h-60 overflow-y-auto space-y-2 border border-border rounded-lg p-2">
-              <p className="text-xs text-muted-foreground px-2 py-1">共 {models.length} 个模型</p>
+              <p className="text-xs text-muted-foreground px-2 py-1">
+                {t('totalModels', { count: models.length })}
+              </p>
               {filteredModels.map((model) => (
                 <label
                   key={model.id}

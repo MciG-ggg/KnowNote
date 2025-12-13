@@ -1,4 +1,5 @@
 import { ReactElement, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
@@ -15,6 +16,7 @@ export default function ReasoningContent({
   content,
   isStreaming
 }: ReasoningContentProps): ReactElement {
+  const { t } = useTranslation('chat')
   const [isExpanded, setIsExpanded] = useState(false)
 
   // 如果没有内容且不在流式传输，不显示
@@ -47,7 +49,7 @@ export default function ReasoningContent({
 
           {/* 标题 */}
           <span className="font-medium text-foreground">
-            {isStreaming ? '正在思考中...' : '思考过程'}
+            {isStreaming ? t('thinkingInProgress') : t('thinkingProcess')}
           </span>
 
           {/* 流式传输动画 */}
@@ -97,7 +99,7 @@ export default function ReasoningContent({
               ) : (
                 // 空内容时显示占位符
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span>思考中</span>
+                  <span>{t('thinkingShort')}</span>
                   <span className="inline-block w-2 h-3 bg-muted-foreground/50 animate-pulse" />
                 </div>
               )}

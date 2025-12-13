@@ -1,7 +1,9 @@
 import { Settings, ChevronRight } from 'lucide-react'
 import { ReactElement } from 'react'
+import { useTranslation } from 'react-i18next'
 
 export default function AboutSettings(): ReactElement {
+  const { t } = useTranslation('settings')
   return (
     <div className="space-y-6">
       <div className="text-center py-8">
@@ -9,25 +11,25 @@ export default function AboutSettings(): ReactElement {
           <Settings className="w-8 h-8 text-primary-foreground" />
         </div>
         <h2 className="text-xl font-medium mb-2 text-foreground">LiteBook</h2>
-        <p className="text-sm text-muted-foreground">版本 1.0.0</p>
+        <p className="text-sm text-muted-foreground">{t('version')}</p>
       </div>
 
       <div className="flex flex-col gap-3">
         <div className="flex justify-between p-3 bg-card rounded-lg">
-          <span className="text-sm text-muted-foreground">更新日志</span>
+          <span className="text-sm text-muted-foreground">{t('changelog')}</span>
           <ChevronRight className="w-4 h-4 text-muted-foreground" />
         </div>
         <div className="flex justify-between p-3 bg-card rounded-lg">
-          <span className="text-sm text-muted-foreground">用户手册</span>
+          <span className="text-sm text-muted-foreground">{t('userManual')}</span>
           <ChevronRight className="w-4 h-4 text-muted-foreground" />
         </div>
         <div className="flex justify-between p-3 bg-card rounded-lg">
-          <span className="text-sm text-muted-foreground">意见反馈</span>
+          <span className="text-sm text-muted-foreground">{t('feedback')}</span>
           <ChevronRight className="w-4 h-4 text-muted-foreground" />
         </div>
         <div className="flex justify-between p-3 bg-card rounded-lg">
-          <span className="text-sm text-muted-foreground">检查更新</span>
-          <span className="text-xs text-muted-foreground">已是最新版本</span>
+          <span className="text-sm text-muted-foreground">{t('checkUpdates')}</span>
+          <span className="text-xs text-muted-foreground">{t('latestVersion')}</span>
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { ReactElement } from 'react'
 import { FileText, Trash2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { Note } from '@/../../preload/index'
 
 interface NoteListProps {
@@ -15,14 +16,14 @@ export default function NoteList({
   onSelectNote,
   onDeleteNote
 }: NoteListProps): ReactElement {
+  const { t, i18n } = useTranslation('notebook')
+
   if (notes.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full p-8 text-center">
         <FileText className="w-12 h-12 text-muted-foreground mb-4" />
-        <p className="text-sm text-muted-foreground">暂无笔记</p>
-        <p className="text-xs text-muted-foreground mt-2">
-          点击右上角的&ldquo;+&rdquo;按钮创建笔记
-        </p>
+        <p className="text-sm text-muted-foreground">{t('noNotesYet')}</p>
+        <p className="text-xs text-muted-foreground mt-2">{t('noNotesYetDesc')}</p>
       </div>
     )
   }
@@ -48,7 +49,9 @@ export default function NoteList({
                     {note.content.replace(/^#.*\n/, '').slice(0, 100)}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {new Date(note.updatedAt).toLocaleDateString()}
+                    {new Date(note.updatedAt).toLocaleDateString(
+                      i18n.language === 'zh-CN' ? 'zh-CN' : 'en-US'
+                    )}
                   </p>
                 </div>
               </div>
@@ -56,12 +59,12 @@ export default function NoteList({
             <button
               onClick={(e) => {
                 e.stopPropagation()
-                if (confirm('确定要删除这个笔记吗？')) {
+                if (confirm(t('confirmDeleteNote'))) {
                   onDeleteNote(note.id)
                 }
               }}
               className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-destructive/10 text-destructive rounded-lg transition-all"
-              title="删除笔记"
+              title={t('deleteNote')}
             >
               <Trash2 className="w-4 h-4" />
             </button>
