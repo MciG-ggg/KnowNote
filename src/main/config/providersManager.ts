@@ -85,8 +85,7 @@ export class ProvidersManager {
     const modelsData = store.get('models', {})
 
     modelsData[providerName] = {
-      models,
-      updatedAt: Date.now()
+      models
     }
 
     store.set('models', modelsData)
@@ -99,14 +98,6 @@ export class ProvidersManager {
     const store = await this.getStore()
     const modelsData = store.get('models', {})
     const providerModels = modelsData[providerName]
-
-    // 如果模型数据超过24小时，返回空数组提示重新获取
-    if (providerModels && providerModels.updatedAt) {
-      const hoursSinceUpdate = (Date.now() - providerModels.updatedAt) / (1000 * 60 * 60)
-      if (hoursSinceUpdate > 24) {
-        return []
-      }
-    }
 
     return providerModels?.models || []
   }
