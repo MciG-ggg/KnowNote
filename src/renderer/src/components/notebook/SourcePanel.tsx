@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback, ReactElement } from 'react'
 import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Plus, FileText, Globe, FileUp, Loader2, StickyNote } from 'lucide-react'
+import { Plus, FileText, Globe, FileUp, Loader2, StickyNote, ArrowLeft } from 'lucide-react'
 import { useKnowledgeStore, setupKnowledgeListeners } from '../../store/knowledgeStore'
 import { useNoteStore } from '../../store/noteStore'
 import { ScrollArea } from '../ui/scroll-area'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog'
 import DocumentList from './source/DocumentList'
+import type { KnowledgeDocument } from '../../../../shared/types/knowledge'
 
 // 添加来源类型
 type AddSourceType = 'file' | 'url' | 'text' | 'note'
@@ -170,12 +171,81 @@ function IndexingProgress() {
   )
 }
 
+// 文档预览面板组件
+interface DocumentViewerPanelProps {
+  document: KnowledgeDocument
+  onBack: () => void
+}
+
+function DocumentViewerPanel({ document, onBack }: DocumentViewerPanelProps) {
+  const { t } = useTranslation('ui')
+  const [content, setContent] = useState<string>('')
+  const [isLoading, setIsLoading] = useState(false)
+
+  // 加载文档内容
+  useEffect(() => {
+    const loadContent = async () => {
+      setIsLoading(true)
+      try {
+        const chunks = await window.api.knowledge.getDocumentChunks(document.id)
+        // 合并所有 chunk 的内容
+        const fullContent = chunks.map((chunk) => chunk.content).join('\n\n')
+        setContent(fullContent)
+      } catch (error) {
+        console.error('Error loading document content:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadContent()
+  }, [document.id])
+
+  return (
+    <>
+      {/* 顶部工具栏 */}
+      <div
+        className="h-14 flex items-center justify-between px-4 border-b border-border/50"
+        style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
+      >
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <button
+            onClick={onBack}
+            className="p-1.5 hover:bg-muted rounded-lg transition-colors shrink-0"
+            style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+            title={t('backToList')}
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+          <span className="flex-1 min-w-0 text-sm font-medium truncate">{document.title}</span>
+        </div>
+      </div>
+
+      {/* 文档内容 */}
+      <ScrollArea className="flex-1">
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full">
+            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <div className="p-6">
+            <div className="prose prose-sm dark:prose-invert max-w-none">
+              <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">{content}</pre>
+            </div>
+          </div>
+        )}
+      </ScrollArea>
+    </>
+  )
+}
+
 export default function SourcePanel(): ReactElement {
   const { t } = useTranslation('ui')
   const { id: notebookId } = useParams()
   const [showAddMenu, setShowAddMenu] = useState(false)
   const [modalType, setModalType] = useState<AddSourceType | null>(null)
   const [defaultEmbeddingModel, setDefaultEmbeddingModel] = useState<string | undefined>(undefined)
+  const [selectedDocument, setSelectedDocument] = useState<KnowledgeDocument | null>(null)
 
   const {
     documents,
@@ -222,7 +292,13 @@ export default function SourcePanel(): ReactElement {
       loadStats(notebookId)
       loadNotes(notebookId)
     }
-  }, [notebookId, loadDocuments, loadStats, loadNotes])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notebookId])
+
+  // 当 notebook 切换时清空选中的文档
+  useEffect(() => {
+    setSelectedDocument(null)
+  }, [notebookId])
 
   // 处理文件上传
   const handleFileUpload = useCallback(async () => {
@@ -308,6 +384,34 @@ export default function SourcePanel(): ReactElement {
     [notebookId, deleteDocument]
   )
 
+  // 处理打开源文件
+  const handleOpenSource = useCallback(async (documentId: string) => {
+    try {
+      await window.api.knowledge.openSource(documentId)
+    } catch (error) {
+      console.error('Error opening source:', error)
+    }
+  }, [])
+
+  // 处理文档点击
+  const handleSelectDocument = useCallback(
+    (document: KnowledgeDocument) => {
+      // 文本和笔记类型可以预览，直接显示预览页面
+      if (document.type === 'text' || document.type === 'note') {
+        setSelectedDocument(document)
+      } else {
+        // 其他类型（文件、URL）直接打开
+        handleOpenSource(document.id)
+      }
+    },
+    [handleOpenSource]
+  )
+
+  // 返回列表
+  const handleBack = useCallback(() => {
+    setSelectedDocument(null)
+  }, [])
+
   // 处理弹窗提交
   const handleModalSubmit = useCallback(
     (data: { title?: string; content?: string; url?: string; noteId?: string }) => {
@@ -324,78 +428,94 @@ export default function SourcePanel(): ReactElement {
 
   return (
     <div className="flex flex-col bg-card rounded-xl overflow-hidden h-full">
-      {/* 顶部工具栏 */}
-      <div
-        className="h-14 flex items-center justify-between px-4 border-b border-border/50"
-        style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
-      >
-        <span className="text-sm text-foreground">{t('knowledgeBase')}</span>
-        <div className="relative" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
-          <button
-            onClick={() => setShowAddMenu(!showAddMenu)}
-            className="p-1.5 hover:bg-muted rounded-lg transition-colors"
-            title={t('addSource')}
-          >
-            <Plus className="w-4 h-4" />
-          </button>
-
-          {/* 添加菜单 */}
-          {showAddMenu && (
-            <div className="absolute right-0 top-full mt-1 w-40 bg-popover border border-border rounded-lg shadow-lg overflow-hidden z-10">
-              <button
-                onClick={handleFileUpload}
-                className="w-full px-3 py-2 text-sm text-left hover:bg-muted flex items-center gap-2"
-              >
-                <FileUp className="w-4 h-4" />
-                {t('uploadFile')}
-              </button>
-              <button
-                onClick={() => {
-                  setModalType('url')
-                  setShowAddMenu(false)
-                }}
-                className="w-full px-3 py-2 text-sm text-left hover:bg-muted flex items-center gap-2"
-              >
-                <Globe className="w-4 h-4" />
-                {t('importUrl')}
-              </button>
-              <button
-                onClick={() => {
-                  setModalType('text')
-                  setShowAddMenu(false)
-                }}
-                className="w-full px-3 py-2 text-sm text-left hover:bg-muted flex items-center gap-2"
-              >
-                <FileText className="w-4 h-4" />
-                {t('pasteText')}
-              </button>
-              <button
-                onClick={() => {
-                  setModalType('note')
-                  setShowAddMenu(false)
-                }}
-                className="w-full px-3 py-2 text-sm text-left hover:bg-muted flex items-center gap-2"
-              >
-                <StickyNote className="w-4 h-4" />
-                {t('importNote')}
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* 索引进度 */}
-      <IndexingProgress />
-
-      {/* 文档列表 */}
-      {isLoading ? (
-        <div className="flex-1 flex items-center justify-center">
-          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-        </div>
+      {selectedDocument ? (
+        // 文档预览页面
+        <DocumentViewerPanel
+          key={selectedDocument.id}
+          document={selectedDocument}
+          onBack={handleBack}
+        />
       ) : (
-        <ScrollArea className="flex-1">
-          <DocumentList documents={documents} onDeleteDocument={handleDelete} />
-        </ScrollArea>
+        // 文档列表页面
+        <>
+          {/* 顶部工具栏 */}
+          <div
+            className="h-14 flex items-center justify-between px-4 border-b border-border/50"
+            style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
+          >
+            <span className="text-sm text-foreground">{t('knowledgeBase')}</span>
+            <div className="relative" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
+              <button
+                onClick={() => setShowAddMenu(!showAddMenu)}
+                className="p-1.5 hover:bg-muted rounded-lg transition-colors"
+                title={t('addSource')}
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+
+              {/* 添加菜单 */}
+              {showAddMenu && (
+                <div className="absolute right-0 top-full mt-1 w-40 bg-popover border border-border rounded-lg shadow-lg overflow-hidden z-10">
+                  <button
+                    onClick={handleFileUpload}
+                    className="w-full px-3 py-2 text-sm text-left hover:bg-muted flex items-center gap-2"
+                  >
+                    <FileUp className="w-4 h-4" />
+                    {t('uploadFile')}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setModalType('url')
+                      setShowAddMenu(false)
+                    }}
+                    className="w-full px-3 py-2 text-sm text-left hover:bg-muted flex items-center gap-2"
+                  >
+                    <Globe className="w-4 h-4" />
+                    {t('importUrl')}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setModalType('text')
+                      setShowAddMenu(false)
+                    }}
+                    className="w-full px-3 py-2 text-sm text-left hover:bg-muted flex items-center gap-2"
+                  >
+                    <FileText className="w-4 h-4" />
+                    {t('pasteText')}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setModalType('note')
+                      setShowAddMenu(false)
+                    }}
+                    className="w-full px-3 py-2 text-sm text-left hover:bg-muted flex items-center gap-2"
+                  >
+                    <StickyNote className="w-4 h-4" />
+                    {t('importNote')}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 索引进度 */}
+          <IndexingProgress />
+
+          {/* 文档列表 */}
+          {isLoading ? (
+            <div className="flex-1 flex items-center justify-center">
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <ScrollArea className="flex-1">
+              <DocumentList
+                documents={documents}
+                onDeleteDocument={handleDelete}
+                onSelectDocument={handleSelectDocument}
+              />
+            </ScrollArea>
+          )}
+        </>
       )}
 
       {/* 添加来源弹窗 - 使用 key 强制在 type 变化时重新挂载组件 */}

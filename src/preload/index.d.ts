@@ -3,6 +3,7 @@ import type { ChatSession, ChatMessage } from '../shared/types/chat'
 import type { Notebook, Note, ProviderConfig, AppSettings } from '../shared/types'
 import type {
   KnowledgeDocument,
+  KnowledgeChunk,
   KnowledgeSearchResult,
   KnowledgeStats,
   AddDocumentOptions,
@@ -14,6 +15,7 @@ import type {
 export type { ChatSession, ChatMessage, Notebook, Note, ProviderConfig, AppSettings }
 export type {
   KnowledgeDocument,
+  KnowledgeChunk,
   KnowledgeSearchResult,
   KnowledgeStats,
   AddDocumentOptions,
@@ -129,6 +131,7 @@ declare global {
         // 文档管理
         getDocuments: (notebookId: string) => Promise<KnowledgeDocument[]>
         getDocument: (documentId: string) => Promise<KnowledgeDocument | null>
+        getDocumentChunks: (documentId: string) => Promise<KnowledgeChunk[]>
         deleteDocument: (documentId: string) => Promise<{ success: boolean; error?: string }>
         reindexDocument: (documentId: string) => Promise<{ success: boolean; error?: string }>
 
@@ -137,6 +140,9 @@ declare global {
 
         // 文件选择对话框
         selectFiles: () => Promise<string[]>
+
+        // 打开源文件
+        openSource: (documentId: string) => Promise<{ success: boolean; error?: string }>
 
         // 索引进度监听
         onIndexProgress: (callback: (progress: IndexProgress) => void) => () => void

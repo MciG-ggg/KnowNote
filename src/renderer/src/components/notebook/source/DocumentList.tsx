@@ -6,11 +6,13 @@ import type { KnowledgeDocument } from '../../../../../shared/types/knowledge'
 interface DocumentListProps {
   documents: KnowledgeDocument[]
   onDeleteDocument: (documentId: string) => void
+  onSelectDocument: (document: KnowledgeDocument) => void
 }
 
 export default function DocumentList({
   documents,
-  onDeleteDocument
+  onDeleteDocument,
+  onSelectDocument
 }: DocumentListProps): ReactElement {
   const { t } = useTranslation('ui')
 
@@ -27,7 +29,12 @@ export default function DocumentList({
   return (
     <div className="p-2 space-y-1">
       {documents.map((doc) => (
-        <DocumentItem key={doc.id} document={doc} onDelete={onDeleteDocument} />
+        <DocumentItem
+          key={doc.id}
+          document={doc}
+          onDelete={onDeleteDocument}
+          onSelect={onSelectDocument}
+        />
       ))}
     </div>
   )
@@ -37,9 +44,10 @@ export default function DocumentList({
 interface DocumentItemProps {
   document: KnowledgeDocument
   onDelete: (id: string) => void
+  onSelect: (document: KnowledgeDocument) => void
 }
 
-function DocumentItem({ document, onDelete }: DocumentItemProps): ReactElement {
+function DocumentItem({ document, onDelete, onSelect }: DocumentItemProps): ReactElement {
   const { t } = useTranslation('ui')
   const hasShownErrorRef = useRef(false)
 
@@ -67,7 +75,8 @@ function DocumentItem({ document, onDelete }: DocumentItemProps): ReactElement {
 
   return (
     <div
-      className={`group relative p-3 pr-12 rounded-lg transition-colors ${
+      onClick={() => onSelect(document)}
+      className={`group relative p-3 pr-12 rounded-lg transition-colors cursor-pointer select-none ${
         document.status === 'processing' ? 'bg-muted/50' : 'hover:bg-muted'
       }`}
     >

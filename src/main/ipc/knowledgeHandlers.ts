@@ -3,7 +3,7 @@
  * 知识库相关的 IPC 处理函数
  */
 
-import { ipcMain, IpcMainInvokeEvent, dialog } from 'electron'
+import { ipcMain, IpcMainInvokeEvent, dialog, shell } from 'electron'
 import {
   KnowledgeService,
   type AddDocumentOptions,
@@ -237,6 +237,32 @@ export function registerKnowledgeHandlers(knowledgeService: KnowledgeService) {
     })
 
     return result.canceled ? [] : result.filePaths
+  })
+
+  // 打开文档源文件
+  ipcMain.handle('knowledge:open-source', async (_event, documentId: string) => {
+    Logger.debug('KnowledgeHandlers', 'open-source:', documentId)
+
+    try {
+      const doc = knowledgeService.getDocument(documentId)
+      if (!doc) {
+        return { success: false, error: 'Document not found' }
+      }
+
+      // 根据文档类型处理
+      if (doc.type === 'url' && doc.sourceUri) {
+        // 打开 URL
+        await shell.openExternal(doc.sourceUri)
+      } else if (doc.type === 'file' && doc.sourceUri) {
+        // 打开文件
+        await shell.openPath(doc.sourceUri)
+      }
+
+      return { success: true }
+    } catch (error) {
+      Logger.error('KnowledgeHandlers', 'Error opening source:', error)
+      return { success: false, error: (error as Error).message }
+    }
   })
 
   Logger.info('KnowledgeHandlers', 'Knowledge handlers registered')

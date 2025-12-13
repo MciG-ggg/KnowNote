@@ -45,5 +45,9 @@
   "add": "添加",
   "cancel": "取消",
   "processing": "处理中...",
-  "noEmbeddingModelConfigured": "请先在设置中配置默认嵌入模型"
+  "noEmbeddingModelConfigured": "请先在设置中配置默认嵌入模型",
+  "backToList": "返回列表",
+  "openUrl": "打开网页",
+  "openFile": "打开文件",
+  "cannotPreview": "无法预览此文件类型"
 }

@@ -141,6 +141,9 @@ const api = {
     // 文件选择
     selectFiles: () => ipcRenderer.invoke('knowledge:select-files'),
 
+    // 打开源文件
+    openSource: (documentId: string) => ipcRenderer.invoke('knowledge:open-source', documentId),
+
     // 进度监听
     onIndexProgress: (callback: (data: any) => void) => {
       const listener = (_event: any, data: any) => callback(data)
