@@ -104,7 +104,7 @@ export default function ProcessPanel(): ReactElement {
   }
 
   return (
-    <div className="relative flex flex-col bg-card rounded-xl overflow-hidden h-full mx-0">
+    <div className="relative flex flex-col bg-card rounded-xl overflow-hidden h-full mx-0 shadow-md">
       {/* 顶部标题栏 */}
       <div
         className="h-14 flex items-center justify-center px-4 border-b border-border/50 flex-shrink-0"
@@ -144,7 +144,7 @@ export default function ProcessPanel(): ReactElement {
 
       {/* 底部输入区域 - 绝对定位浮动在底部 */}
       <div className="absolute bottom-0 left-0 right-0 p-4 pointer-events-none flex-shrink-0 z-20">
-        <div className="relative bg-muted/95 backdrop-blur-md rounded-lg border border-border focus-within:ring-2 focus-within:ring-ring shadow-xl pointer-events-auto">
+        <div className="relative bg-muted/95 backdrop-blur-md rounded-lg border border-border focus-within:ring-2 focus-within:ring-ring shadow-lg pointer-events-auto">
           {/* 多行输入框 */}
           <textarea
             value={input}

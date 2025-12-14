@@ -70,7 +70,7 @@ export default function TopNavigationBar({
           onClick={handleHomeClick}
           disabled={isHomePage}
           style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-          className={`flex items-center gap-2 px-3 py-1 rounded-lg transition-colors text-sm h-7 ${
+          className={`flex items-center gap-2 px-3 py-1 rounded-lg transition-colors text-sm h-7 shadow-sm ${
             isHomePage ? 'bg-card cursor-default' : 'bg-card hover:bg-accent'
           }`}
         >
@@ -86,7 +86,7 @@ export default function TopNavigationBar({
               key={notebook.id}
               onClick={() => handleOpenedNotebookClick(notebook.id)}
               style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-              className={`flex items-center gap-1 px-3 py-1 rounded-lg text-sm h-7 transition-colors ${
+              className={`flex items-center gap-1 px-3 py-1 rounded-lg text-sm h-7 transition-colors shadow-sm ${
                 isActive && !isHomePage ? 'bg-card' : 'bg-card hover:bg-accent'
               }`}
             >

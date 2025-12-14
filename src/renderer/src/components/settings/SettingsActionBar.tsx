@@ -15,7 +15,7 @@ export default function SettingsActionBar({
 }: SettingsActionBarProps): ReactElement {
   const { t } = useTranslation('common')
   return (
-    <div className="bg-card rounded-xl p-4 flex-shrink-0">
+    <div className="bg-card rounded-xl p-4 flex-shrink-0 shadow-md">
       <div className="flex items-center justify-end gap-3">
         <button
           onClick={onCancel}

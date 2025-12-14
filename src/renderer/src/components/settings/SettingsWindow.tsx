@@ -142,7 +142,7 @@ export default function SettingsWindow(): ReactElement {
       {/* Island风格布局容器 */}
       <div className="flex w-full h-full pt-10 px-3 pb-3 gap-3">
         {/* 左侧菜单 - Island */}
-        <div className="w-48 min-w-[12rem] bg-card rounded-xl p-4 flex flex-col">
+        <div className="w-48 min-w-[12rem] bg-card rounded-xl p-4 flex flex-col shadow-md">
           <div className="flex flex-col gap-2">
             {menuItems.map((item) => {
               const Icon = item.icon
@@ -169,7 +169,7 @@ export default function SettingsWindow(): ReactElement {
         {/* 右侧内容区域 */}
         <div className="flex-1 min-w-0 flex flex-col gap-3">
           {/* 设置内容 - Island */}
-          <div className="flex-1 min-h-0 bg-card rounded-xl overflow-hidden">
+          <div className="flex-1 min-h-0 bg-card rounded-xl overflow-hidden shadow-md">
             <ScrollArea className="h-full">
               <div className="p-6">{renderContent()}</div>
             </ScrollArea>

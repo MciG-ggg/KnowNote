@@ -427,7 +427,7 @@ export default function SourcePanel(): ReactElement {
   )
 
   return (
-    <div className="flex flex-col bg-card rounded-xl overflow-hidden h-full">
+    <div className="flex flex-col bg-card rounded-xl overflow-hidden h-full shadow-md">
       {selectedDocument ? (
         // 文档预览页面
         <DocumentViewerPanel

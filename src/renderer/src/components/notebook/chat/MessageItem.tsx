@@ -57,7 +57,7 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
   if (isSystem) {
     return (
       <div className="flex justify-center mb-4">
-        <div className="max-w-[90%] bg-muted border border-border text-muted-foreground rounded-xl px-4 py-3">
+        <div className="max-w-[90%] bg-muted border border-border text-muted-foreground rounded-xl px-4 py-3 shadow-sm">
           <div className="prose prose-sm max-w-none">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
@@ -85,7 +85,7 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
     return (
       <div className="flex justify-end mb-4 group">
         <div className="flex flex-col max-w-[80%]">
-          <div className="bg-primary text-primary-foreground rounded-2xl px-4 py-3">
+          <div className="bg-primary text-primary-foreground rounded-2xl px-4 py-3 shadow-sm">
             <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
           </div>
           {/* Copy button */}
@@ -128,7 +128,7 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
   // AI message: no background, left-aligned, Markdown rendered
   return (
     <div className="flex justify-start mb-4 group">
-      <div className="flex flex-col max-w-[90%]">
+      <div className="flex flex-col gap-3 max-w-[90%]">
         {/* Reasoning process display - only shown when reasoning content exists */}
         {message.reasoningContent && (
           <ReasoningContent

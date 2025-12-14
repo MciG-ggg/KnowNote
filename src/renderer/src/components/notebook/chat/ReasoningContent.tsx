@@ -25,7 +25,7 @@ export default function ReasoningContent({
   }
 
   return (
-    <div className="mb-2 border border-border rounded-lg overflow-hidden bg-muted/30">
+    <div className="border border-border rounded-lg overflow-hidden bg-muted/30 shadow-sm">
       {/* 头部：展开/折叠按钮 */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
