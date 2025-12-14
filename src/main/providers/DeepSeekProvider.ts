@@ -27,7 +27,7 @@ export class DeepSeekProvider extends OpenAICompatibleProvider {
     onChunk: (chunk: StreamChunk) => void,
     onError: (error: Error) => void,
     onComplete: () => void
-  ): Promise<void> {
+  ): Promise<AbortController> {
     try {
       // 1. DeepSeek 特定的消息清理
       const cleanedMessages = cleanDeepSeekMessages(messages)
@@ -36,13 +36,20 @@ export class DeepSeekProvider extends OpenAICompatibleProvider {
       const validation = validateMessageOrder(cleanedMessages)
       if (!validation.valid) {
         onError(new Error(`消息格式验证失败: ${validation.error}`))
-        return
+        // 返回一个已中止的 AbortController
+        const controller = new AbortController()
+        controller.abort()
+        return controller
       }
 
-      // 3. 调用父类方法
-      await super.sendMessageStream(cleanedMessages, onChunk, onError, onComplete)
+      // 3. 调用父类方法,返回 AbortController
+      return await super.sendMessageStream(cleanedMessages, onChunk, onError, onComplete)
     } catch (error) {
       onError(error as Error)
+      // 返回一个已中止的 AbortController
+      const controller = new AbortController()
+      controller.abort()
+      return controller
     }
   }
 }

@@ -69,6 +69,7 @@ declare global {
       // Chat Message 相关
       getMessages: (sessionId: string) => Promise<ChatMessage[]>
       sendMessage: (sessionId: string, content: string) => Promise<string>
+      abortMessage: (messageId: string) => Promise<{ success: boolean; reason?: string }>
 
       // 流式消息监听
       onMessageChunk: (

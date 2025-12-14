@@ -159,11 +159,13 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
             )}
           </div>
         ) : (
-          // Show cursor when message is empty
-          <div className="flex items-center gap-2 px-2">
-            <span className="text-sm text-muted-foreground">{t('chat:thinking')}</span>
-            <span className="inline-block w-2 h-4 bg-muted-foreground animate-pulse" />
-          </div>
+          // Show cursor when message is empty and still streaming
+          isStreaming && (
+            <div className="flex items-center gap-2 px-2">
+              <span className="text-sm text-muted-foreground">{t('chat:thinking')}</span>
+              <span className="inline-block w-2 h-4 bg-muted-foreground animate-pulse" />
+            </div>
+          )
         )}
         {/* Action buttons - only shown when reply is complete and has content */}
         {message.content && !isStreaming && (

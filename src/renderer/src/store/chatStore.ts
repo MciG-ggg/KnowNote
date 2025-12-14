@@ -37,6 +37,7 @@ interface ChatStore {
   loadMessages: (sessionId: string) => Promise<void>
   createSession: (notebookId: string, title: string) => Promise<ChatSession>
   sendMessage: (sessionId: string, content: string) => Promise<void>
+  abortMessage: (notebookId: string) => Promise<void>
 }
 
 export const useChatStore = create<ChatStore>()((set, get) => ({
@@ -182,6 +183,46 @@ export const useChatStore = create<ChatStore>()((set, get) => ({
         [messageId]: { notebookId, content: '', reasoningContent: '' }
       }
     }))
+  },
+
+  abortMessage: async (notebookId: string) => {
+    const state = get()
+    const messageId = state.streamingMessages[notebookId]
+
+    if (!messageId) {
+      console.warn('[ChatStore] No streaming message to abort for notebook:', notebookId)
+      return
+    }
+
+    try {
+      console.log('[ChatStore] Aborting message:', messageId)
+
+      // 乐观更新: 立即标记消息为非流式
+      set((state) => ({
+        messages: state.messages.map((msg) =>
+          msg.id === messageId ? { ...msg, isStreaming: false, isReasoningStreaming: false } : msg
+        )
+      }))
+
+      // 调用 IPC 中止请求
+      const result = await window.api.abortMessage(messageId)
+
+      if (result.success) {
+        console.log('[ChatStore] Message aborted successfully')
+
+        // 立即清理流状态
+        state.setStreamingMessage(notebookId, null)
+
+        // 清理缓存
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { [messageId]: _removed, ...rest } = state.messageToNotebook
+        set({ messageToNotebook: rest })
+      } else {
+        console.warn('[ChatStore] Failed to abort:', result.reason)
+      }
+    } catch (error) {
+      console.error('[ChatStore] Error aborting message:', error)
+    }
   }
 }))
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, ReactElement } from 'react'
-import { Send } from 'lucide-react'
+import { Send, StopCircle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useChatStore } from '../../store/chatStore'
 import { useNotebookStore } from '../../store/notebookStore'
@@ -9,7 +9,8 @@ export default function ProcessPanel(): ReactElement {
   const { t } = useTranslation('ui')
   const [input, setInput] = useState('')
   const [hasProvider, setHasProvider] = useState(true)
-  const { currentSession, messages, isNotebookStreaming, sendMessage } = useChatStore()
+  const { currentSession, messages, isNotebookStreaming, sendMessage, abortMessage } =
+    useChatStore()
   const { currentNotebook, updateNotebook } = useNotebookStore()
 
   const [editingTitle, setEditingTitle] = useState('')
@@ -20,6 +21,7 @@ export default function ProcessPanel(): ReactElement {
     ? isNotebookStreaming(currentNotebookId)
     : false
   const canSend = currentSession && !isCurrentNotebookStreaming && input.trim() && hasProvider
+  const canStop = currentSession && isCurrentNotebookStreaming
 
   // Check if there are available providers
   const checkProvider = async (): Promise<void> => {
@@ -54,10 +56,19 @@ export default function ProcessPanel(): ReactElement {
     setInput('')
   }
 
+  const handleStop = async (): Promise<void> => {
+    if (!canStop || !currentNotebookId) return
+    await abortMessage(currentNotebookId)
+  }
+
   const handleKeyDown = (e: React.KeyboardEvent): void => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      handleSend()
+      if (isCurrentNotebookStreaming) {
+        void handleStop()
+      } else {
+        handleSend()
+      }
     }
   }
 
@@ -162,17 +173,30 @@ export default function ProcessPanel(): ReactElement {
             className="w-full bg-transparent pl-4 pr-14 py-3 text-sm outline-none text-foreground placeholder-muted-foreground resize-none disabled:opacity-50 disabled:cursor-not-allowed"
           />
 
-          {/* 发送按钮 */}
-          <button
-            onClick={handleSend}
-            disabled={!canSend}
-            title={
-              !hasProvider ? t('noProviderConfigured') : !currentSession ? t('selectSession') : ''
-            }
-            className="absolute right-2 bottom-3 p-2 bg-primary hover:bg-primary/90 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary"
-          >
-            <Send className="w-4 h-4 text-primary-foreground" />
-          </button>
+          {/* 发送/停止按钮 - 动态切换 */}
+          {isCurrentNotebookStreaming ? (
+            // 停止按钮
+            <button
+              onClick={handleStop}
+              disabled={!canStop}
+              title="停止生成"
+              className="absolute right-2 bottom-3 p-2 bg-destructive hover:bg-destructive/90 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <StopCircle className="w-4 h-4 text-destructive-foreground" />
+            </button>
+          ) : (
+            // 发送按钮
+            <button
+              onClick={handleSend}
+              disabled={!canSend}
+              title={
+                !hasProvider ? t('noProviderConfigured') : !currentSession ? t('selectSession') : ''
+              }
+              className="absolute right-2 bottom-3 p-2 bg-primary hover:bg-primary/90 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary"
+            >
+              <Send className="w-4 h-4 text-primary-foreground" />
+            </button>
+          )}
         </div>
       </div>
     </div>

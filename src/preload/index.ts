@@ -68,6 +68,7 @@ const api = {
   getMessages: (sessionId: string) => invokeWithTimeout('get-messages', 10000, sessionId),
   sendMessage: (sessionId: string, content: string) =>
     invokeWithTimeout('send-message', 60000, sessionId, content), // 60秒超时（流式消息可能较长）
+  abortMessage: (messageId: string) => invokeWithTimeout('abort-message', 5000, messageId),
 
   // 流式消息监听
   onMessageChunk: (callback: (data: any) => void) => {

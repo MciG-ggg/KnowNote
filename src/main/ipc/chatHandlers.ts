@@ -6,6 +6,9 @@ import { KnowledgeService } from '../services/KnowledgeService'
 import { validateAndCleanMessages } from '../utils/messageValidator'
 import Logger from '../../shared/utils/logger'
 
+// 管理活跃的流式请求
+const activeStreams = new Map<string, AbortController>()
+
 /**
  * 构建 RAG 上下文 prompt
  */
@@ -135,7 +138,8 @@ export function registerChatHandlers(
       let fullReasoningContent = ''
       let usageMetadata: any = null
 
-      provider.sendMessageStream(
+      // 调用 Provider 流式生成,获取 AbortController
+      const abortController = await provider.sendMessageStream(
         messages,
         // onChunk
         (chunk) => {
@@ -165,6 +169,8 @@ export function registerChatHandlers(
             messageId: assistantMessage.id,
             error: error.message
           })
+          // 清理 AbortController
+          activeStreams.delete(assistantMessage.id)
         },
         // onComplete
         async () => {
@@ -210,12 +216,32 @@ export function registerChatHandlers(
               messageId: assistantMessage.id,
               error: 'Error occurred while processing message'
             })
+          } finally {
+            // 清理 AbortController
+            activeStreams.delete(assistantMessage.id)
           }
         }
       )
+
+      // 存储 AbortController
+      activeStreams.set(assistantMessage.id, abortController)
 
       // Return messageId immediately so frontend can continue
       return assistantMessage.id
     }
   )
+
+  // ==================== Abort Message ====================
+  ipcMain.handle('abort-message', async (_event, messageId: string) => {
+    const controller = activeStreams.get(messageId)
+
+    if (controller) {
+      Logger.info('ChatHandlers', `Aborting message: ${messageId}`)
+      controller.abort()
+      return { success: true }
+    } else {
+      Logger.warn('ChatHandlers', `No active stream found for message: ${messageId}`)
+      return { success: false, reason: 'No active stream found' }
+    }
+  })
 }

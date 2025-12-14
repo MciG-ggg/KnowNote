@@ -59,13 +59,14 @@ export interface LLMProvider {
    * @param onChunk - 接收到新 chunk 时的回调
    * @param onError - 发生错误时的回调
    * @param onComplete - 完成时的回调
+   * @returns Promise<AbortController> - 用于中断请求的 AbortController
    */
   sendMessageStream(
     messages: APIMessage[],
     onChunk: (chunk: StreamChunk) => void,
     onError: (error: Error) => void,
     onComplete: () => void
-  ): Promise<void>
+  ): Promise<AbortController>
 
   /**
    * 验证配置是否有效（可选）
