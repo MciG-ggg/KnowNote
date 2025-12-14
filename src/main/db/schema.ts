@@ -124,7 +124,8 @@ export const documents = sqliteTable(
       .references(() => notebooks.id, { onDelete: 'cascade' }),
     title: text('title').notNull(),
     type: text('type', { enum: ['file', 'note', 'url', 'text'] }).notNull(),
-    sourceUri: text('source_uri'), // 文件路径或 URL
+    sourceUri: text('source_uri'), // 原始文件路径或 URL
+    localFilePath: text('local_file_path'), // 本地拷贝文件路径
     sourceNoteId: text('source_note_id').references(() => notes.id, { onDelete: 'set null' }),
     content: text('content'), // 原始内容（可选存储）
     contentHash: text('content_hash'), // 内容哈希，用于检测变更

@@ -253,9 +253,14 @@ export function registerKnowledgeHandlers(knowledgeService: KnowledgeService) {
       if (doc.type === 'url' && doc.sourceUri) {
         // 打开 URL
         await shell.openExternal(doc.sourceUri)
-      } else if (doc.type === 'file' && doc.sourceUri) {
-        // 打开文件
-        await shell.openPath(doc.sourceUri)
+      } else if (doc.type === 'file') {
+        // 优先使用本地拷贝的文件，如果不存在则使用源文件
+        const filePathToOpen = doc.localFilePath || doc.sourceUri
+        if (filePathToOpen) {
+          await shell.openPath(filePathToOpen)
+        } else {
+          return { success: false, error: 'No file path available' }
+        }
       }
 
       return { success: true }

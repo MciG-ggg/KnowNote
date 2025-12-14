@@ -4,6 +4,9 @@
  */
 
 import { createHash } from 'crypto'
+import { app } from 'electron'
+import { join } from 'path'
+import { mkdir, copyFile, unlink, stat } from 'fs/promises'
 import { getDatabase, executeCheckpoint } from '../db'
 import { documents, chunks, embeddings, notes } from '../db/schema'
 import type { Document, Chunk, NewDocument, NewChunk, NewEmbedding } from '../db/schema'
@@ -68,12 +71,69 @@ export class KnowledgeService {
   private chunkingService: ChunkingService
   private fileParserService: FileParserService
   private webFetchService: WebFetchService
+  private knowledgeFilesDir: string
 
   constructor(providerManager: ProviderManager) {
     this.embeddingService = new EmbeddingService(providerManager)
     this.chunkingService = new ChunkingService()
     this.fileParserService = new FileParserService()
     this.webFetchService = new WebFetchService()
+    // 知识库文件存储目录
+    this.knowledgeFilesDir = join(app.getPath('userData'), 'knowledge-files')
+    this.ensureKnowledgeFilesDir()
+  }
+
+  /**
+   * 确保知识库文件目录存在
+   */
+  private async ensureKnowledgeFilesDir() {
+    try {
+      await mkdir(this.knowledgeFilesDir, { recursive: true })
+    } catch (error) {
+      Logger.error('KnowledgeService', 'Failed to create knowledge files directory:', error)
+    }
+  }
+
+  /**
+   * 拷贝文件到知识库目录
+   * @param sourceFilePath 源文件路径
+   * @param documentId 文档 ID
+   * @returns 本地文件路径
+   */
+  private async copyFileToKnowledgeDir(
+    sourceFilePath: string,
+    documentId: string
+  ): Promise<string> {
+    await this.ensureKnowledgeFilesDir()
+
+    // 提取文件扩展名
+    const extension = sourceFilePath.split('.').pop() || 'bin'
+    const localFileName = `${documentId}.${extension}`
+    const localFilePath = join(this.knowledgeFilesDir, localFileName)
+
+    // 拷贝文件
+    await copyFile(sourceFilePath, localFilePath)
+    Logger.info('KnowledgeService', `File copied: ${sourceFilePath} -> ${localFilePath}`)
+
+    return localFilePath
+  }
+
+  /**
+   * 删除知识库中的本地文件
+   * @param localFilePath 本地文件路径
+   */
+  private async deleteLocalFile(localFilePath: string): Promise<void> {
+    try {
+      const fileExists = await stat(localFilePath)
+        .then(() => true)
+        .catch(() => false)
+      if (fileExists) {
+        await unlink(localFilePath)
+        Logger.info('KnowledgeService', `Local file deleted: ${localFilePath}`)
+      }
+    } catch (error) {
+      Logger.error('KnowledgeService', 'Failed to delete local file:', error)
+    }
   }
 
   /**
@@ -253,22 +313,178 @@ export class KnowledgeService {
     filePath: string,
     onProgress?: IndexProgressCallback
   ): Promise<string> {
-    onProgress?.('parsing_file', 0)
+    const db = getDatabase()
+    const documentId = `doc_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
+    let localFilePath: string | undefined
 
-    const parseResult = await this.fileParserService.parseFile(filePath)
+    try {
+      onProgress?.('parsing_file', 0)
 
-    return this.addDocument(
-      notebookId,
-      {
+      // 先拷贝文件到知识库目录
+      localFilePath = await this.copyFileToKnowledgeDir(filePath, documentId)
+
+      const parseResult = await this.fileParserService.parseFile(filePath)
+
+      // 计算内容哈希
+      const contentHash = createHash('md5').update(parseResult.content).digest('hex')
+      const now = new Date()
+
+      // 1. 创建文档记录（包含 localFilePath）
+      onProgress?.('creating_document', 0)
+
+      const newDoc: NewDocument = {
+        id: documentId,
+        notebookId,
         title: parseResult.title || filePath.split('/').pop() || 'Untitled',
         type: 'file',
-        content: parseResult.content,
         sourceUri: filePath,
+        localFilePath: localFilePath,
+        content: parseResult.content,
+        contentHash,
         mimeType: parseResult.mimeType,
-        metadata: parseResult.metadata
-      },
-      onProgress
-    )
+        fileSize: parseResult.metadata?.fileSize as number | undefined,
+        metadata: parseResult.metadata,
+        status: 'processing',
+        chunkCount: 0,
+        createdAt: now,
+        updatedAt: now
+      }
+
+      db.insert(documents).values(newDoc).run()
+
+      // 2. 分块
+      onProgress?.('chunking', 10)
+      const chunkResults = this.chunkingService.chunk(parseResult.content)
+
+      if (chunkResults.length === 0) {
+        throw new Error('No chunks generated from document')
+      }
+
+      Logger.info('KnowledgeService', `Document ${documentId}: ${chunkResults.length} chunks`)
+
+      // 3. 保存分块
+      onProgress?.('saving_chunks', 20)
+      const chunkIds: string[] = []
+      const chunkContents: string[] = []
+
+      for (const chunk of chunkResults) {
+        const chunkId = `chunk_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
+        chunkIds.push(chunkId)
+        chunkContents.push(chunk.content)
+
+        const newChunk: NewChunk = {
+          id: chunkId,
+          documentId,
+          notebookId,
+          content: chunk.content,
+          chunkIndex: chunk.index,
+          startOffset: chunk.startOffset,
+          endOffset: chunk.endOffset,
+          tokenCount: chunk.tokenCount,
+          createdAt: now
+        }
+
+        db.insert(chunks).values(newChunk).run()
+      }
+
+      // 4. 生成嵌入向量
+      onProgress?.('generating_embeddings', 30)
+      const embeddingResults = await this.embeddingService.embedBatch(
+        chunkContents,
+        undefined,
+        (completed, total) => {
+          const progress = 30 + (completed / total) * 50
+          onProgress?.('generating_embeddings', Math.round(progress))
+        }
+      )
+
+      // 检测向量维度并更新 VectorStoreManager
+      const detectedDimensions = embeddingResults.length > 0 ? embeddingResults[0].dimensions : 1536
+      if (embeddingResults.length > 0) {
+        vectorStoreManager.setDefaultDimensions(detectedDimensions)
+        Logger.debug('KnowledgeService', `Detected embedding dimensions: ${detectedDimensions}`)
+      }
+
+      // 5. 保存嵌入元数据并添加到向量存储
+      onProgress?.('saving_embeddings', 85)
+      const vectorStore = await vectorStoreManager.getStore(
+        notebookId,
+        undefined,
+        detectedDimensions
+      )
+      const vectorItems: Array<{
+        id: string
+        chunkId: string
+        vector: Float32Array
+        metadata?: Record<string, unknown>
+      }> = []
+
+      for (let i = 0; i < chunkIds.length; i++) {
+        const embeddingId = `emb_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
+        const embResult = embeddingResults[i]
+
+        // 保存嵌入元数据到数据库
+        const newEmbedding: NewEmbedding = {
+          id: embeddingId,
+          chunkId: chunkIds[i],
+          notebookId,
+          model: embResult.model,
+          dimensions: embResult.dimensions,
+          createdAt: now
+        }
+
+        db.insert(embeddings).values(newEmbedding).run()
+
+        // 准备向量数据
+        vectorItems.push({
+          id: embeddingId,
+          chunkId: chunkIds[i],
+          vector: embResult.embedding,
+          metadata: { model: embResult.model, documentId }
+        })
+      }
+
+      // 批量添加到向量存储
+      await vectorStore.upsert(vectorItems)
+
+      // 6. 更新文档状态
+      onProgress?.('finalizing', 95)
+      db.update(documents)
+        .set({
+          status: 'indexed',
+          chunkCount: chunkResults.length,
+          updatedAt: new Date()
+        })
+        .where(eq(documents.id, documentId))
+        .run()
+
+      executeCheckpoint('PASSIVE')
+      onProgress?.('completed', 100)
+
+      Logger.info(
+        'KnowledgeService',
+        `Document indexed: ${documentId}, ${chunkResults.length} chunks`
+      )
+      return documentId
+    } catch (error) {
+      // 失败时删除已拷贝的文件
+      if (localFilePath) {
+        await this.deleteLocalFile(localFilePath)
+      }
+
+      // 更新文档状态为失败
+      db.update(documents)
+        .set({
+          status: 'failed',
+          errorMessage: (error as Error).message,
+          updatedAt: new Date()
+        })
+        .where(eq(documents.id, documentId))
+        .run()
+
+      Logger.error('KnowledgeService', 'Failed to add document from file:', error)
+      throw error
+    }
   }
 
   /**
@@ -447,6 +663,11 @@ export class KnowledgeService {
     if (docChunks.length > 0) {
       const vectorStore = await vectorStoreManager.getStore(doc.notebookId)
       await vectorStore.deleteByChunkIds(docChunks.map((c) => c.id))
+    }
+
+    // 删除本地拷贝的文件（如果存在）
+    if (doc.localFilePath) {
+      await this.deleteLocalFile(doc.localFilePath)
     }
 
     // 级联删除会自动清理 chunks 和 embeddings

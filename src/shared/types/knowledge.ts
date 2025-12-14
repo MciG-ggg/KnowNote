@@ -21,6 +21,7 @@ export interface KnowledgeDocument {
   title: string
   type: DocumentType
   sourceUri?: string
+  localFilePath?: string
   sourceNoteId?: string
   content?: string
   contentHash?: string
