@@ -59,9 +59,9 @@ export default function NotebookList(): ReactElement {
     }
   }
 
-  const handleDeleteConfirm = (): void => {
+  const handleDeleteConfirm = async (): Promise<void> => {
     if (deleteNotebookId) {
-      deleteNotebook(deleteNotebookId)
+      await deleteNotebook(deleteNotebookId)
       removeOpenedNotebook(deleteNotebookId)
       setDeleteNotebookId(null)
     }

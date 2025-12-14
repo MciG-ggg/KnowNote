@@ -69,7 +69,7 @@ export function registerNotebookHandlers() {
   ipcMain.handle('delete-notebook', async (_event, id: string) => {
     console.log('[IPC] delete-notebook:', id)
     try {
-      deleteNotebook(id)
+      await deleteNotebook(id)
       console.log('[IPC] Notebook deleted successfully:', id)
       return { success: true }
     } catch (error) {

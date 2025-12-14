@@ -1,6 +1,6 @@
 import { eq, desc, and } from 'drizzle-orm'
 import { getDatabase, executeCheckpoint } from './index'
-import { chatSessions, chatMessages, notebooks, notes } from './schema'
+import { chatSessions, chatMessages, notebooks, notes, documents } from './schema'
 
 // ==================== Chat Sessions ====================
 
@@ -269,12 +269,34 @@ export function updateNotebook(
  * 删除笔记本
  * 由于外键级联删除，会自动删除该笔记本下的所有会话和消息
  */
-export function deleteNotebook(id: string) {
+export async function deleteNotebook(id: string) {
   const db = getDatabase()
 
   try {
-    // 删除笔记本（外键级联会自动删除所有关联的 sessions 和 messages）
+    // 先获取该笔记本下所有带本地文件的文档
+    const docsWithLocalFiles = db
+      .select({ localFilePath: documents.localFilePath })
+      .from(documents)
+      .where(eq(documents.notebookId, id))
+      .all()
+
+    // 删除笔记本（外键级联会自动删除所有关联的 sessions、messages 和 documents）
     db.delete(notebooks).where(eq(notebooks.id, id)).run()
+
+    // 删除本地文件（异步执行，不阻塞数据库操作）
+    if (docsWithLocalFiles.length > 0) {
+      const { unlink } = await import('fs/promises')
+      for (const doc of docsWithLocalFiles) {
+        if (doc.localFilePath) {
+          try {
+            await unlink(doc.localFilePath)
+            console.log(`[Database] Deleted local file: ${doc.localFilePath}`)
+          } catch (error) {
+            console.error(`[Database] Failed to delete local file: ${doc.localFilePath}`, error)
+          }
+        }
+      }
+    }
 
     // 执行 checkpoint 确保数据持久化
     executeCheckpoint('PASSIVE')
