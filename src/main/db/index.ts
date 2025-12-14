@@ -28,7 +28,31 @@ export function initDatabase() {
     sqlite = new Database(dbPath)
 
     // 加载 sqlite-vec 扩展
-    sqliteVec.load(sqlite)
+    if (app.isPackaged) {
+      // 打包环境：手动构建到 .asar.unpacked 的路径
+      const platform = process.platform
+      const arch = process.arch
+
+      // 映射平台和架构名称
+      const platformName = platform === 'win32' ? 'windows' : platform
+      const packageName = `sqlite-vec-${platformName}-${arch}`
+      const extension = platform === 'win32' ? 'dll' : platform === 'darwin' ? 'dylib' : 'so'
+
+      // 构建到解包目录的路径
+      const vecPath = join(
+        process.resourcesPath,
+        'app.asar.unpacked',
+        'node_modules',
+        packageName,
+        `vec0.${extension}`
+      )
+
+      console.log('[Database] Loading sqlite-vec from:', vecPath)
+      sqlite.loadExtension(vecPath)
+    } else {
+      // 开发环境：使用 sqlite-vec 默认加载
+      sqliteVec.load(sqlite)
+    }
     console.log('[Database] sqlite-vec extension loaded')
 
     // 验证 sqlite-vec 版本
