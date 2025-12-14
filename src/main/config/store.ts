@@ -25,8 +25,8 @@ export async function getStore(): Promise<Store<StoreSchema>> {
         settings: defaultSettings,
         providers: {}
       },
-      name: 'litebook-config',
-      // 文件会保存在: ~/Library/Application Support/litebook/litebook-config.json (macOS)
+      name: 'knownote-config',
+      // 文件会保存在: ~/Library/Application Support/knownote/knownote-config.json (macOS)
       encryptionKey: undefined // 如果需要加密可以设置密钥
     })
   }

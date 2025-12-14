@@ -1,5 +1,5 @@
-appId: com.electron.app
-productName: litebook
+appId: com.knownote.app
+productName: KnowNote
 directories:
   buildResources: build
 files:
@@ -12,7 +12,7 @@ files:
 asarUnpack:
   - resources/**
 win:
-  executableName: litebook
+  executableName: knownote
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}

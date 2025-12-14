@@ -19,7 +19,7 @@ let isClosing = false // 防止重复关闭
  */
 export function initDatabase() {
   // 数据库文件存放在用户数据目录
-  const dbPath = join(app.getPath('userData'), 'litebook.db')
+  const dbPath = join(app.getPath('userData'), 'knownote.db')
 
   console.log('[Database] Initializing database at:', dbPath)
 

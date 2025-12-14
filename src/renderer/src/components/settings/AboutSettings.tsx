@@ -10,7 +10,7 @@ export default function AboutSettings(): ReactElement {
         <div className="w-16 h-16 bg-gradient-to-br from-primary to-chart-5 rounded-xl mx-auto mb-4 flex items-center justify-center">
           <Settings className="w-8 h-8 text-primary-foreground" />
         </div>
-        <h2 className="text-xl font-medium mb-2 text-foreground">LiteBook</h2>
+        <h2 className="text-xl font-medium mb-2 text-foreground">KnowNote</h2>
         <p className="text-sm text-muted-foreground">{t('version')}</p>
       </div>
 
