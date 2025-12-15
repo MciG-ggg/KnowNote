@@ -67,17 +67,25 @@ export default function GeneralSettings({
           }
 
           // 根据类型分类
-          if (modelDetail?.type === 'chat') {
-            chatModels.push(modelObj)
-          } else if (modelDetail?.type === 'embedding') {
+          // 如果模型有明确的type字段，按type分类
+          // 如果没有type字段，默认当作chat模型（大部分模型都是chat模型）
+          if (modelDetail?.type === 'embedding') {
             embeddingModels.push(modelObj)
+          } else if (modelDetail?.type === 'chat' || !modelDetail?.type) {
+            // chat模型或未分类的模型都放入chat列表
+            chatModels.push(modelObj)
           }
         })
       }
     })
 
+    console.log('[GeneralSettings] Available chat models:', chatModels)
+    console.log('[GeneralSettings] Available embedding models:', embeddingModels)
+    console.log('[GeneralSettings] Current defaultChatModel:', settings.defaultChatModel)
+    console.log('[GeneralSettings] Current defaultEmbeddingModel:', settings.defaultEmbeddingModel)
+
     return { availableChatModels: chatModels, availableEmbeddingModels: embeddingModels }
-  }, [providers, t])
+  }, [providers, t, settings.defaultChatModel, settings.defaultEmbeddingModel])
 
   const currentChatModel =
     availableChatModels.find((model) => model.id === settings.defaultChatModel) ||
@@ -88,13 +96,20 @@ export default function GeneralSettings({
     availableEmbeddingModels[0]
 
   // 检查默认模型是否仍然可用，如果不可用则清空
+  // 注意：只有当 providers 不为空时才执行检查，避免在 providers 加载期间误清空用户设置
   useEffect(() => {
+    // 如果 providers 还在加载中（为空或只有"无"选项），不执行检查
+    if (providers.length === 0) {
+      return
+    }
+
     // 检查默认对话模型
     const isChatModelAvailable = settings.defaultChatModel
       ? availableChatModels.some((model) => model.id === settings.defaultChatModel)
       : true
 
     if (!isChatModelAvailable && settings.defaultChatModel) {
+      console.log('[GeneralSettings] 默认对话模型不可用，清空设置:', settings.defaultChatModel)
       onSettingsChange({ defaultChatModel: '' })
     }
 
@@ -104,9 +119,11 @@ export default function GeneralSettings({
       : true
 
     if (!isEmbeddingModelAvailable && settings.defaultEmbeddingModel) {
+      console.log('[GeneralSettings] 默认嵌入模型不可用，清空设置:', settings.defaultEmbeddingModel)
       onSettingsChange({ defaultEmbeddingModel: '' })
     }
   }, [
+    providers,
     settings.defaultChatModel,
     settings.defaultEmbeddingModel,
     availableChatModels,

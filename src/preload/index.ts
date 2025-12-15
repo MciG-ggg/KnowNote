@@ -25,9 +25,9 @@ const api = {
   // 应用设置相关
   settings: {
     getAll: () => ipcRenderer.invoke('settings:getAll'),
-    get: (key: string) => ipcRenderer.invoke('settings:get', key),
-    update: (updates: any) => ipcRenderer.invoke('settings:update', updates),
-    set: (key: string, value: any) => ipcRenderer.invoke('settings:set', key, value),
+    get: (key: string) => ipcRenderer.invoke('settings:get', { key }),
+    update: (updates: any) => ipcRenderer.invoke('settings:update', { updates }),
+    set: (key: string, value: any) => ipcRenderer.invoke('settings:set', { key, value }),
     reset: () => ipcRenderer.invoke('settings:reset'),
     // 监听设置变化
     onSettingsChange: (callback: (newSettings: any, oldSettings: any) => void) => {
@@ -41,34 +41,36 @@ const api = {
 
   // Notebook 相关
   createNotebook: (title: string, description?: string) =>
-    ipcRenderer.invoke('create-notebook', title, description),
+    ipcRenderer.invoke('create-notebook', { title, description }),
   getAllNotebooks: () => ipcRenderer.invoke('get-all-notebooks'),
-  getNotebook: (id: string) => ipcRenderer.invoke('get-notebook', id),
-  updateNotebook: (id: string, updates: any) => ipcRenderer.invoke('update-notebook', id, updates),
-  deleteNotebook: (id: string) => ipcRenderer.invoke('delete-notebook', id),
+  getNotebook: (id: string) => ipcRenderer.invoke('get-notebook', { id }),
+  updateNotebook: (id: string, updates: any) =>
+    ipcRenderer.invoke('update-notebook', { id, updates }),
+  deleteNotebook: (id: string) => ipcRenderer.invoke('delete-notebook', { id }),
 
   // Note 相关
   createNote: (notebookId: string, content: string, customTitle?: string) =>
-    ipcRenderer.invoke('create-note', notebookId, content, customTitle),
-  getNotes: (notebookId: string) => ipcRenderer.invoke('get-notes', notebookId),
-  getNote: (id: string) => ipcRenderer.invoke('get-note', id),
-  updateNote: (id: string, updates: any) => ipcRenderer.invoke('update-note', id, updates),
-  deleteNote: (id: string) => ipcRenderer.invoke('delete-note', id),
+    ipcRenderer.invoke('create-note', { notebookId, title: customTitle || '', content }),
+  getNotes: (notebookId: string) => ipcRenderer.invoke('get-notes', { notebookId }),
+  getNote: (id: string) => ipcRenderer.invoke('get-note', { id }),
+  updateNote: (id: string, updates: any) => ipcRenderer.invoke('update-note', { id, updates }),
+  deleteNote: (id: string) => ipcRenderer.invoke('delete-note', { id }),
 
   // Chat Session 相关
   createChatSession: (notebookId: string, title: string) =>
-    ipcRenderer.invoke('create-chat-session', notebookId, title),
-  getChatSessions: (notebookId: string) => ipcRenderer.invoke('get-chat-sessions', notebookId),
-  getActiveSession: (notebookId: string) => ipcRenderer.invoke('get-active-session', notebookId),
+    ipcRenderer.invoke('create-chat-session', { notebookId, title }),
+  getChatSessions: (notebookId: string) => ipcRenderer.invoke('get-chat-sessions', { notebookId }),
+  getActiveSession: (notebookId: string) =>
+    ipcRenderer.invoke('get-active-session', { notebookId }),
   updateSessionTitle: (sessionId: string, title: string) =>
-    ipcRenderer.invoke('update-session-title', sessionId, title),
-  deleteSession: (sessionId: string) => ipcRenderer.invoke('delete-session', sessionId),
+    ipcRenderer.invoke('update-session-title', { sessionId, title }),
+  deleteSession: (sessionId: string) => ipcRenderer.invoke('delete-session', { sessionId }),
 
   // Chat Message 相关
-  getMessages: (sessionId: string) => invokeWithTimeout('get-messages', 10000, sessionId),
+  getMessages: (sessionId: string) => invokeWithTimeout('get-messages', 10000, { sessionId }),
   sendMessage: (sessionId: string, content: string) =>
-    invokeWithTimeout('send-message', 60000, sessionId, content), // 60秒超时（流式消息可能较长）
-  abortMessage: (messageId: string) => invokeWithTimeout('abort-message', 5000, messageId),
+    invokeWithTimeout('send-message', 60000, { sessionId, content }), // 60秒超时（流式消息可能较长）
+  abortMessage: (messageId: string) => invokeWithTimeout('abort-message', 5000, { messageId }),
 
   // 流式消息监听
   onMessageChunk: (callback: (data: any) => void) => {
@@ -94,14 +96,14 @@ const api = {
   // Provider 配置相关
   saveProviderConfig: (config: any) => invokeWithTimeout('save-provider-config', 5000, config),
   getProviderConfig: (providerName: string) =>
-    ipcRenderer.invoke('get-provider-config', providerName),
+    ipcRenderer.invoke('get-provider-config', { providerName }),
   getAllProviderConfigs: () => ipcRenderer.invoke('get-all-provider-configs'),
   validateProviderConfig: (providerName: string, config: any) =>
-    invokeWithTimeout('validate-provider-config', 15000, providerName, config), // 15秒超时（网络验证）
+    invokeWithTimeout('validate-provider-config', 15000, { providerName, config }), // 15秒超时（网络验证）
   fetchModels: (providerName: string, apiKey: string) =>
-    invokeWithTimeout('fetch-models', 15000, providerName, apiKey), // 15秒超时（网络请求）
+    invokeWithTimeout('fetch-models', 15000, { providerName, apiKey }), // 15秒超时（网络请求）
   getProviderModels: (providerName: string) =>
-    ipcRenderer.invoke('get-provider-models', providerName),
+    ipcRenderer.invoke('get-provider-models', { providerName }),
 
   // Provider 配置变更监听
   onProviderConfigChanged: (callback: () => void) => {
@@ -114,36 +116,38 @@ const api = {
   knowledge: {
     // 添加文档
     addDocument: (notebookId: string, options: any) =>
-      ipcRenderer.invoke('knowledge:add-document', notebookId, options),
+      ipcRenderer.invoke('knowledge:add-document', { notebookId, options }),
     addDocumentFromFile: (notebookId: string, filePath: string) =>
-      ipcRenderer.invoke('knowledge:add-document-from-file', notebookId, filePath),
+      ipcRenderer.invoke('knowledge:add-document-from-file', { notebookId, filePath }),
     addDocumentFromUrl: (notebookId: string, url: string) =>
-      ipcRenderer.invoke('knowledge:add-document-from-url', notebookId, url),
+      ipcRenderer.invoke('knowledge:add-document-from-url', { notebookId, url }),
     addNote: (notebookId: string, noteId: string) =>
-      ipcRenderer.invoke('knowledge:add-note', notebookId, noteId),
+      ipcRenderer.invoke('knowledge:add-note', { notebookId, noteId }),
 
     // 搜索
     search: (notebookId: string, query: string, options?: any) =>
-      ipcRenderer.invoke('knowledge:search', notebookId, query, options),
+      ipcRenderer.invoke('knowledge:search', { notebookId, query, options }),
 
     // 文档管理
-    getDocuments: (notebookId: string) => ipcRenderer.invoke('knowledge:get-documents', notebookId),
-    getDocument: (documentId: string) => ipcRenderer.invoke('knowledge:get-document', documentId),
+    getDocuments: (notebookId: string) =>
+      ipcRenderer.invoke('knowledge:get-documents', { notebookId }),
+    getDocument: (documentId: string) =>
+      ipcRenderer.invoke('knowledge:get-document', { documentId }),
     getDocumentChunks: (documentId: string) =>
-      ipcRenderer.invoke('knowledge:get-document-chunks', documentId),
+      ipcRenderer.invoke('knowledge:get-document-chunks', { documentId }),
     deleteDocument: (documentId: string) =>
-      ipcRenderer.invoke('knowledge:delete-document', documentId),
+      ipcRenderer.invoke('knowledge:delete-document', { documentId }),
     reindexDocument: (documentId: string) =>
-      ipcRenderer.invoke('knowledge:reindex-document', documentId),
+      ipcRenderer.invoke('knowledge:reindex-document', { documentId }),
 
     // 统计
-    getStats: (notebookId: string) => ipcRenderer.invoke('knowledge:get-stats', notebookId),
+    getStats: (notebookId: string) => ipcRenderer.invoke('knowledge:get-stats', { notebookId }),
 
     // 文件选择
     selectFiles: () => ipcRenderer.invoke('knowledge:select-files'),
 
     // 打开源文件
-    openSource: (documentId: string) => ipcRenderer.invoke('knowledge:open-source', documentId),
+    openSource: (documentId: string) => ipcRenderer.invoke('knowledge:open-source', { documentId }),
 
     // 进度监听
     onIndexProgress: (callback: (data: any) => void) => {

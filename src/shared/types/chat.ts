@@ -1,35 +1,29 @@
 /**
  * 统一的聊天相关类型定义
  * 此文件被 main、renderer、preload 三个进程共享
+ *
+ * 类型定义基于 Drizzle 推导的数据库 schema,确保类型定义的单一数据源
  */
+
+import type {
+  ChatSession as DBChatSession,
+  ChatMessage as DBChatMessage
+} from '../../main/db/schema'
 
 /**
  * 聊天会话接口（完整版）
+ * 直接使用 Drizzle 推导的数据库类型
  */
-export interface ChatSession {
-  id: string
-  notebookId: string
-  title: string
-  summary?: string
-  totalTokens: number
-  status: 'active' | 'archived'
-  parentSessionId?: string
-  createdAt: Date
-  updatedAt: Date
-}
+export type ChatSession = DBChatSession
 
 /**
  * 聊天消息接口（完整版）
+ * 基于 Drizzle 推导的数据库类型,并添加前端扩展字段
  */
-export interface ChatMessage {
-  id: string
-  sessionId: string
-  notebookId?: string // 用于并发消息管理
-  role: 'user' | 'assistant' | 'system'
-  content: string
-  reasoningContent?: string // DeepSeek Reasoner 推理过程内容
-  metadata?: any
-  createdAt: Date
+export interface ChatMessage extends Omit<DBChatMessage, 'metadata' | 'reasoningContent'> {
+  notebookId?: string // 前端扩展字段，用于并发消息管理
+  reasoningContent?: string | null // 可选的推理内容字段
+  metadata?: Record<string, any>
   isStreaming?: boolean // 前端扩展字段，标识流式消息
   isReasoningStreaming?: boolean // 前端扩展字段，推理过程是否在流式传输
 }

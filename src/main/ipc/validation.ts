@@ -8,6 +8,24 @@ import { Result, Err, Ok } from '../../shared/types/result'
 import Logger from '../../shared/utils/logger'
 
 /**
+ * 设置相关的验证 schemas
+ */
+export const SettingsSchemas = {
+  get: z.object({
+    key: z.string().min(1, '设置键不能为空')
+  }),
+
+  set: z.object({
+    key: z.string().min(1, '设置键不能为空'),
+    value: z.any()
+  }),
+
+  update: z.object({
+    updates: z.record(z.string(), z.any())
+  })
+}
+
+/**
  * 笔记本相关的验证 schemas
  */
 export const NotebookSchemas = {
@@ -39,11 +57,16 @@ export const NotebookSchemas = {
 export const NoteSchemas = {
   createNote: z.object({
     notebookId: z.string().min(1, { message: '笔记本 ID 不能为空' }),
-    title: z
-      .string()
-      .min(1, { message: '标题不能为空' })
-      .max(200, { message: '标题不能超过200个字符' }),
+    title: z.string().max(200, { message: '标题不能超过200个字符' }),
     content: z.string()
+  }),
+
+  getNotes: z.object({
+    notebookId: z.string().min(1, '笔记本 ID 不能为空')
+  }),
+
+  getNote: z.object({
+    id: z.string().min(1, 'ID 不能为空')
   }),
 
   updateNote: z.object({
@@ -77,7 +100,17 @@ export const ProviderSchemas = {
     providerName: z.string().min(1, 'Provider 名称不能为空')
   }),
 
+  validateProviderConfig: z.object({
+    providerName: z.string().min(1, 'Provider 名称不能为空'),
+    config: z.record(z.string(), z.any())
+  }),
+
   fetchModels: z.object({
+    providerName: z.string().min(1, 'Provider 名称不能为空'),
+    apiKey: z.string().min(1, 'API Key 不能为空')
+  }),
+
+  getProviderModels: z.object({
     providerName: z.string().min(1, 'Provider 名称不能为空')
   })
 }
@@ -93,10 +126,39 @@ export const KnowledgeSchemas = {
 
   addDocumentFromUrl: z.object({
     notebookId: z.string().min(1, '笔记本 ID 不能为空'),
-    url: z.string().url('无效的 URL')
+    url: z.string().min(1, '无效的 URL')
+  }),
+
+  addNote: z.object({
+    notebookId: z.string().min(1, '笔记本 ID 不能为空'),
+    noteId: z.string().min(1, '笔记 ID 不能为空')
+  }),
+
+  getDocuments: z.object({
+    notebookId: z.string().min(1, '笔记本 ID 不能为空')
+  }),
+
+  getDocument: z.object({
+    documentId: z.string().min(1, '文档 ID 不能为空')
+  }),
+
+  getDocumentChunks: z.object({
+    documentId: z.string().min(1, '文档 ID 不能为空')
   }),
 
   deleteDocument: z.object({
+    documentId: z.string().min(1, '文档 ID 不能为空')
+  }),
+
+  reindexDocument: z.object({
+    documentId: z.string().min(1, '文档 ID 不能为空')
+  }),
+
+  getStats: z.object({
+    notebookId: z.string().min(1, '笔记本 ID 不能为空')
+  }),
+
+  openSource: z.object({
     documentId: z.string().min(1, '文档 ID 不能为空')
   }),
 
@@ -124,11 +186,32 @@ export const ChatSchemas = {
 
   createSession: z.object({
     notebookId: z.string().min(1, '笔记本 ID 不能为空'),
-    title: z.string().max(200, '标题不能超过200个字符').optional()
+    title: z.string().max(200, '标题不能超过200个字符')
+  }),
+
+  getChatSessions: z.object({
+    notebookId: z.string().min(1, '笔记本 ID 不能为空')
+  }),
+
+  getActiveSession: z.object({
+    notebookId: z.string().min(1, '笔记本 ID 不能为空')
+  }),
+
+  updateSessionTitle: z.object({
+    sessionId: z.string().min(1, '会话 ID 不能为空'),
+    title: z.string().min(1, '标题不能为空').max(200, '标题不能超过200个字符')
   }),
 
   deleteSession: z.object({
     sessionId: z.string().min(1, '会话 ID 不能为空')
+  }),
+
+  getMessages: z.object({
+    sessionId: z.string().min(1, '会话 ID 不能为空')
+  }),
+
+  abortMessage: z.object({
+    messageId: z.string().min(1, '消息 ID 不能为空')
   })
 }
 
@@ -155,12 +238,20 @@ export function validate<TSchema extends z.ZodType, TResult>(
 ): (_event: Electron.IpcMainInvokeEvent, ...args: any[]) => Promise<TResult> {
   return async (_event: Electron.IpcMainInvokeEvent, ...args: any[]): Promise<TResult> => {
     try {
-      // 如果只有一个参数，直接验证
-      // 如果有多个参数，将其组合成对象
-      const input = args.length === 1 ? args[0] : args
+      // 验证输入参数
+      // IPC 调用应该传递单个对象参数，而不是多个独立参数
+      if (args.length === 0) {
+        throw new Error('IPC 调用缺少参数')
+      }
 
-      // 验证输入
-      const validatedArgs = schema.parse(input)
+      if (args.length > 1) {
+        throw new Error(
+          `IPC 调用参数错误: 期望传递单个对象参数，但收到 ${args.length} 个参数。请使用对象形式调用，例如: api.createNotebook({title, description})`
+        )
+      }
+
+      // 使用第一个参数进行验证
+      const validatedArgs = schema.parse(args[0])
 
       // 调用实际的 handler
       return await handler(validatedArgs)

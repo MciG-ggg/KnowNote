@@ -1,5 +1,6 @@
 import { ipcMain, BrowserWindow } from 'electron'
 import { settingsManager, type AppSettings } from '../config'
+import { SettingsSchemas, validate } from './validation'
 
 /**
  * 向所有窗口广播设置变化
@@ -21,22 +22,31 @@ export function registerSettingsHandlers(): void {
     return await settingsManager.getAllSettings()
   })
 
-  // 获取单个设置
-  ipcMain.handle('settings:get', async (_event, key: keyof AppSettings) => {
-    return await settingsManager.getSetting(key)
-  })
+  // 获取单个设置（带参数验证）
+  ipcMain.handle(
+    'settings:get',
+    validate(SettingsSchemas.get, async (args) => {
+      return await settingsManager.getSetting(args.key as keyof AppSettings)
+    })
+  )
 
-  // 更新设置
-  ipcMain.handle('settings:update', async (_event, updates: Partial<AppSettings>) => {
-    await settingsManager.updateSettings(updates)
-    return await settingsManager.getAllSettings()
-  })
+  // 更新设置（带参数验证）
+  ipcMain.handle(
+    'settings:update',
+    validate(SettingsSchemas.update, async (args) => {
+      await settingsManager.updateSettings(args.updates)
+      return await settingsManager.getAllSettings()
+    })
+  )
 
-  // 设置单个值
-  ipcMain.handle('settings:set', async (_event, key: keyof AppSettings, value: any) => {
-    await settingsManager.setSetting(key, value)
-    return await settingsManager.getSetting(key)
-  })
+  // 设置单个值（带参数验证）
+  ipcMain.handle(
+    'settings:set',
+    validate(SettingsSchemas.set, async (args) => {
+      await settingsManager.setSetting(args.key as keyof AppSettings, args.value)
+      return await settingsManager.getSetting(args.key as keyof AppSettings)
+    })
+  )
 
   // 重置设置
   ipcMain.handle('settings:reset', async () => {

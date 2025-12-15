@@ -1,55 +1,29 @@
 /**
  * 知识库相关类型定义
+ * 基于 Drizzle 推导的数据库 schema,确保类型定义的单一数据源
  */
 
+import type { Document, Chunk } from '../../main/db/schema'
+
 /**
- * 文档类型
+ * 文档类型（直接使用 Drizzle 推导的类型）
+ */
+export type KnowledgeDocument = Document
+
+/**
+ * 文档分块（直接使用 Drizzle 推导的类型）
+ */
+export type KnowledgeChunk = Chunk
+
+/**
+ * 文档类型枚举
  */
 export type DocumentType = 'file' | 'note' | 'url' | 'text'
 
 /**
- * 文档状态
+ * 文档状态枚举
  */
 export type DocumentStatus = 'pending' | 'processing' | 'indexed' | 'failed'
-
-/**
- * 文档
- */
-export interface KnowledgeDocument {
-  id: string
-  notebookId: string
-  title: string
-  type: DocumentType
-  sourceUri?: string
-  localFilePath?: string
-  sourceNoteId?: string
-  content?: string
-  contentHash?: string
-  mimeType?: string
-  fileSize?: number
-  metadata?: Record<string, unknown>
-  status: DocumentStatus
-  errorMessage?: string
-  chunkCount: number
-  createdAt: Date
-  updatedAt: Date
-}
-
-/**
- * 文档分块
- */
-export interface KnowledgeChunk {
-  id: string
-  documentId: string
-  notebookId: string
-  content: string
-  chunkIndex: number
-  startOffset?: number
-  endOffset?: number
-  metadata?: Record<string, unknown>
-  tokenCount?: number
-  createdAt: Date
-}
 
 /**
  * 搜索结果

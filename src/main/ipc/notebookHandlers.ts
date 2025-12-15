@@ -41,20 +41,23 @@ export function registerNotebookHandlers() {
     }
   })
 
-  // 获取单个笔记本
-  ipcMain.handle('get-notebook', async (_event, id: string) => {
-    console.log('[IPC] get-notebook:', id)
-    try {
-      const notebook = getNotebookById(id)
-      if (!notebook) {
-        console.warn(`[IPC] Notebook not found: ${id}`)
+  // 获取单个笔记本（带参数验证）
+  ipcMain.handle(
+    'get-notebook',
+    validate(NotebookSchemas.getNotebook, async (args) => {
+      console.log('[IPC] get-notebook:', args.id)
+      try {
+        const notebook = getNotebookById(args.id)
+        if (!notebook) {
+          console.warn(`[IPC] Notebook not found: ${args.id}`)
+        }
+        return notebook
+      } catch (error) {
+        console.error('[IPC] Error getting notebook:', error)
+        throw error
       }
-      return notebook
-    } catch (error) {
-      console.error('[IPC] Error getting notebook:', error)
-      throw error
-    }
-  })
+    })
+  )
 
   // 更新笔记本（带参数验证）
   ipcMain.handle(

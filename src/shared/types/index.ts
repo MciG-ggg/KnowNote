@@ -1,26 +1,32 @@
 /**
  * 共享的类型定义
+ * 基于 Drizzle 推导的数据库 schema,确保类型定义的单一数据源
  */
 
 // 导出知识库类型
 export * from './knowledge'
+
+// 导出聊天类型
+export * from './chat'
 
 // 导出 Result 错误处理类型
 export * from './result'
 
 /**
  * 笔记本接口
+ * 与 Drizzle schema 推导的类型兼容
  */
 export interface Notebook {
   id: string
   title: string
-  description?: string | null
+  description?: string | null | undefined // 兼容 Drizzle 推导的可选字段
   createdAt: Date
   updatedAt: Date
 }
 
 /**
  * 笔记接口
+ * 与 Drizzle schema 推导的类型兼容
  */
 export interface Note {
   id: string
