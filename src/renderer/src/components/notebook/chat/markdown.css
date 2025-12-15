@@ -141,7 +141,8 @@
 
 /* 表格样式 */
 .markdown-content table {
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
   border-collapse: collapse;
   margin: 1rem 0;
   border: 1px solid var(--border);

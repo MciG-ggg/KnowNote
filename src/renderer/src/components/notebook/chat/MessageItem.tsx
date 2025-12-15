@@ -11,6 +11,7 @@ import ReasoningContent from './ReasoningContent'
 import { useNoteStore } from '../../../store/noteStore'
 import { useNotebookStore } from '../../../store/notebookStore'
 import { Button } from '../../ui/button'
+import { ScrollArea, ScrollBar } from '../../ui/scroll-area'
 import 'highlight.js/styles/github-dark.css'
 import 'katex/dist/katex.min.css'
 import './markdown.css'
@@ -70,7 +71,14 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
                       {children}
                     </p>
                   )
-                }
+                },
+                // Table: wrap in scrollable container
+                table: ({ children, ...props }) => (
+                  <ScrollArea className="w-full">
+                    <table {...props}>{children}</table>
+                    <ScrollBar orientation="horizontal" />
+                  </ScrollArea>
+                )
               }}
             >
               {message.content}
@@ -150,6 +158,13 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
                   <a target="_blank" rel="noopener noreferrer" {...props}>
                     {children}
                   </a>
+                ),
+                // Table: wrap in scrollable container
+                table: ({ children, ...props }) => (
+                  <ScrollArea className="w-full">
+                    <table {...props}>{children}</table>
+                    <ScrollBar orientation="horizontal" />
+                  </ScrollArea>
                 )
               }}
             >

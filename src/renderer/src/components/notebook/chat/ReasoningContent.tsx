@@ -5,7 +5,7 @@ import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import rehypeHighlight from 'rehype-highlight'
 import rehypeKatex from 'rehype-katex'
-import { ScrollArea } from '../../ui/scroll-area'
+import { ScrollArea, ScrollBar } from '../../ui/scroll-area'
 import { Button } from '../../ui/button'
 
 interface ReasoningContentProps {
@@ -91,6 +91,13 @@ export default function ReasoningContent({
                         <a target="_blank" rel="noopener noreferrer" {...props}>
                           {children}
                         </a>
+                      ),
+                      // Table: wrap in scrollable container
+                      table: ({ children, ...props }) => (
+                        <ScrollArea className="w-full">
+                          <table {...props}>{children}</table>
+                          <ScrollBar orientation="horizontal" />
+                        </ScrollArea>
                       )
                     }}
                   >
