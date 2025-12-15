@@ -73,7 +73,7 @@ function AddSourceModal({
           <DialogTitle>{getTitle()}</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {type === 'url' && (
             <Input
               type="url"
@@ -88,7 +88,7 @@ function AddSourceModal({
           )}
 
           {type === 'text' && (
-            <div className="space-y-4">
+            <div className="flex flex-col gap-4">
               <Input
                 type="text"
                 value={title}
