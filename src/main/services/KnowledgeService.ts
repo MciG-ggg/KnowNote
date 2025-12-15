@@ -5,7 +5,7 @@
 
 import { createHash } from 'crypto'
 import { app } from 'electron'
-import { join } from 'path'
+import { join, basename } from 'path'
 import { mkdir, copyFile, unlink, stat } from 'fs/promises'
 import { getDatabase, executeCheckpoint } from '../db'
 import { documents, chunks, embeddings, notes } from '../db/schema'
@@ -335,7 +335,7 @@ export class KnowledgeService {
       const newDoc: NewDocument = {
         id: documentId,
         notebookId,
-        title: parseResult.title || filePath.split('/').pop() || 'Untitled',
+        title: parseResult.title || basename(filePath) || 'Untitled',
         type: 'file',
         sourceUri: filePath,
         localFilePath: localFilePath,

@@ -27,7 +27,12 @@ export function createSettingsWindow(): void {
     minHeight: 600,
     show: false,
     autoHideMenuBar: true,
-    titleBarStyle: 'hiddenInset',
+    // remove the default titlebar
+    titleBarStyle: 'hidden',
+    // expose window controls in Windows/Linux
+    ...(process.platform !== 'darwin'
+      ? { titleBarOverlay: { color: 'rgba(0,0,0,0)', height: 35, symbolColor: 'white' } }
+      : {}),
     backgroundColor,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),

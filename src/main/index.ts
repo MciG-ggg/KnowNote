@@ -68,6 +68,11 @@ app.whenReady().then(() => {
     createSettingsWindow()
   })
 
+  // Handle get platform request
+  ipcMain.handle('get-platform', () => {
+    return process.platform
+  })
+
   // Create main window
   createMainWindow()
 

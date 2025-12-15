@@ -1,7 +1,6 @@
 import { BrowserWindow, shell } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
-import icon from '../../../resources/icon.png?asset'
 import { settingsManager } from '../config'
 
 let mainWindow: BrowserWindow | null = null
@@ -21,9 +20,13 @@ export function createMainWindow(): BrowserWindow {
     minHeight: 700,
     show: false,
     autoHideMenuBar: true,
-    titleBarStyle: 'hiddenInset',
+    // remove the default titlebar
+    titleBarStyle: 'hidden',
+    // expose window controls in Windows/Linux
+    ...(process.platform !== 'darwin'
+      ? { titleBarOverlay: { color: 'rgba(0,0,0,0)', height: 35, symbolColor: 'white' } }
+      : {}),
     backgroundColor,
-    ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false

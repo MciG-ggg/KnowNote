@@ -2,7 +2,7 @@ import { Home, Plus, X, Settings } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useNotebookStore } from '../../store/notebookStore'
-import { ReactElement } from 'react'
+import { ReactElement, useEffect, useState } from 'react'
 import { Button } from '../ui/button'
 
 interface TopNavigationBarProps {
@@ -18,6 +18,20 @@ export default function TopNavigationBar({
   const navigate = useNavigate()
   const { currentNotebook, openedNotebooks, removeOpenedNotebook, setCurrentNotebook } =
     useNotebookStore()
+  const [platform, setPlatform] = useState<string>('')
+
+  // 获取平台信息
+  useEffect(() => {
+    const getPlatform = async () => {
+      try {
+        const platformName = await window.api.getPlatform()
+        setPlatform(platformName)
+      } catch (error) {
+        console.error('Failed to get platform:', error)
+      }
+    }
+    getPlatform()
+  }, [])
 
   const handleHomeClick = (): void => {
     navigate('/')
@@ -62,8 +76,8 @@ export default function TopNavigationBar({
       className="h-10 flex-shrink-0 flex items-center justify-between px-3"
       style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
     >
-      {/* 左侧空白区域（留给窗口控制按钮） */}
-      <div className="w-16"></div>
+      {/* macOS 左侧空白区域（留给窗口控制按钮） */}
+      {platform === 'darwin' && <div className="w-16"></div>}
 
       {/* 导航按钮 */}
       <div className="flex items-center gap-2 flex-1">
@@ -131,6 +145,9 @@ export default function TopNavigationBar({
       >
         <Settings className="w-4 h-4" />
       </Button>
+
+      {/* Windows 右侧空白区域（留给窗口控制按钮） */}
+      {platform === 'win32' && <div className="w-32"></div>}
     </div>
   )
 }
