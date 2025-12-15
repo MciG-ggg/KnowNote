@@ -4,31 +4,30 @@
  */
 
 import { ipcMain, IpcMainInvokeEvent, dialog, shell } from 'electron'
-import {
-  KnowledgeService,
-  type AddDocumentOptions,
-  type SearchOptions
-} from '../services/KnowledgeService'
+import { KnowledgeService } from '../services/KnowledgeService'
 import Logger from '../../shared/utils/logger'
+import { KnowledgeSchemas, validate } from './validation'
 
 /**
  * 注册知识库相关 IPC Handlers
  */
 export function registerKnowledgeHandlers(knowledgeService: KnowledgeService) {
   // 添加文档（文本内容）
-  ipcMain.handle(
-    'knowledge:add-document',
-    async (event: IpcMainInvokeEvent, notebookId: string, options: AddDocumentOptions) => {
-      Logger.debug('KnowledgeHandlers', 'add-document:', { notebookId, title: options.title })
+  ipcMain.handle('knowledge:add-document', async (event: IpcMainInvokeEvent, args: unknown) => {
+    const validated = await validate(KnowledgeSchemas.addDocument, async (params) => {
+      Logger.debug('KnowledgeHandlers', 'add-document:', {
+        notebookId: params.notebookId,
+        title: params.options.title
+      })
 
       try {
         const documentId = await knowledgeService.addDocument(
-          notebookId,
-          options,
+          params.notebookId,
+          params.options,
           (stage, progress) => {
             // 发送进度更新
             event.sender.send('knowledge:index-progress', {
-              notebookId,
+              notebookId: params.notebookId,
               stage,
               progress
             })
@@ -39,74 +38,83 @@ export function registerKnowledgeHandlers(knowledgeService: KnowledgeService) {
         Logger.error('KnowledgeHandlers', 'Error adding document:', error)
         return { success: false, error: (error as Error).message }
       }
-    }
-  )
+    })(event, args)
+
+    return validated
+  })
 
   // 从文件添加文档
   ipcMain.handle(
     'knowledge:add-document-from-file',
-    async (event: IpcMainInvokeEvent, notebookId: string, filePath: string) => {
-      Logger.debug('KnowledgeHandlers', 'add-document-from-file:', { notebookId, filePath })
+    async (event: IpcMainInvokeEvent, args: unknown) => {
+      const validated = await validate(KnowledgeSchemas.addDocumentFromFile, async (params) => {
+        Logger.debug('KnowledgeHandlers', 'add-document-from-file:', params)
 
-      try {
-        const documentId = await knowledgeService.addDocumentFromFile(
-          notebookId,
-          filePath,
-          (stage, progress) => {
-            event.sender.send('knowledge:index-progress', {
-              notebookId,
-              stage,
-              progress
-            })
-          }
-        )
-        return { success: true, documentId }
-      } catch (error) {
-        Logger.error('KnowledgeHandlers', 'Error adding document from file:', error)
-        return { success: false, error: (error as Error).message }
-      }
+        try {
+          const documentId = await knowledgeService.addDocumentFromFile(
+            params.notebookId,
+            params.filePath,
+            (stage, progress) => {
+              event.sender.send('knowledge:index-progress', {
+                notebookId: params.notebookId,
+                stage,
+                progress
+              })
+            }
+          )
+          return { success: true, documentId }
+        } catch (error) {
+          Logger.error('KnowledgeHandlers', 'Error adding document from file:', error)
+          return { success: false, error: (error as Error).message }
+        }
+      })(event, args)
+
+      return validated
     }
   )
 
   // 从 URL 添加文档
   ipcMain.handle(
     'knowledge:add-document-from-url',
-    async (event: IpcMainInvokeEvent, notebookId: string, url: string) => {
-      Logger.debug('KnowledgeHandlers', 'add-document-from-url:', { notebookId, url })
+    async (event: IpcMainInvokeEvent, args: unknown) => {
+      const validated = await validate(KnowledgeSchemas.addDocumentFromUrl, async (params) => {
+        Logger.debug('KnowledgeHandlers', 'add-document-from-url:', params)
 
-      try {
-        const documentId = await knowledgeService.addDocumentFromUrl(
-          notebookId,
-          url,
-          (stage, progress) => {
-            event.sender.send('knowledge:index-progress', {
-              notebookId,
-              stage,
-              progress
-            })
-          }
-        )
-        return { success: true, documentId }
-      } catch (error) {
-        Logger.error('KnowledgeHandlers', 'Error adding document from URL:', error)
-        return { success: false, error: (error as Error).message }
-      }
+        try {
+          const documentId = await knowledgeService.addDocumentFromUrl(
+            params.notebookId,
+            params.url,
+            (stage, progress) => {
+              event.sender.send('knowledge:index-progress', {
+                notebookId: params.notebookId,
+                stage,
+                progress
+              })
+            }
+          )
+          return { success: true, documentId }
+        } catch (error) {
+          Logger.error('KnowledgeHandlers', 'Error adding document from URL:', error)
+          return { success: false, error: (error as Error).message }
+        }
+      })(event, args)
+
+      return validated
     }
   )
 
   // 从 Note 添加到知识库
-  ipcMain.handle(
-    'knowledge:add-note',
-    async (event: IpcMainInvokeEvent, notebookId: string, noteId: string) => {
-      Logger.debug('KnowledgeHandlers', 'add-note:', { notebookId, noteId })
+  ipcMain.handle('knowledge:add-note', async (event: IpcMainInvokeEvent, args: unknown) => {
+    const validated = await validate(KnowledgeSchemas.addNote, async (params) => {
+      Logger.debug('KnowledgeHandlers', 'add-note:', params)
 
       try {
         const documentId = await knowledgeService.addNoteToKnowledge(
-          notebookId,
-          noteId,
+          params.notebookId,
+          params.noteId,
           (stage, progress) => {
             event.sender.send('knowledge:index-progress', {
-              notebookId,
+              notebookId: params.notebookId,
               stage,
               progress
             })
@@ -117,87 +125,104 @@ export function registerKnowledgeHandlers(knowledgeService: KnowledgeService) {
         Logger.error('KnowledgeHandlers', 'Error adding note:', error)
         return { success: false, error: (error as Error).message }
       }
-    }
-  )
+    })(event, args)
+
+    return validated
+  })
 
   // 搜索知识库
   ipcMain.handle(
     'knowledge:search',
-    async (_event, notebookId: string, query: string, options?: SearchOptions) => {
-      Logger.debug('KnowledgeHandlers', 'search:', { notebookId, query })
+    validate(KnowledgeSchemas.search, async (params) => {
+      Logger.debug('KnowledgeHandlers', 'search:', params)
 
       try {
-        const results = await knowledgeService.search(notebookId, query, options)
+        const results = await knowledgeService.search(
+          params.notebookId,
+          params.query,
+          params.options
+        )
         return { success: true, results }
       } catch (error) {
         Logger.error('KnowledgeHandlers', 'Error searching:', error)
         return { success: false, error: (error as Error).message, results: [] }
       }
-    }
+    })
   )
 
   // 获取文档列表
-  ipcMain.handle('knowledge:get-documents', async (_event, notebookId: string) => {
-    Logger.debug('KnowledgeHandlers', 'get-documents:', notebookId)
-
-    try {
-      const docs = knowledgeService.getDocuments(notebookId)
-      return docs
-    } catch (error) {
-      Logger.error('KnowledgeHandlers', 'Error getting documents:', error)
-      return []
-    }
-  })
-
-  // 获取单个文档
-  ipcMain.handle('knowledge:get-document', async (_event, documentId: string) => {
-    Logger.debug('KnowledgeHandlers', 'get-document:', documentId)
-
-    try {
-      const doc = knowledgeService.getDocument(documentId)
-      return doc || null
-    } catch (error) {
-      Logger.error('KnowledgeHandlers', 'Error getting document:', error)
-      return null
-    }
-  })
-
-  // 获取文档的 chunks
-  ipcMain.handle('knowledge:get-document-chunks', async (_event, documentId: string) => {
-    Logger.debug('KnowledgeHandlers', 'get-document-chunks:', documentId)
-
-    try {
-      const chunks = knowledgeService.getDocumentChunks(documentId)
-      return chunks
-    } catch (error) {
-      Logger.error('KnowledgeHandlers', 'Error getting document chunks:', error)
-      return []
-    }
-  })
-
-  // 删除文档
-  ipcMain.handle('knowledge:delete-document', async (_event, documentId: string) => {
-    Logger.debug('KnowledgeHandlers', 'delete-document:', documentId)
-
-    try {
-      await knowledgeService.deleteDocument(documentId)
-      return { success: true }
-    } catch (error) {
-      Logger.error('KnowledgeHandlers', 'Error deleting document:', error)
-      return { success: false, error: (error as Error).message }
-    }
-  })
-
-  // 重建索引
   ipcMain.handle(
-    'knowledge:reindex-document',
-    async (event: IpcMainInvokeEvent, documentId: string) => {
-      Logger.debug('KnowledgeHandlers', 'reindex-document:', documentId)
+    'knowledge:get-documents',
+    validate(KnowledgeSchemas.getDocuments, async (params) => {
+      Logger.debug('KnowledgeHandlers', 'get-documents:', params.notebookId)
 
       try {
-        await knowledgeService.reindexDocument(documentId, (stage, progress) => {
+        const docs = knowledgeService.getDocuments(params.notebookId)
+        return docs
+      } catch (error) {
+        Logger.error('KnowledgeHandlers', 'Error getting documents:', error)
+        return []
+      }
+    })
+  )
+
+  // 获取单个文档
+  ipcMain.handle(
+    'knowledge:get-document',
+    validate(KnowledgeSchemas.getDocument, async (params) => {
+      Logger.debug('KnowledgeHandlers', 'get-document:', params.documentId)
+
+      try {
+        const doc = knowledgeService.getDocument(params.documentId)
+        return doc || null
+      } catch (error) {
+        Logger.error('KnowledgeHandlers', 'Error getting document:', error)
+        return null
+      }
+    })
+  )
+
+  // 获取文档的 chunks
+  ipcMain.handle(
+    'knowledge:get-document-chunks',
+    validate(KnowledgeSchemas.getDocumentChunks, async (params) => {
+      Logger.debug('KnowledgeHandlers', 'get-document-chunks:', params.documentId)
+
+      try {
+        const chunks = knowledgeService.getDocumentChunks(params.documentId)
+        return chunks
+      } catch (error) {
+        Logger.error('KnowledgeHandlers', 'Error getting document chunks:', error)
+        return []
+      }
+    })
+  )
+
+  // 删除文档
+  ipcMain.handle(
+    'knowledge:delete-document',
+    validate(KnowledgeSchemas.deleteDocument, async (params) => {
+      Logger.debug('KnowledgeHandlers', 'delete-document:', params.documentId)
+
+      try {
+        await knowledgeService.deleteDocument(params.documentId)
+        return { success: true }
+      } catch (error) {
+        Logger.error('KnowledgeHandlers', 'Error deleting document:', error)
+        return { success: false, error: (error as Error).message }
+      }
+    })
+  )
+
+  // 重建索引
+  ipcMain.handle('knowledge:reindex-document', async (event: IpcMainInvokeEvent, args: unknown) => {
+    const validated = await validate(KnowledgeSchemas.reindexDocument, async (params) => {
+      Logger.debug('KnowledgeHandlers', 'reindex-document:', params.documentId)
+
+      try {
+        await knowledgeService.reindexDocument(params.documentId, (stage, progress) => {
           event.sender.send('knowledge:index-progress', {
-            documentId,
+            documentId: params.documentId,
             stage,
             progress
           })
@@ -207,21 +232,26 @@ export function registerKnowledgeHandlers(knowledgeService: KnowledgeService) {
         Logger.error('KnowledgeHandlers', 'Error reindexing document:', error)
         return { success: false, error: (error as Error).message }
       }
-    }
-  )
+    })(event, args)
+
+    return validated
+  })
 
   // 获取知识库统计信息
-  ipcMain.handle('knowledge:get-stats', async (_event, notebookId: string) => {
-    Logger.debug('KnowledgeHandlers', 'get-stats:', notebookId)
+  ipcMain.handle(
+    'knowledge:get-stats',
+    validate(KnowledgeSchemas.getStats, async (params) => {
+      Logger.debug('KnowledgeHandlers', 'get-stats:', params.notebookId)
 
-    try {
-      const stats = knowledgeService.getStats(notebookId)
-      return stats
-    } catch (error) {
-      Logger.error('KnowledgeHandlers', 'Error getting stats:', error)
-      return { documentCount: 0, chunkCount: 0, embeddingCount: 0 }
-    }
-  })
+      try {
+        const stats = knowledgeService.getStats(params.notebookId)
+        return stats
+      } catch (error) {
+        Logger.error('KnowledgeHandlers', 'Error getting stats:', error)
+        return { documentCount: 0, chunkCount: 0, embeddingCount: 0 }
+      }
+    })
+  )
 
   // 打开文件选择对话框
   ipcMain.handle('knowledge:select-files', async () => {
@@ -240,35 +270,38 @@ export function registerKnowledgeHandlers(knowledgeService: KnowledgeService) {
   })
 
   // 打开文档源文件
-  ipcMain.handle('knowledge:open-source', async (_event, documentId: string) => {
-    Logger.debug('KnowledgeHandlers', 'open-source:', documentId)
+  ipcMain.handle(
+    'knowledge:open-source',
+    validate(KnowledgeSchemas.openSource, async (params) => {
+      Logger.debug('KnowledgeHandlers', 'open-source:', params.documentId)
 
-    try {
-      const doc = knowledgeService.getDocument(documentId)
-      if (!doc) {
-        return { success: false, error: 'Document not found' }
-      }
-
-      // 根据文档类型处理
-      if (doc.type === 'url' && doc.sourceUri) {
-        // 打开 URL
-        await shell.openExternal(doc.sourceUri)
-      } else if (doc.type === 'file') {
-        // 优先使用本地拷贝的文件，如果不存在则使用源文件
-        const filePathToOpen = doc.localFilePath || doc.sourceUri
-        if (filePathToOpen) {
-          await shell.openPath(filePathToOpen)
-        } else {
-          return { success: false, error: 'No file path available' }
+      try {
+        const doc = knowledgeService.getDocument(params.documentId)
+        if (!doc) {
+          return { success: false, error: 'Document not found' }
         }
-      }
 
-      return { success: true }
-    } catch (error) {
-      Logger.error('KnowledgeHandlers', 'Error opening source:', error)
-      return { success: false, error: (error as Error).message }
-    }
-  })
+        // 根据文档类型处理
+        if (doc.type === 'url' && doc.sourceUri) {
+          // 打开 URL
+          await shell.openExternal(doc.sourceUri)
+        } else if (doc.type === 'file') {
+          // 优先使用本地拷贝的文件，如果不存在则使用源文件
+          const filePathToOpen = doc.localFilePath || doc.sourceUri
+          if (filePathToOpen) {
+            await shell.openPath(filePathToOpen)
+          } else {
+            return { success: false, error: 'No file path available' }
+          }
+        }
+
+        return { success: true }
+      } catch (error) {
+        Logger.error('KnowledgeHandlers', 'Error opening source:', error)
+        return { success: false, error: (error as Error).message }
+      }
+    })
+  )
 
   Logger.info('KnowledgeHandlers', 'Knowledge handlers registered')
 }

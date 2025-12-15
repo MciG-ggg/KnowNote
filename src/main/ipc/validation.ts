@@ -119,6 +119,21 @@ export const ProviderSchemas = {
  * 知识库相关的验证 schemas
  */
 export const KnowledgeSchemas = {
+  addDocument: z.object({
+    notebookId: z.string().min(1, '笔记本 ID 不能为空'),
+    options: z.object({
+      title: z.string().min(1, '标题不能为空'),
+      type: z.enum(['file', 'note', 'url', 'text']),
+      content: z.string(),
+      sourceUri: z.string().optional(),
+      sourceNoteId: z.string().optional(),
+      mimeType: z.string().optional(),
+      fileSize: z.number().optional(),
+      metadata: z.record(z.string(), z.any()).optional(),
+      chunkOptions: z.any().optional()
+    })
+  }),
+
   addDocumentFromFile: z.object({
     notebookId: z.string().min(1, '笔记本 ID 不能为空'),
     filePath: z.string().min(1, '文件路径不能为空')
