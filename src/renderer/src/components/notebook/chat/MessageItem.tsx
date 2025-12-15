@@ -10,6 +10,7 @@ import type { ChatMessage } from '../../../types/notebook'
 import ReasoningContent from './ReasoningContent'
 import { useNoteStore } from '../../../store/noteStore'
 import { useNotebookStore } from '../../../store/notebookStore'
+import { Button } from '../../ui/button'
 import 'highlight.js/styles/github-dark.css'
 import 'katex/dist/katex.min.css'
 import './markdown.css'
@@ -65,7 +66,7 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
                 p(props) {
                   const { children, ...rest } = props
                   return (
-                    <p className="text-sm whitespace-pre-wrap wrap-break-word m-0" {...rest}>
+                    <p className="text-sm whitespace-pre-wrap break-words m-0" {...rest}>
                       {children}
                     </p>
                   )
@@ -86,12 +87,13 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
       <div className="flex justify-end mb-4 group">
         <div className="flex flex-col max-w-[80%]">
           <div className="bg-primary text-primary-foreground rounded-2xl px-4 py-3 shadow-sm">
-            <p className="text-sm whitespace-pre-wrap wrap-break-word">{message.content}</p>
+            <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
           </div>
           {/* Copy button */}
-          <button
+          <Button
             onClick={handleCopy}
-            className="self-end mt-1 px-2 py-1 text-xs text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1"
+            variant="ghost"
+            className="self-end mt-1 px-2 py-1 text-xs h-auto text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100"
             title={copied ? t('common:copied') : t('common:copy')}
           >
             {copied ? (
@@ -119,7 +121,7 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
                 <span>{t('common:copy')}</span>
               </>
             )}
-          </button>
+          </Button>
         </div>
       </div>
     )
@@ -171,9 +173,10 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
         {message.content && !isStreaming && (
           <div className="flex items-center gap-2 self-start ml-2 mt-1">
             {/* Copy button */}
-            <button
+            <Button
               onClick={handleCopy}
-              className="px-2 py-1 text-xs text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1"
+              variant="ghost"
+              className="px-2 py-1 text-xs h-auto text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100"
               title={copied ? t('common:copied') : t('common:copy')}
             >
               {copied ? (
@@ -201,12 +204,13 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
                   <span>{t('common:copy')}</span>
                 </>
               )}
-            </button>
+            </Button>
 
             {/* Add to note button */}
-            <button
+            <Button
               onClick={handleAddToNote}
-              className="px-2 py-1 text-xs text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1"
+              variant="ghost"
+              className="px-2 py-1 text-xs h-auto text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100"
               title={addedToNote ? t('chat:addedToNote') : t('chat:addToNote')}
             >
               {addedToNote ? (
@@ -227,7 +231,7 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
                   <span>{t('chat:addToNote')}</span>
                 </>
               )}
-            </button>
+            </Button>
           </div>
         )}
       </div>

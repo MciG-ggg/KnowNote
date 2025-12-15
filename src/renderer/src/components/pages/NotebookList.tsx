@@ -8,6 +8,7 @@ import RenameDialog from '../common/RenameDialog'
 import DeleteConfirmDialog from '../common/DeleteConfirmDialog'
 import { useNotebookStore } from '../../store/notebookStore'
 import { ScrollArea } from '../ui/scroll-area'
+import { Button } from '../ui/button'
 import {
   Empty,
   EmptyContent,
@@ -110,13 +111,10 @@ export default function NotebookList(): ReactElement {
                 </EmptyDescription>
               </EmptyHeader>
               <EmptyContent>
-                <button
-                  onClick={handleCreateNotebook}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-primary hover:bg-primary/90 rounded-lg transition-colors text-primary-foreground font-medium"
-                >
+                <Button onClick={handleCreateNotebook} size="lg">
                   <Plus className="w-4 h-4" />
                   {t('createFirstNotebook')}
-                </button>
+                </Button>
               </EmptyContent>
             </Empty>
           </div>

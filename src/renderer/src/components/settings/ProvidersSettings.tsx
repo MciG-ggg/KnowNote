@@ -3,6 +3,8 @@ import { Search } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import ProviderConfigPanel from './ProviderConfigPanel'
 import { ScrollArea } from '../ui/scroll-area'
+import { Input } from '../ui/input'
+import { Button } from '../ui/button'
 
 interface ProviderConfig {
   providerName: string
@@ -163,26 +165,25 @@ export default function ProvidersSettings({
       <div className="w-48 flex-shrink-0 flex flex-col gap-4">
         {/* 搜索框 */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none z-10" />
+          <Input
             type="text"
             placeholder={t('searchProvider')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 bg-muted rounded-lg text-sm text-foreground placeholder-muted-foreground outline-none border border-border focus:ring-2 focus:ring-inset focus:ring-ring"
+            className="pl-9"
           />
         </div>
 
         {/* 供应商列表 */}
         <div className="flex flex-col gap-2">
           {filteredProviders.map((provider) => (
-            <button
+            <Button
               key={provider.id}
               onClick={() => setActiveProvider(provider.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
-                activeProvider === provider.id
-                  ? 'bg-muted border border-primary/50'
-                  : 'bg-transparent border border-border/50 hover:border-input'
+              variant={activeProvider === provider.id ? 'secondary' : 'outline'}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl justify-start h-auto ${
+                activeProvider === provider.id ? 'border-primary/50' : ''
               }`}
             >
               <div className="flex-1 min-w-0">
@@ -191,14 +192,14 @@ export default function ProvidersSettings({
               <div
                 className={`w-2 h-2 rounded-full ${provider.enabled ? 'bg-primary' : 'bg-muted'}`}
               ></div>
-            </button>
+            </Button>
           ))}
         </div>
 
         {/* 添加自定义提供商按钮 */}
-        <button className="w-full py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl text-sm font-medium transition-colors">
+        <Button className="w-full py-3 rounded-xl text-sm font-medium h-auto">
           {t('addCustomProvider')}
-        </button>
+        </Button>
       </div>
 
       {/* 右侧配置区域 */}

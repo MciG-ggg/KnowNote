@@ -3,6 +3,9 @@
   color: var(--foreground);
   font-size: 0.875rem;
   line-height: 1.75;
+  /* 文本换行控制 - 防止长单词和URL溢出 */
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 /* 标题样式 */

@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, ReactElement } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog'
+import { Button } from '../ui/button'
+import { Input } from '../ui/input'
 
 interface RenameDialogProps {
   isOpen: boolean
@@ -55,30 +57,22 @@ export default function RenameDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit}>
-          <input
+          <Input
             ref={inputRef}
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full bg-card border border-border rounded-lg px-4 py-3 text-foreground text-base focus:outline-none focus:ring-2 focus:ring-ring transition-colors placeholder-muted-foreground"
             placeholder={t('notebook:enterNotebookName')}
+            className="mb-4"
           />
 
           <DialogFooter>
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-6 py-2.5 bg-secondary hover:bg-secondary/80 rounded-lg transition-colors text-secondary-foreground text-sm font-medium"
-            >
+            <Button type="button" variant="outline" onClick={onClose}>
               {t('common:cancel')}
-            </button>
-            <button
-              type="submit"
-              disabled={!canSubmit}
-              className="px-6 py-2.5 bg-primary hover:bg-primary/90 disabled:bg-secondary disabled:cursor-not-allowed disabled:text-muted-foreground rounded-lg transition-colors text-primary-foreground text-sm font-medium"
-            >
+            </Button>
+            <Button type="submit" disabled={!canSubmit}>
               {t('common:confirm')}
-            </button>
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

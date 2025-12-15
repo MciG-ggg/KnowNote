@@ -3,6 +3,10 @@ import { Search, Eye, EyeOff, ExternalLink, Download, Loader2 } from 'lucide-rea
 import { useTranslation } from 'react-i18next'
 import { type Model, ModelType } from '../../../../shared/types'
 import { categorizeModels } from '../../../../shared/utils/modelClassifier'
+import { Button } from '../ui/button'
+import { Input } from '../ui/input'
+import { Switch } from '../ui/switch'
+import { Checkbox } from '../ui/checkbox'
 
 interface ProviderConfig {
   providerName: string
@@ -86,15 +90,7 @@ export default function ProviderConfigPanel({
             </span>
           )}
         </div>
-        <label className="relative inline-flex items-center cursor-pointer">
-          <input
-            type="checkbox"
-            checked={provider.enabled}
-            onChange={(e) => onEnabledChange(e.target.checked)}
-            className="sr-only peer"
-          />
-          <div className="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-5 peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-        </label>
+        <Switch checked={provider.enabled} onCheckedChange={onEnabledChange} />
       </div>
 
       {/* 描述 */}
@@ -104,23 +100,25 @@ export default function ProviderConfigPanel({
       <div className="flex flex-col gap-2">
         <h3 className="text-sm font-medium text-foreground">{t('apiKey')}</h3>
         <div className="relative">
-          <input
+          <Input
             type={showApiKey ? 'text' : 'password'}
             value={provider.config.apiKey || ''}
             onChange={(e) => handleApiKeyChange(e.target.value)}
             placeholder="sk-..."
-            className="w-full px-3 py-2 bg-muted rounded-lg text-sm text-foreground placeholder-muted-foreground outline-none border border-border focus:ring-2 focus:ring-inset focus:ring-ring pr-12"
+            className="pr-12"
           />
-          <button
+          <Button
             onClick={() => setShowApiKey(!showApiKey)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 hover:bg-accent rounded-md transition-colors"
+            variant="ghost"
+            size="icon"
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8"
           >
             {showApiKey ? (
               <EyeOff className="w-4 h-4 text-muted-foreground" />
             ) : (
               <Eye className="w-4 h-4 text-muted-foreground" />
             )}
-          </button>
+          </Button>
         </div>
         <div className="flex items-center gap-1 text-sm text-muted-foreground">
           <span>{t('getApiKeyFrom')}</span>
@@ -140,11 +138,7 @@ export default function ProviderConfigPanel({
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-medium text-foreground">{t('models')}</h3>
-          <button
-            onClick={onFetchModels}
-            disabled={isFetching}
-            className="flex items-center gap-2 px-3 py-1.5 bg-secondary hover:bg-secondary/80 disabled:bg-secondary/50 text-secondary-foreground text-xs rounded-lg transition-colors"
-          >
+          <Button onClick={onFetchModels} disabled={isFetching} variant="secondary" size="sm">
             {isFetching ? (
               <>
                 <Loader2 className="w-3 h-3 animate-spin" />
@@ -156,65 +150,57 @@ export default function ProviderConfigPanel({
                 <span>{t('fetchModels')}</span>
               </>
             )}
-          </button>
+          </Button>
         </div>
 
         {models && models.length > 0 && (
           <>
             {/* 分类标签 */}
             <div className="flex gap-2 flex-wrap">
-              <button
+              <Button
                 onClick={() => setShowCategory('all')}
-                className={`px-3 py-1 text-xs rounded-md transition-colors ${
-                  showCategory === 'all'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                }`}
+                variant={showCategory === 'all' ? 'default' : 'secondary'}
+                size="sm"
+                className="text-xs"
               >
                 {t('allModels')} ({models.length})
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => setShowCategory('chat')}
-                className={`px-3 py-1 text-xs rounded-md transition-colors ${
-                  showCategory === 'chat'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                }`}
+                variant={showCategory === 'chat' ? 'default' : 'secondary'}
+                size="sm"
+                className="text-xs"
               >
                 {t('chatModels')} ({categorized.chat.length})
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => setShowCategory('embedding')}
-                className={`px-3 py-1 text-xs rounded-md transition-colors ${
-                  showCategory === 'embedding'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                }`}
+                variant={showCategory === 'embedding' ? 'default' : 'secondary'}
+                size="sm"
+                className="text-xs"
               >
                 {t('embeddingModels')} ({categorized.embedding.length})
-              </button>
+              </Button>
               {(categorized.reranker.length > 0 || categorized.other.length > 0) && (
-                <button
+                <Button
                   onClick={() => setShowCategory('other')}
-                  className={`px-3 py-1 text-xs rounded-md transition-colors ${
-                    showCategory === 'other'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                  }`}
+                  variant={showCategory === 'other' ? 'default' : 'secondary'}
+                  size="sm"
+                  className="text-xs"
                 >
                   {t('otherModels')} ({categorized.reranker.length + categorized.other.length})
-                </button>
+                </Button>
               )}
             </div>
 
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
+              <Input
                 type="text"
                 placeholder={t('searchModels')}
                 value={modelSearchQuery}
                 onChange={(e) => setModelSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 bg-muted rounded-lg text-sm text-foreground placeholder-muted-foreground outline-none border border-border focus:ring-2 focus:ring-inset focus:ring-ring"
+                className="pl-9"
               />
             </div>
 
@@ -229,11 +215,9 @@ export default function ProviderConfigPanel({
                   key={model.id}
                   className="flex items-center gap-3 px-3 py-2 hover:bg-muted rounded-lg cursor-pointer transition-colors"
                 >
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={provider.config.models?.includes(model.id) || false}
-                    onChange={(e) => handleModelToggle(model.id, e.target.checked)}
-                    className="w-4 h-4 rounded border-border text-primary focus:ring-2 focus:ring-ring focus:ring-offset-0"
+                    onCheckedChange={(checked) => handleModelToggle(model.id, checked as boolean)}
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">

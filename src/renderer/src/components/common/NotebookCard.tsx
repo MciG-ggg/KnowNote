@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, ReactElement } from 'react'
 import { MoreVertical } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { Notebook } from '../../types/notebook'
+import { Button } from '../ui/button'
 
 interface NotebookCardProps {
   notebook: Notebook
@@ -91,28 +92,32 @@ export default function NotebookCard({
 
       {/* 右上角菜单按钮 */}
       <div className="absolute top-4 right-4" ref={menuRef}>
-        <button
+        <Button
           onClick={handleMenuClick}
-          className="w-8 h-8 flex items-center justify-center rounded-full bg-card hover:bg-accent transition-colors opacity-0 group-hover:opacity-100"
+          variant="ghost"
+          size="icon"
+          className="w-8 h-8 rounded-full opacity-0 group-hover:opacity-100"
         >
-          <MoreVertical className="w-4 h-4 text-muted-foreground" />
-        </button>
+          <MoreVertical className="w-4 h-4" />
+        </Button>
 
         {/* 下拉菜单 */}
         {showMenu && (
           <div className="absolute top-10 right-0 w-40 bg-card rounded-lg shadow-lg border border-border overflow-hidden z-10">
-            <button
+            <Button
               onClick={handleRename}
-              className="w-full px-4 py-2.5 text-left text-sm text-foreground hover:bg-accent transition-colors"
+              variant="ghost"
+              className="w-full justify-start text-sm font-normal rounded-none"
             >
               {t('renameNotebook')}
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handleDelete}
-              className="w-full px-4 py-2.5 text-left text-sm text-destructive hover:bg-accent transition-colors"
+              variant="ghost"
+              className="w-full justify-start text-sm font-normal text-destructive hover:text-destructive rounded-none"
             >
               {t('deleteNotebook')}
-            </button>
+            </Button>
           </div>
         )}
       </div>

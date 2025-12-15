@@ -4,6 +4,9 @@ import { useTranslation } from 'react-i18next'
 import { useChatStore } from '../../store/chatStore'
 import { useNotebookStore } from '../../store/notebookStore'
 import MessageList from './chat/MessageList'
+import { Button } from '../ui/button'
+import { Input } from '../ui/input'
+import { Textarea } from '../ui/textarea'
 
 export default function ProcessPanel(): ReactElement {
   const { t } = useTranslation('ui')
@@ -138,25 +141,26 @@ export default function ProcessPanel(): ReactElement {
       >
         {currentNotebook ? (
           isEditingTitle ? (
-            <input
+            <Input
               type="text"
               value={editingTitle}
               onChange={(e) => setEditingTitle(e.target.value)}
               onBlur={handleSaveTitle}
               onKeyDown={handleTitleKeyDown}
               autoFocus
-              className="text-sm font-medium bg-transparent outline-none text-center min-w-0 max-w-full"
+              className="text-sm font-medium bg-transparent border-0 text-center min-w-0 max-w-full p-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
               style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
             />
           ) : (
-            <button
+            <Button
               onClick={handleStartEditTitle}
-              className="text-sm font-medium hover:text-primary transition-colors"
+              variant="ghost"
+              className="text-sm font-medium h-auto p-0"
               style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
               title={t('clickToEditTitle')}
             >
               {currentNotebook.title}
-            </button>
+            </Button>
           )
         ) : (
           <span className="text-sm text-muted-foreground">{t('selectOrCreateNotebook')}</span>
@@ -164,7 +168,7 @@ export default function ProcessPanel(): ReactElement {
       </div>
 
       {/* 对话消息区域 - 使用 absolute 定位占满剩余空间 */}
-      <div className="absolute top-14 bottom-0 left-0 right-0">
+      <div className="absolute top-14 bottom-0 left-0 right-0 overflow-hidden">
         <MessageList messages={messages} />
       </div>
 
@@ -172,7 +176,7 @@ export default function ProcessPanel(): ReactElement {
       <div className="absolute bottom-0 left-0 right-0 p-4 pointer-events-none flex-shrink-0 z-20">
         <div className="relative bg-muted/95 backdrop-blur-md rounded-lg border border-border focus-within:ring-2 focus-within:ring-ring shadow-lg pointer-events-auto">
           {/* 多行输入框 */}
-          <textarea
+          <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -189,32 +193,35 @@ export default function ProcessPanel(): ReactElement {
               !currentSession || isCurrentNotebookStreaming || !hasProvider || !defaultChatModel
             }
             rows={3}
-            className="w-full bg-transparent pl-4 pr-14 py-3 text-sm outline-none text-foreground placeholder-muted-foreground resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-transparent border-0 pl-4 pr-14 py-3 text-sm text-foreground placeholder-muted-foreground resize-none focus-visible:ring-0 focus-visible:ring-offset-0"
           />
 
           {/* 发送/停止按钮 - 动态切换 */}
           {isCurrentNotebookStreaming ? (
             // 停止按钮
-            <button
+            <Button
               onClick={handleStop}
               disabled={!canStop}
               title="停止生成"
-              className="absolute right-2 bottom-3 p-2 bg-destructive hover:bg-destructive/90 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              variant="destructive"
+              size="icon"
+              className="absolute right-2 bottom-3 w-10 h-10"
             >
-              <StopCircle className="w-4 h-4 text-destructive-foreground" />
-            </button>
+              <StopCircle className="w-4 h-4" />
+            </Button>
           ) : (
             // 发送按钮
-            <button
+            <Button
               onClick={handleSend}
               disabled={!canSend}
               title={
                 !hasProvider ? t('noProviderConfigured') : !currentSession ? t('selectSession') : ''
               }
-              className="absolute right-2 bottom-3 p-2 bg-primary hover:bg-primary/90 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary"
+              size="icon"
+              className="absolute right-2 bottom-3 w-10 h-10"
             >
-              <Send className="w-4 h-4 text-primary-foreground" />
-            </button>
+              <Send className="w-4 h-4" />
+            </Button>
           )}
         </div>
       </div>

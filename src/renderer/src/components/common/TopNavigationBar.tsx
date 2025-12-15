@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useNotebookStore } from '../../store/notebookStore'
 import { ReactElement } from 'react'
+import { Button } from '../ui/button'
 
 interface TopNavigationBarProps {
   onCreateClick: () => void
@@ -66,64 +67,70 @@ export default function TopNavigationBar({
 
       {/* 导航按钮 */}
       <div className="flex items-center gap-2 flex-1">
-        <button
+        <Button
           onClick={handleHomeClick}
           disabled={isHomePage}
+          variant={isHomePage ? 'ghost' : 'outline'}
+          size="sm"
           style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-          className={`flex items-center gap-2 px-3 py-1 rounded-lg transition-colors text-sm h-7 shadow-sm ${
-            isHomePage ? 'bg-card cursor-default' : 'bg-card hover:bg-accent'
-          }`}
+          className="h-7 gap-2 shadow-sm"
         >
           <Home className="w-4 h-4" />
           <span>{t('home')}</span>
-        </button>
+        </Button>
 
         {/* 打开的笔记本标签 - 所有页面都显示 */}
         {openedNotebooks.map((notebook) => {
           const isActive = currentNotebook?.id === notebook.id
           return (
-            <button
+            <Button
               key={notebook.id}
               onClick={() => handleOpenedNotebookClick(notebook.id)}
+              variant={isActive && !isHomePage ? 'ghost' : 'outline'}
+              size="sm"
               style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-              className={`flex items-center gap-1 px-3 py-1 rounded-lg text-sm h-7 transition-colors shadow-sm ${
-                isActive && !isHomePage ? 'bg-card' : 'bg-card hover:bg-accent'
-              }`}
+              className="h-7 gap-1 shadow-sm"
             >
               <span className="max-w-[200px] truncate">{notebook.title}</span>
-              <span
+              <Button
                 onClick={(e) => {
                   e.stopPropagation()
                   handleCloseOpenedNotebook(notebook.id)
                 }}
+                variant="ghost"
+                size="icon"
                 style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-                className="ml-2 p-1 hover:bg-accent rounded transition-colors cursor-pointer"
+                className="ml-2 h-auto w-auto p-1"
                 title={t('closeTab')}
               >
-                <X className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground" />
-              </span>
-            </button>
+                <X className="w-3.5 h-3.5" />
+              </Button>
+            </Button>
           )
         })}
 
-        <button
+        <Button
           onClick={onCreateClick}
+          variant="ghost"
+          size="icon"
           style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-          className="flex items-center justify-center w-7 h-7 hover:bg-accent rounded-lg transition-colors"
+          className="w-7 h-7"
         >
           <Plus className="w-4 h-4" />
-        </button>
+        </Button>
       </div>
 
       {/* 设置按钮 */}
-      <button
+      <Button
         onClick={handleSettingsClick}
+        variant="ghost"
+        size="icon"
         style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-        className="flex items-center justify-center w-7 h-7 hover:bg-accent rounded-lg transition-colors"
+        className="w-7 h-7"
         title={t('settings')}
       >
         <Settings className="w-4 h-4" />
-      </button>
+      </Button>
     </div>
   )
 }

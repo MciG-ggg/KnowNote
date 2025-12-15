@@ -6,6 +6,7 @@ import ProvidersSettings from './ProvidersSettings'
 import AboutSettings from './AboutSettings'
 import SettingsActionBar from './SettingsActionBar'
 import { ScrollArea } from '../ui/scroll-area'
+import { Button } from '../ui/button'
 import type { AppSettings } from '../../../../shared/types'
 
 interface ProviderConfig {
@@ -147,20 +148,21 @@ export default function SettingsWindow(): ReactElement {
             {menuItems.map((item) => {
               const Icon = item.icon
               return (
-                <button
+                <Button
                   key={item.id}
                   onClick={() => setActiveSection(item.id)}
-                  className={`w-full p-3 rounded-lg text-left transition-colors ${
+                  variant="ghost"
+                  className={`w-full p-3 rounded-lg justify-start h-auto ${
                     activeSection === item.id
                       ? 'bg-accent text-foreground'
-                      : 'hover:bg-accent/50 text-muted-foreground'
+                      : 'text-muted-foreground'
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <Icon className="w-4 h-4" />
                     <span className="text-sm font-medium">{item.label}</span>
                   </div>
-                </button>
+                </Button>
               )
             })}
           </div>

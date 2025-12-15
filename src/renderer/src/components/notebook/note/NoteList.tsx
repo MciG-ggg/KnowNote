@@ -2,6 +2,7 @@ import { ReactElement } from 'react'
 import { FileText, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { Note } from '../../../../../shared/types'
+import { Button } from '../../ui/button'
 
 interface NoteListProps {
   notes: Note[]
@@ -40,9 +41,13 @@ export default function NoteList({
           }`}
         >
           <div className="flex items-start gap-2">
-            <button onClick={() => onSelectNote(note)} className="flex-1 min-w-0 text-left">
+            <Button
+              onClick={() => onSelectNote(note)}
+              variant="ghost"
+              className="flex-1 min-w-0 text-left h-auto p-0 justify-start"
+            >
               <div className="flex items-start gap-2">
-                <FileText className="w-4 h-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
+                <FileText className="w-4 h-4 mt-0.5 shrink-0 text-muted-foreground" />
                 <div className="flex-1 min-w-0">
                   <h3 className="text-sm font-medium truncate">{note.title}</h3>
                   <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
@@ -55,19 +60,21 @@ export default function NoteList({
                   </p>
                 </div>
               </div>
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={(e) => {
                 e.stopPropagation()
                 if (confirm(t('confirmDeleteNote'))) {
                   onDeleteNote(note.id)
                 }
               }}
-              className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-destructive/10 text-destructive rounded-lg transition-all"
+              variant="ghost"
+              size="icon"
+              className="opacity-0 group-hover:opacity-100 w-8 h-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
               title={t('deleteNote')}
             >
               <Trash2 className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
         </div>
       ))}

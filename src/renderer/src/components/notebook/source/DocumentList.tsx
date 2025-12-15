@@ -2,6 +2,7 @@ import { ReactElement, useRef, useEffect } from 'react'
 import { FileText, Globe, FileUp, StickyNote, Trash2, Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { KnowledgeDocument } from '../../../../../shared/types/knowledge'
+import { Button } from '../../ui/button'
 
 interface DocumentListProps {
   documents: KnowledgeDocument[]
@@ -91,18 +92,20 @@ function DocumentItem({ document, onDelete, onSelect }: DocumentItemProps): Reac
           )}
         </div>
       </div>
-      <button
+      <Button
         onClick={(e) => {
           e.stopPropagation()
           if (confirm(t('confirmDeleteDocument'))) {
             onDelete(document.id)
           }
         }}
-        className="absolute right-3 top-2.5 opacity-0 group-hover:opacity-100 p-1.5 hover:bg-destructive/10 text-destructive rounded-lg transition-all"
+        variant="ghost"
+        size="icon"
+        className="absolute right-3 top-2.5 opacity-0 group-hover:opacity-100 w-8 h-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
         title={t('deleteDocument')}
       >
         <Trash2 className="w-4 h-4" />
-      </button>
+      </Button>
     </div>
   )
 }

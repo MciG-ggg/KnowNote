@@ -6,6 +6,8 @@ import { useNoteStore } from '../../store/noteStore'
 import NoteEditor from './note/NoteEditor'
 import NoteList from './note/NoteList'
 import { ScrollArea } from '../ui/scroll-area'
+import { Button } from '../ui/button'
+import { Input } from '../ui/input'
 import type { Note } from '../../../../shared/types'
 
 // 编辑器面板子组件 - 管理编辑状态
@@ -49,42 +51,48 @@ function NoteEditorPanel({
         style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
       >
         <div className="flex items-center gap-2 flex-1 min-w-0">
-          <button
+          <Button
             onClick={onBack}
-            className="p-1.5 hover:bg-muted rounded-lg transition-colors flex-shrink-0"
+            variant="ghost"
+            size="icon"
+            className="w-8 h-8 shrink-0"
             style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
             title={t('backToList')}
           >
             <ArrowLeft className="w-4 h-4" />
-          </button>
-          <input
+          </Button>
+          <Input
             type="text"
             value={editTitle}
             onChange={(e) => setEditTitle(e.target.value)}
-            className="flex-1 min-w-0 bg-transparent text-sm font-medium outline-none"
+            className="flex-1 min-w-0 bg-transparent border-0 text-sm font-medium p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
             style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
             placeholder={t('noteTitle')}
           />
         </div>
         <div
-          className="flex items-center gap-2 flex-shrink-0"
+          className="flex items-center gap-2 shrink-0"
           style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
         >
-          <button
+          <Button
             onClick={handleSave}
             disabled={isSaving}
-            className="p-1.5 hover:bg-muted rounded-lg transition-colors disabled:opacity-50"
+            variant="ghost"
+            size="icon"
+            className="w-8 h-8"
             title={t('save')}
           >
             <Save className="w-4 h-4" />
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={onDelete}
-            className="p-1.5 hover:bg-destructive/10 text-destructive rounded-lg transition-colors"
+            variant="ghost"
+            size="icon"
+            className="w-8 h-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
             title={t('delete')}
           >
             <Trash2 className="w-4 h-4" />
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -187,14 +195,16 @@ export default function NotePanel(): ReactElement {
             style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
           >
             <span className="text-sm text-foreground">{t('notes')}</span>
-            <button
+            <Button
               onClick={handleCreateNote}
-              className="p-1.5 hover:bg-muted rounded-lg transition-colors"
+              variant="ghost"
+              size="icon"
+              className="w-8 h-8"
               style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
               title={t('createNote')}
             >
               <Plus className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
 
           {/* 笔记列表 */}

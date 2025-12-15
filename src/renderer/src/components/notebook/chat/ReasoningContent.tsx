@@ -6,6 +6,7 @@ import remarkMath from 'remark-math'
 import rehypeHighlight from 'rehype-highlight'
 import rehypeKatex from 'rehype-katex'
 import { ScrollArea } from '../../ui/scroll-area'
+import { Button } from '../../ui/button'
 
 interface ReasoningContentProps {
   content: string
@@ -30,9 +31,10 @@ export default function ReasoningContent({
   return (
     <div className="border border-border rounded-lg overflow-hidden bg-muted/30 shadow-sm">
       {/* 头部：展开/折叠按钮 */}
-      <button
+      <Button
         onClick={() => setManualExpanded(!manualExpanded)}
-        className="w-full flex items-center justify-between px-3 py-1.5 text-xs hover:bg-muted/50 transition-colors"
+        variant="ghost"
+        className="w-full flex items-center justify-between px-3 py-1.5 text-xs h-auto hover:bg-muted/50"
       >
         <div className="flex items-center gap-1.5">
           {/* 思考图标 */}
@@ -72,7 +74,7 @@ export default function ReasoningContent({
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
-      </button>
+      </Button>
 
       {/* 内容区域：展开时显示 */}
       {isExpanded && (

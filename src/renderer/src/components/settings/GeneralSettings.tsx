@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next'
 import SettingItem from './SettingItem'
 import { useI18nStore } from '../../store/i18nStore'
 import type { AppSettings } from '../../../../shared/types'
+import { Button } from '../ui/button'
+import { Switch } from '../ui/switch'
 
 interface ProviderConfig {
   providerName: string
@@ -169,70 +171,59 @@ export default function GeneralSettings({
       {/* 主题模式设置 */}
       <SettingItem title={t('themeMode')} description={t('selectTheme')}>
         <div className="flex items-center gap-2">
-          <button
+          <Button
             onClick={() => onSettingsChange({ theme: 'light' })}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
-              settings.theme === 'light'
-                ? 'bg-primary text-primary-foreground shadow-sm'
-                : 'bg-muted text-muted-foreground hover:bg-muted/80'
-            }`}
+            variant={settings.theme === 'light' ? 'default' : 'outline'}
+            size="sm"
+            className="gap-1.5"
           >
             <Sun className="w-3.5 h-3.5" />
             <span className="text-xs font-medium">{t('light')}</span>
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => onSettingsChange({ theme: 'dark' })}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
-              settings.theme === 'dark'
-                ? 'bg-primary text-primary-foreground shadow-sm'
-                : 'bg-muted text-muted-foreground hover:bg-muted/80'
-            }`}
+            variant={settings.theme === 'dark' ? 'default' : 'outline'}
+            size="sm"
+            className="gap-1.5"
           >
             <Moon className="w-3.5 h-3.5" />
             <span className="text-xs font-medium">{t('dark')}</span>
-          </button>
+          </Button>
         </div>
       </SettingItem>
 
       {/* 开机自启动设置 */}
       <SettingItem title={t('autoLaunch')} description={t('autoLaunchDesc')}>
-        <button
-          onClick={() => onSettingsChange({ autoLaunch: !settings.autoLaunch })}
-          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 ${
-            settings.autoLaunch ? 'bg-primary' : 'bg-muted-foreground'
-          }`}
-        >
-          <span
-            className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${
-              settings.autoLaunch ? 'translate-x-4.5' : 'translate-x-0.5'
-            }`}
-          />
-        </button>
+        <Switch
+          checked={settings.autoLaunch}
+          onCheckedChange={(checked) => onSettingsChange({ autoLaunch: checked })}
+        />
       </SettingItem>
 
       {/* 语言设置 */}
       <SettingItem title={t('language')} description={t('languageDesc')}>
         <div className="relative language-dropdown w-56">
-          <button
+          <Button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="w-full flex items-center justify-between px-3 py-2 bg-secondary rounded-lg border border-border hover:bg-secondary/80 transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+            variant="secondary"
+            className="w-full flex items-center justify-between h-auto py-2"
           >
             <div className="flex-1 text-left">
               <div className="text-sm font-medium text-foreground">{currentLanguage.native}</div>
               <div className="text-xs text-muted-foreground">{currentLanguage.label}</div>
             </div>
             <ChevronDown
-              className={`w-5 h-5 text-muted-foreground transition-transform flex-shrink-0 ${
+              className={`w-5 h-5 text-muted-foreground transition-transform shrink-0 ${
                 isDropdownOpen ? 'rotate-180' : ''
               }`}
             />
-          </button>
+          </Button>
 
           {isDropdownOpen && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-lg border border-border shadow-lg z-50">
+            <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-lg border border-border shadow-lg z-50 max-h-60 overflow-y-auto">
               <div className="py-1">
                 {languages.map((language) => (
-                  <button
+                  <Button
                     key={language.value}
                     onClick={() => {
                       const newLang = language.value as AppSettings['language']
@@ -240,7 +231,8 @@ export default function GeneralSettings({
                       changeLanguage(newLang)
                       setIsDropdownOpen(false)
                     }}
-                    className={`w-full flex items-center justify-between px-3 py-2 hover:bg-accent transition-colors ${
+                    variant="ghost"
+                    className={`w-full flex items-center justify-between px-3 h-auto py-2 rounded-none ${
                       language.value === settings.language ? 'bg-accent' : ''
                     }`}
                   >
@@ -249,11 +241,11 @@ export default function GeneralSettings({
                       <div className="text-xs text-muted-foreground">{language.label}</div>
                     </div>
                     {language.value === settings.language ? (
-                      <div className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0" />
+                      <div className="w-1.5 h-1.5 bg-primary rounded-full shrink-0" />
                     ) : (
-                      <div className="w-1.5 h-1.5 flex-shrink-0" />
+                      <div className="w-1.5 h-1.5 shrink-0" />
                     )}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -270,9 +262,10 @@ export default function GeneralSettings({
       >
         {availableChatModels.length > 0 && (
           <div className="relative chat-model-dropdown w-56">
-            <button
+            <Button
               onClick={() => setIsChatModelDropdownOpen(!isChatModelDropdownOpen)}
-              className="w-full flex items-center justify-between px-3 py-2 bg-secondary rounded-lg border border-border hover:bg-secondary/80 transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+              variant="secondary"
+              className="w-full flex items-center justify-between h-auto py-2"
             >
               <div className="flex-1 text-left">
                 <div className="text-sm font-medium text-foreground">
@@ -285,23 +278,24 @@ export default function GeneralSettings({
                 )}
               </div>
               <ChevronDown
-                className={`w-5 h-5 text-muted-foreground transition-transform flex-shrink-0 ${
+                className={`w-5 h-5 text-muted-foreground transition-transform shrink-0 ${
                   isChatModelDropdownOpen ? 'rotate-180' : ''
                 }`}
               />
-            </button>
+            </Button>
 
             {isChatModelDropdownOpen && (
               <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-lg border border-border shadow-lg z-50 max-h-60 overflow-y-auto">
                 <div className="py-1">
                   {availableChatModels.map((model) => (
-                    <button
+                    <Button
                       key={model.id}
                       onClick={() => {
                         onSettingsChange({ defaultChatModel: model.id })
                         setIsChatModelDropdownOpen(false)
                       }}
-                      className={`w-full flex items-center justify-between px-3 py-2 hover:bg-accent transition-colors ${
+                      variant="ghost"
+                      className={`w-full flex items-center justify-between px-3 h-auto py-2 rounded-none ${
                         model.id === settings.defaultChatModel ? 'bg-accent' : ''
                       }`}
                     >
@@ -312,11 +306,11 @@ export default function GeneralSettings({
                         </div>
                       </div>
                       {model.id === settings.defaultChatModel ? (
-                        <div className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0" />
+                        <div className="w-1.5 h-1.5 bg-primary rounded-full shrink-0" />
                       ) : (
-                        <div className="w-1.5 h-1.5 flex-shrink-0" />
+                        <div className="w-1.5 h-1.5 shrink-0" />
                       )}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>
@@ -336,9 +330,10 @@ export default function GeneralSettings({
       >
         {availableEmbeddingModels.length > 0 && (
           <div className="relative embedding-model-dropdown w-56">
-            <button
+            <Button
               onClick={() => setIsEmbeddingModelDropdownOpen(!isEmbeddingModelDropdownOpen)}
-              className="w-full flex items-center justify-between px-3 py-2 bg-secondary rounded-lg border border-border hover:bg-secondary/80 transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+              variant="secondary"
+              className="w-full flex items-center justify-between h-auto py-2"
             >
               <div className="flex-1 text-left">
                 <div className="text-sm font-medium text-foreground">
@@ -351,23 +346,24 @@ export default function GeneralSettings({
                 )}
               </div>
               <ChevronDown
-                className={`w-5 h-5 text-muted-foreground transition-transform flex-shrink-0 ${
+                className={`w-5 h-5 text-muted-foreground transition-transform shrink-0 ${
                   isEmbeddingModelDropdownOpen ? 'rotate-180' : ''
                 }`}
               />
-            </button>
+            </Button>
 
             {isEmbeddingModelDropdownOpen && (
               <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-lg border border-border shadow-lg z-50 max-h-60 overflow-y-auto">
                 <div className="py-1">
                   {availableEmbeddingModels.map((model) => (
-                    <button
+                    <Button
                       key={model.id}
                       onClick={() => {
                         onSettingsChange({ defaultEmbeddingModel: model.id })
                         setIsEmbeddingModelDropdownOpen(false)
                       }}
-                      className={`w-full flex items-center justify-between px-3 py-2 hover:bg-accent transition-colors ${
+                      variant="ghost"
+                      className={`w-full flex items-center justify-between px-3 h-auto py-2 rounded-none ${
                         model.id === settings.defaultEmbeddingModel ? 'bg-accent' : ''
                       }`}
                     >
@@ -378,11 +374,11 @@ export default function GeneralSettings({
                         </div>
                       </div>
                       {model.id === settings.defaultEmbeddingModel ? (
-                        <div className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0" />
+                        <div className="w-1.5 h-1.5 bg-primary rounded-full shrink-0" />
                       ) : (
-                        <div className="w-1.5 h-1.5 flex-shrink-0" />
+                        <div className="w-1.5 h-1.5 shrink-0" />
                       )}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>

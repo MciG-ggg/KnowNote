@@ -6,6 +6,10 @@ import { useKnowledgeStore, setupKnowledgeListeners } from '../../store/knowledg
 import { useNoteStore } from '../../store/noteStore'
 import { ScrollArea } from '../ui/scroll-area'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog'
+import { Button } from '../ui/button'
+import { Input } from '../ui/input'
+import { Textarea } from '../ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import DocumentList from './source/DocumentList'
 import type { KnowledgeDocument } from '../../../../shared/types/knowledge'
 
@@ -71,12 +75,12 @@ function AddSourceModal({
 
         <form onSubmit={handleSubmit}>
           {type === 'url' && (
-            <input
+            <Input
               type="url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder={t('urlPlaceholder')}
-              className="w-full bg-card border border-border rounded-lg px-4 py-3 text-foreground text-base focus:outline-none focus:ring-2 focus:ring-ring transition-colors placeholder-muted-foreground"
+              className="text-base"
               required
               autoFocus
               disabled={isLoading}
@@ -85,21 +89,21 @@ function AddSourceModal({
 
           {type === 'text' && (
             <div className="space-y-4">
-              <input
+              <Input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder={t('documentTitle')}
-                className="w-full bg-card border border-border rounded-lg px-4 py-3 text-foreground text-base focus:outline-none focus:ring-2 focus:ring-ring transition-colors placeholder-muted-foreground"
+                className="text-base"
                 required
                 autoFocus
                 disabled={isLoading}
               />
-              <textarea
+              <Textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder={t('textPlaceholder')}
-                className="w-full bg-card border border-border rounded-lg px-4 py-3 text-foreground text-base focus:outline-none focus:ring-2 focus:ring-ring transition-colors placeholder-muted-foreground min-h-60 resize-y"
+                className="text-base min-h-60 resize-y"
                 required
                 disabled={isLoading}
               />
@@ -107,40 +111,28 @@ function AddSourceModal({
           )}
 
           {type === 'note' && (
-            <select
-              value={selectedNoteId}
-              onChange={(e) => setSelectedNoteId(e.target.value)}
-              className="w-full bg-card border border-border rounded-lg px-4 py-3 text-foreground text-base focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
-              required
-              autoFocus
-              disabled={isLoading}
-            >
-              <option value="">{t('selectSession')}</option>
-              {notes.map((note) => (
-                <option key={note.id} value={note.id}>
-                  {note.title}
-                </option>
-              ))}
-            </select>
+            <Select value={selectedNoteId} onValueChange={setSelectedNoteId} disabled={isLoading}>
+              <SelectTrigger className="text-base">
+                <SelectValue placeholder={t('selectSession')} />
+              </SelectTrigger>
+              <SelectContent>
+                {notes.map((note) => (
+                  <SelectItem key={note.id} value={note.id}>
+                    {note.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
 
           <DialogFooter>
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isLoading}
-              className="px-6 py-2.5 bg-secondary hover:bg-secondary/80 disabled:bg-secondary/50 disabled:cursor-not-allowed rounded-lg transition-colors text-secondary-foreground text-sm font-medium"
-            >
+            <Button type="button" variant="secondary" onClick={onClose} disabled={isLoading}>
               {t('cancel')}
-            </button>
-            <button
-              type="submit"
-              disabled={!canSubmit}
-              className="px-6 py-2.5 bg-primary hover:bg-primary/90 disabled:bg-secondary disabled:cursor-not-allowed disabled:text-muted-foreground rounded-lg transition-colors text-primary-foreground text-sm font-medium flex items-center gap-2"
-            >
+            </Button>
+            <Button type="submit" disabled={!canSubmit}>
               {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
               {isLoading ? t('processing') : t('add')}
-            </button>
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -209,14 +201,16 @@ function DocumentViewerPanel({ document, onBack }: DocumentViewerPanelProps) {
         style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
       >
         <div className="flex items-center gap-2 flex-1 min-w-0">
-          <button
+          <Button
             onClick={onBack}
-            className="p-1.5 hover:bg-muted rounded-lg transition-colors shrink-0"
+            variant="ghost"
+            size="icon"
+            className="w-8 h-8"
             style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
             title={t('backToList')}
           >
             <ArrowLeft className="w-4 h-4" />
-          </button>
+          </Button>
           <span className="flex-1 min-w-0 text-sm font-medium truncate">{document.title}</span>
         </div>
       </div>
@@ -445,57 +439,61 @@ export default function SourcePanel(): ReactElement {
           >
             <span className="text-sm text-foreground">{t('knowledgeBase')}</span>
             <div className="relative" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
-              <button
+              <Button
                 onClick={() => setShowAddMenu(!showAddMenu)}
                 disabled={!defaultEmbeddingModel}
-                className={`p-1.5 rounded-lg transition-colors ${
-                  !defaultEmbeddingModel ? 'opacity-50 cursor-not-allowed' : 'hover:bg-muted'
-                }`}
+                variant="ghost"
+                size="icon"
+                className="w-8 h-8"
                 title={!defaultEmbeddingModel ? t('noEmbeddingModelConfigured') : t('addSource')}
               >
                 <Plus className="w-4 h-4" />
-              </button>
+              </Button>
 
               {/* 添加菜单 */}
               {showAddMenu && (
                 <div className="absolute right-0 top-full mt-1 w-40 bg-popover border border-border rounded-lg shadow-lg overflow-hidden z-10">
-                  <button
+                  <Button
                     onClick={handleFileUpload}
-                    className="w-full px-3 py-2 text-sm text-left hover:bg-muted flex items-center gap-2"
+                    variant="ghost"
+                    className="w-full justify-start text-sm font-normal rounded-none"
                   >
                     <FileUp className="w-4 h-4" />
                     {t('uploadFile')}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => {
                       setModalType('url')
                       setShowAddMenu(false)
                     }}
-                    className="w-full px-3 py-2 text-sm text-left hover:bg-muted flex items-center gap-2"
+                    variant="ghost"
+                    className="w-full justify-start text-sm font-normal rounded-none"
                   >
                     <Globe className="w-4 h-4" />
                     {t('importUrl')}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => {
                       setModalType('text')
                       setShowAddMenu(false)
                     }}
-                    className="w-full px-3 py-2 text-sm text-left hover:bg-muted flex items-center gap-2"
+                    variant="ghost"
+                    className="w-full justify-start text-sm font-normal rounded-none"
                   >
                     <FileText className="w-4 h-4" />
                     {t('pasteText')}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => {
                       setModalType('note')
                       setShowAddMenu(false)
                     }}
-                    className="w-full px-3 py-2 text-sm text-left hover:bg-muted flex items-center gap-2"
+                    variant="ghost"
+                    className="w-full justify-start text-sm font-normal rounded-none"
                   >
                     <StickyNote className="w-4 h-4" />
                     {t('importNote')}
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>
