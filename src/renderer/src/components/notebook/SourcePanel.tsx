@@ -147,13 +147,13 @@ function IndexingProgress() {
   if (!isIndexing || !indexProgress) return null
 
   return (
-    <div className="px-4 py-2 bg-primary/10 border-b border-border">
+    <div className="px-4 py-2 bg-primary/10 border-b border-border flex flex-col gap-1">
       <div className="flex items-center gap-2 text-xs text-primary">
         <Loader2 className="w-3 h-3 animate-spin" />
         <span>{indexProgress.stage}</span>
         <span>{indexProgress.progress}%</span>
       </div>
-      <div className="mt-1 h-1 bg-primary/20 rounded-full overflow-hidden">
+      <div className="h-1 bg-primary/20 rounded-full overflow-hidden">
         <div
           className="h-full bg-primary rounded-full transition-all duration-300"
           style={{ width: `${indexProgress.progress}%` }}

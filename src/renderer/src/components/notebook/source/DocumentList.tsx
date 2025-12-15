@@ -19,10 +19,12 @@ export default function DocumentList({
 
   if (documents.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-        <FileText className="w-12 h-12 text-muted-foreground mb-4" />
-        <p className="text-sm text-muted-foreground">{t('noDocuments')}</p>
-        <p className="text-xs text-muted-foreground mt-2">{t('noDocumentsDesc')}</p>
+      <div className="flex flex-col items-center justify-center h-full p-8 text-center gap-4">
+        <FileText className="w-12 h-12 text-muted-foreground" />
+        <div className="flex flex-col gap-2">
+          <p className="text-sm text-muted-foreground">{t('noDocuments')}</p>
+          <p className="text-xs text-muted-foreground">{t('noDocumentsDesc')}</p>
+        </div>
       </div>
     )
   }
@@ -81,11 +83,11 @@ function DocumentItem({ document, onDelete, onSelect }: DocumentItemProps): Reac
     >
       <div className="flex items-start gap-2 min-w-0">
         {getTypeIcon()}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 flex flex-col gap-1">
           <h3 className="text-sm font-medium truncate">{document.title}</h3>
-          <p className="text-xs text-muted-foreground mt-1">{document.chunkCount} chunks</p>
+          <p className="text-xs text-muted-foreground">{document.chunkCount} chunks</p>
           {document.status === 'processing' && (
-            <p className="text-xs text-yellow-600 mt-1 flex items-center gap-1">
+            <p className="text-xs text-yellow-600 flex items-center gap-1">
               <Loader2 className="w-3 h-3 animate-spin" />
               {t('indexing')}
             </p>

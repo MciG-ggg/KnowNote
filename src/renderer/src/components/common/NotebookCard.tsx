@@ -85,7 +85,7 @@ export default function NotebookCard({
   return (
     <div
       onClick={onClick}
-      className="group relative bg-card rounded-2xl p-8 min-h-[200px] cursor-pointer transition-all hover:bg-card/90 hover:scale-[1.02] border border-border/50 hover:border-border overflow-hidden shadow-md"
+      className="group relative bg-card rounded-2xl p-8 min-h-[200px] cursor-pointer transition-all hover:bg-card/90 hover:scale-[1.02] border border-border/50 hover:border-border overflow-hidden shadow-md flex flex-col gap-2"
     >
       {/* 顶部彩色装饰条 - 使用主题图表颜色 */}
       <div className={`absolute top-0 left-0 right-0 h-1 ${colorClass}`} />
@@ -123,23 +123,17 @@ export default function NotebookCard({
       </div>
 
       {/* 内容区域 - 使用 flex 布局让底部信息靠下 */}
-      <div className="mt-2 flex flex-col h-[calc(100%-1rem)]">
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold text-foreground mb-2 line-clamp-2">
-            {notebook.title}
-          </h3>
+      <div className="flex-1 flex flex-col gap-2">
+        <h3 className="text-lg font-semibold text-foreground line-clamp-2">{notebook.title}</h3>
 
-          {notebook.description && (
-            <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-              {notebook.description}
-            </p>
-          )}
-        </div>
+        {notebook.description && (
+          <p className="text-sm text-muted-foreground line-clamp-2">{notebook.description}</p>
+        )}
+      </div>
 
-        {/* 底部信息 - 自动靠底部对齐 */}
-        <div className="flex items-center justify-end text-xs text-muted-foreground pt-4">
-          <span>{formatDate(notebook.updatedAt)}</span>
-        </div>
+      {/* 底部信息 - 自动靠底部对齐 */}
+      <div className="flex items-center justify-end text-xs text-muted-foreground">
+        <span>{formatDate(notebook.updatedAt)}</span>
       </div>
 
       {/* Hover 效果光晕 - 使用主题图表颜色 */}

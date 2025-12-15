@@ -21,10 +21,12 @@ export default function NoteList({
 
   if (notes.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-        <FileText className="w-12 h-12 text-muted-foreground mb-4" />
-        <p className="text-sm text-muted-foreground">{t('noNotesYet')}</p>
-        <p className="text-xs text-muted-foreground mt-2">{t('noNotesYetDesc')}</p>
+      <div className="flex flex-col items-center justify-center h-full p-8 text-center gap-4">
+        <FileText className="w-12 h-12 text-muted-foreground" />
+        <div className="flex flex-col gap-2">
+          <p className="text-sm text-muted-foreground">{t('noNotesYet')}</p>
+          <p className="text-xs text-muted-foreground">{t('noNotesYetDesc')}</p>
+        </div>
       </div>
     )
   }
@@ -48,12 +50,12 @@ export default function NoteList({
             >
               <div className="flex items-start gap-2">
                 <FileText className="w-4 h-4 mt-0.5 shrink-0 text-muted-foreground" />
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 flex flex-col gap-1">
                   <h3 className="text-sm font-medium truncate">{note.title}</h3>
-                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                  <p className="text-xs text-muted-foreground line-clamp-2">
                     {note.content.replace(/^#.*\n/, '').slice(0, 100)}
                   </p>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-xs text-muted-foreground">
                     {new Date(note.updatedAt).toLocaleDateString(
                       i18n.language === 'zh-CN' ? 'zh-CN' : 'en-US'
                     )}

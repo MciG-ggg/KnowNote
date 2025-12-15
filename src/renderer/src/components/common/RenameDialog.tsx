@@ -56,14 +56,13 @@ export default function RenameDialog({
           <DialogTitle>{t('notebook:renameNotebook')}</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <Input
             ref={inputRef}
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder={t('notebook:enterNotebookName')}
-            className="mb-4"
           />
 
           <DialogFooter>

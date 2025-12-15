@@ -38,8 +38,8 @@ export const I18nProvider = ({ children }: I18nProviderProps) => {
   if (!isReady || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background dark:bg-background-dark">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           <p className="text-foreground dark:text-foreground-dark">Loading...</p>
         </div>
       </div>

@@ -58,7 +58,7 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
   // System message: centered notification box
   if (isSystem) {
     return (
-      <div className="flex justify-center mb-4">
+      <div className="flex justify-center">
         <div className="max-w-[90%] bg-muted border border-border text-muted-foreground rounded-xl px-4 py-3 shadow-sm">
           <div className="prose prose-sm max-w-none">
             <ReactMarkdown
@@ -92,8 +92,8 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
   if (isUser) {
     // User message: blue background, right-aligned
     return (
-      <div className="flex justify-end mb-4 group">
-        <div className="flex flex-col max-w-[80%]">
+      <div className="flex justify-end group">
+        <div className="flex flex-col gap-1 max-w-[80%]">
           <div className="bg-primary text-primary-foreground rounded-2xl px-4 py-3 shadow-sm">
             <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
           </div>
@@ -101,7 +101,7 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
           <Button
             onClick={handleCopy}
             variant="ghost"
-            className="self-end mt-1 px-2 py-1 text-xs h-auto text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100"
+            className="self-end px-2 py-1 text-xs h-auto text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100"
             title={copied ? t('common:copied') : t('common:copy')}
           >
             {copied ? (
@@ -137,7 +137,7 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
 
   // AI message: no background, left-aligned, Markdown rendered
   return (
-    <div className="flex justify-start mb-4 group">
+    <div className="flex justify-start group">
       <div className="flex flex-col gap-3 max-w-[90%]">
         {/* Reasoning process display - only shown when reasoning content exists */}
         {message.reasoningContent && (
@@ -186,7 +186,7 @@ export default function MessageItem({ message }: MessageItemProps): ReactElement
         )}
         {/* Action buttons - only shown when reply is complete and has content */}
         {message.content && !isStreaming && (
-          <div className="flex items-center gap-2 self-start ml-2 mt-1">
+          <div className="flex items-center gap-2 self-start ml-2">
             {/* Copy button */}
             <Button
               onClick={handleCopy}

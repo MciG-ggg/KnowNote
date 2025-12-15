@@ -31,7 +31,7 @@ const EmptyMedia = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      'mb-4 flex items-center justify-center',
+      'flex items-center justify-center',
       variant === 'icon' && 'text-muted-foreground',
       className
     )}

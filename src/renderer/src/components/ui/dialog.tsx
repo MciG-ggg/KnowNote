@@ -39,19 +39,19 @@ const DialogContent = React.forwardRef<
       )}
       {...props}
     >
-      {children}
+      <div className="flex flex-col gap-6">{children}</div>
     </DialogPrimitive.Content>
   </DialogPortal>
 ))
 DialogContent.displayName = DialogPrimitive.Content.displayName
 
 const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn('flex flex-col space-y-2 mb-6', className)} {...props} />
+  <div className={cn('flex flex-col space-y-2', className)} {...props} />
 )
 DialogHeader.displayName = 'DialogHeader'
 
 const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn('flex flex-row justify-end gap-4 mt-8', className)} {...props} />
+  <div className={cn('flex flex-row justify-end gap-4', className)} {...props} />
 )
 DialogFooter.displayName = 'DialogFooter'
 
