@@ -183,7 +183,7 @@ export default function ProcessPanel({
     <div className="relative flex flex-col bg-card rounded-xl overflow-hidden h-full mx-0 shadow-md">
       {/* 顶部标题栏 */}
       <div
-        className="h-14 flex items-center justify-between px-4 border-b border-border/50 flex-shrink-0"
+        className="h-14 flex items-center justify-between px-4 border-b border-border/50 shrink-0"
         style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
       >
         {/* 左侧折叠按钮 */}
@@ -259,7 +259,7 @@ export default function ProcessPanel({
       </div>
 
       {/* 底部输入区域 - 绝对定位浮动在底部 */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 pointer-events-none flex-shrink-0 z-20">
+      <div className="absolute bottom-0 left-0 right-0 p-4 pointer-events-none shrink-0 z-20">
         <div className="relative bg-muted/95 backdrop-blur-md rounded-lg border border-border focus-within:ring-2 focus-within:ring-ring shadow-lg pointer-events-auto">
           {/* 多行输入框 */}
           <Textarea

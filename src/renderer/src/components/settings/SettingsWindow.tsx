@@ -151,7 +151,7 @@ export default function SettingsWindow(): ReactElement {
       {/* Island风格布局容器 */}
       <div className="flex w-full h-full pt-10 px-3 pb-3 gap-3">
         {/* 左侧菜单 - Island */}
-        <div className="w-48 min-w-[12rem] bg-card rounded-xl p-4 flex flex-col shadow-md">
+        <div className="w-48 min-w-48 bg-card rounded-xl p-4 flex flex-col shadow-md">
           <div className="flex flex-col gap-2">
             {menuItems.map((item) => {
               const Icon = item.icon

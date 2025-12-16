@@ -286,7 +286,7 @@ export default function ProvidersSettings({
   return (
     <div className="flex h-full gap-6 overflow-hidden">
       {/* 左侧供应商列表 */}
-      <div className="w-48 flex-shrink-0 flex flex-col gap-4">
+      <div className="w-48 shrink-0 flex flex-col gap-4">
         {/* 搜索框 */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none z-10" />
