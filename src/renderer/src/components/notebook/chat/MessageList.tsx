@@ -61,7 +61,7 @@ export default function MessageList({ messages }: MessageListProps): ReactElemen
       onScrollChange={handleScroll}
     >
       <div className="px-4 py-6 pb-32">
-        <div className="max-w-4xl mx-auto space-y-4">
+        <div className="space-y-4">
           {messages.map((message) => (
             <MessageItem key={message.id} message={message} />
           ))}
