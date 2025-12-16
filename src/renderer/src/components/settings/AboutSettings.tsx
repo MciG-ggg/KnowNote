@@ -11,6 +11,7 @@ export default function AboutSettings(): ReactElement {
     status: UpdateStatus.IDLE
   })
   const [checking, setChecking] = useState(false)
+  const [appVersion, setAppVersion] = useState<string>('')
 
   // 监听更新状态变化
   useEffect(() => {
@@ -24,6 +25,11 @@ export default function AboutSettings(): ReactElement {
       if (result.success && result.state) {
         setUpdateState(result.state)
       }
+    })
+
+    // 获取应用版本号
+    window.api.getAppVersion().then((version) => {
+      setAppVersion(version)
     })
 
     return unsubscribe
@@ -47,22 +53,6 @@ export default function AboutSettings(): ReactElement {
     }
   }
 
-  const handleDownloadUpdate = async () => {
-    try {
-      await window.api.update.download()
-    } catch (error) {
-      console.error('Failed to download update:', error)
-    }
-  }
-
-  const handleInstallUpdate = async () => {
-    try {
-      await window.api.update.install()
-    } catch (error) {
-      console.error('Failed to install update:', error)
-    }
-  }
-
   // 获取更新按钮文本和状态
   const getUpdateButtonContent = () => {
     switch (updateState.status) {
@@ -75,10 +65,16 @@ export default function AboutSettings(): ReactElement {
         }
       case UpdateStatus.AVAILABLE:
         return {
-          text: t('updateAvailable', { version: updateState.info?.version }),
+          text: t('downloadAndInstall', { version: updateState.info?.version }),
           icon: <Download className="w-4 h-4" />,
           disabled: false,
-          onClick: handleDownloadUpdate
+          onClick: async () => {
+            try {
+              await window.api.update.download()
+            } catch (error) {
+              console.error('Failed to download update:', error)
+            }
+          }
         }
       case UpdateStatus.DOWNLOADING:
         return {
@@ -91,10 +87,10 @@ export default function AboutSettings(): ReactElement {
         }
       case UpdateStatus.DOWNLOADED:
         return {
-          text: t('installUpdate'),
-          icon: <Download className="w-4 h-4" />,
-          disabled: false,
-          onClick: handleInstallUpdate
+          text: t('installing'),
+          icon: <RefreshCw className="w-4 h-4 animate-spin" />,
+          disabled: true,
+          onClick: undefined
         }
       case UpdateStatus.NOT_AVAILABLE:
         return {
@@ -128,7 +124,9 @@ export default function AboutSettings(): ReactElement {
         <img src={logoImg} alt="Logo" className="w-16 h-16 rounded-xl" />
         <div className="flex flex-col gap-2">
           <h2 className="text-xl font-medium text-foreground">KnowNote</h2>
-          <p className="text-sm text-muted-foreground">{t('version')}</p>
+          <p className="text-sm text-muted-foreground">
+            {t('version')} {appVersion}
+          </p>
         </div>
       </div>
 

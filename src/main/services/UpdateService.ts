@@ -101,6 +101,12 @@ export class UpdateService {
         status: UpdateStatus.DOWNLOADED,
         info
       })
+
+      // 自动安装更新
+      Logger.info('UpdateService', 'Auto-installing update...')
+      setTimeout(() => {
+        this.quitAndInstall()
+      }, 1000)
     })
   }
 

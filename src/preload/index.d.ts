@@ -35,6 +35,9 @@ declare global {
       // 获取平台信息
       getPlatform: () => Promise<string>
 
+      // 获取应用版本号
+      getAppVersion: () => Promise<string>
+
       // 应用设置相关
       settings: {
         getAll: () => Promise<AppSettings>

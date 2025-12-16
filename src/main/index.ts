@@ -80,6 +80,11 @@ app.whenReady().then(() => {
     return process.platform
   })
 
+  // Handle get app version request
+  ipcMain.handle('get-app-version', () => {
+    return app.getVersion()
+  })
+
   // Create main window
   const mainWindow = createMainWindow()
 

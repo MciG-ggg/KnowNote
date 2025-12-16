@@ -25,6 +25,9 @@ const api = {
   // 获取平台信息
   getPlatform: (): Promise<string> => ipcRenderer.invoke('get-platform'),
 
+  // 获取应用版本号
+  getAppVersion: (): Promise<string> => ipcRenderer.invoke('get-app-version'),
+
   // 应用设置相关
   settings: {
     getAll: () => ipcRenderer.invoke('settings:getAll'),
