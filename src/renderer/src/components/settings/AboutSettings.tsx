@@ -59,14 +59,14 @@ export default function AboutSettings(): ReactElement {
       case UpdateStatus.CHECKING:
         return {
           text: t('checking'),
-          icon: <RefreshCw className="w-4 h-4 animate-spin" />,
+          icon: <RefreshCw className="w-4 h-4 animate-spin text-muted-foreground" />,
           disabled: true,
           onClick: undefined
         }
       case UpdateStatus.AVAILABLE:
         return {
           text: t('downloadAndInstall', { version: updateState.info?.version }),
-          icon: <Download className="w-4 h-4" />,
+          icon: <Download className="w-4 h-4 text-muted-foreground" />,
           disabled: false,
           onClick: async () => {
             try {
@@ -81,14 +81,14 @@ export default function AboutSettings(): ReactElement {
           text: t('downloading', {
             percent: updateState.progress?.percent.toFixed(0) || 0
           }),
-          icon: <Download className="w-4 h-4 animate-pulse" />,
+          icon: <Download className="w-4 h-4 animate-pulse text-muted-foreground" />,
           disabled: true,
           onClick: undefined
         }
       case UpdateStatus.DOWNLOADED:
         return {
           text: t('installing'),
-          icon: <RefreshCw className="w-4 h-4 animate-spin" />,
+          icon: <RefreshCw className="w-4 h-4 animate-spin text-muted-foreground" />,
           disabled: true,
           onClick: undefined
         }
@@ -102,14 +102,14 @@ export default function AboutSettings(): ReactElement {
       case UpdateStatus.ERROR:
         return {
           text: t('checkUpdateError'),
-          icon: <RefreshCw className="w-4 h-4" />,
+          icon: <RefreshCw className="w-4 h-4 text-muted-foreground" />,
           disabled: false,
           onClick: handleCheckUpdates
         }
       default:
         return {
           text: t('checkUpdates'),
-          icon: <RefreshCw className="w-4 h-4" />,
+          icon: <RefreshCw className="w-4 h-4 text-muted-foreground" />,
           disabled: checking,
           onClick: handleCheckUpdates
         }
