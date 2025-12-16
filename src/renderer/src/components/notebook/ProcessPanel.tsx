@@ -1,5 +1,12 @@
 import { useState, useEffect, useRef, ReactElement } from 'react'
-import { Send, StopCircle } from 'lucide-react'
+import {
+  Send,
+  StopCircle,
+  PanelLeftClose,
+  PanelLeftOpen,
+  PanelRightClose,
+  PanelRightOpen
+} from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useChatStore } from '../../store/chatStore'
 import { useNotebookStore } from '../../store/notebookStore'
@@ -8,7 +15,19 @@ import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Textarea } from '../ui/textarea'
 
-export default function ProcessPanel(): ReactElement {
+interface ProcessPanelProps {
+  onToggleLeft?: () => void
+  onToggleRight?: () => void
+  isLeftCollapsed?: boolean
+  isRightCollapsed?: boolean
+}
+
+export default function ProcessPanel({
+  onToggleLeft,
+  onToggleRight,
+  isLeftCollapsed = false,
+  isRightCollapsed = false
+}: ProcessPanelProps = {}): ReactElement {
   const { t } = useTranslation('ui')
   const [input, setInput] = useState('')
   const [hasProvider, setHasProvider] = useState(true)
@@ -164,34 +183,73 @@ export default function ProcessPanel(): ReactElement {
     <div className="relative flex flex-col bg-card rounded-xl overflow-hidden h-full mx-0 shadow-md">
       {/* 顶部标题栏 */}
       <div
-        className="h-14 flex items-center justify-center px-4 border-b border-border/50 flex-shrink-0"
+        className="h-14 flex items-center justify-between px-4 border-b border-border/50 flex-shrink-0"
         style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
       >
-        {currentNotebook ? (
-          isEditingTitle ? (
-            <Input
-              type="text"
-              value={editingTitle}
-              onChange={(e) => setEditingTitle(e.target.value)}
-              onBlur={handleSaveTitle}
-              onKeyDown={handleTitleKeyDown}
-              autoFocus
-              className="text-sm font-medium bg-transparent border-0 text-center min-w-0 max-w-full p-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
-              style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-            />
+        {/* 左侧折叠按钮 */}
+        {onToggleLeft && (
+          <Button
+            onClick={onToggleLeft}
+            variant="ghost"
+            size="icon"
+            className="w-8 h-8 shrink-0"
+            style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+            title={isLeftCollapsed ? '展开知识库' : '折叠知识库'}
+          >
+            {isLeftCollapsed ? (
+              <PanelLeftOpen className="w-4 h-4" />
+            ) : (
+              <PanelLeftClose className="w-4 h-4" />
+            )}
+          </Button>
+        )}
+
+        {/* 中间标题区域 */}
+        <div className="flex-1 flex items-center justify-center px-2 min-w-0">
+          {currentNotebook ? (
+            isEditingTitle ? (
+              <Input
+                type="text"
+                value={editingTitle}
+                onChange={(e) => setEditingTitle(e.target.value)}
+                onBlur={handleSaveTitle}
+                onKeyDown={handleTitleKeyDown}
+                autoFocus
+                className="text-sm font-medium bg-transparent border-0 text-center min-w-0 max-w-full p-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
+                style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+              />
+            ) : (
+              <Button
+                onClick={handleStartEditTitle}
+                variant="ghost"
+                className="text-sm font-medium h-auto p-0"
+                style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+                title={t('clickToEditTitle')}
+              >
+                {currentNotebook.title}
+              </Button>
+            )
           ) : (
-            <Button
-              onClick={handleStartEditTitle}
-              variant="ghost"
-              className="text-sm font-medium h-auto p-0"
-              style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-              title={t('clickToEditTitle')}
-            >
-              {currentNotebook.title}
-            </Button>
-          )
-        ) : (
-          <span className="text-sm text-muted-foreground">{t('selectOrCreateNotebook')}</span>
+            <span className="text-sm text-muted-foreground">{t('selectOrCreateNotebook')}</span>
+          )}
+        </div>
+
+        {/* 右侧折叠按钮 */}
+        {onToggleRight && (
+          <Button
+            onClick={onToggleRight}
+            variant="ghost"
+            size="icon"
+            className="w-8 h-8 shrink-0"
+            style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+            title={isRightCollapsed ? '展开笔记' : '折叠笔记'}
+          >
+            {isRightCollapsed ? (
+              <PanelRightOpen className="w-4 h-4" />
+            ) : (
+              <PanelRightClose className="w-4 h-4" />
+            )}
+          </Button>
         )}
       </div>
 

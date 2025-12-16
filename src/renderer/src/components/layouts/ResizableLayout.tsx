@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, ReactNode, ReactElement } from 'react'
+import * as React from 'react'
 import DragHandle from './DragHandle'
 
 export interface ResizableLayoutProps {
@@ -56,6 +57,10 @@ export default function ResizableLayout({
   const [rightWidth, setRightWidth] = useState(defaultRightWidth || 360)
   const [isDraggingLeft, setIsDraggingLeft] = useState(false)
   const [isDraggingRight, setIsDraggingRight] = useState(false)
+  const [isLeftCollapsed, setIsLeftCollapsed] = useState(false)
+  const [isRightCollapsed, setIsRightCollapsed] = useState(false)
+  const [savedLeftWidth, setSavedLeftWidth] = useState<number | null>(null)
+  const [savedRightWidth, setSavedRightWidth] = useState<number | null>(null)
 
   // 初始化和窗口大小变化时计算黄金比例宽度
   useEffect(() => {
@@ -131,6 +136,30 @@ export default function ResizableLayout({
     setIsDraggingRight(false)
   }
 
+  // 折叠/展开左侧面板
+  const toggleLeftPanel = (): void => {
+    if (isLeftCollapsed) {
+      // 展开：恢复之前的宽度
+      setLeftWidth(savedLeftWidth || defaultLeftWidth || 320)
+      setSavedLeftWidth(null)
+    } else {
+      // 折叠：保存当前宽度
+      setSavedLeftWidth(leftWidth)
+    }
+    setIsLeftCollapsed(!isLeftCollapsed)
+  }
+
+  // 折叠/展开右侧面板
+  const toggleRightPanel = (): void => {
+    if (isRightCollapsed) {
+      setRightWidth(savedRightWidth || defaultRightWidth || 360)
+      setSavedRightWidth(null)
+    } else {
+      setSavedRightWidth(rightWidth)
+    }
+    setIsRightCollapsed(!isRightCollapsed)
+  }
+
   return (
     <div
       ref={containerRef}
@@ -139,35 +168,47 @@ export default function ResizableLayout({
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
-      {/* 左侧面板 */}
-      <div
-        className="h-full overflow-hidden"
-        style={{ width: `${leftWidth}px`, minWidth: `${minLeftWidth}px` }}
-      >
-        {leftPanel}
-      </div>
+      {/* 左侧面板 - 条件渲染 */}
+      {!isLeftCollapsed && (
+        <div
+          className="h-full overflow-hidden"
+          style={{ width: `${leftWidth}px`, minWidth: `${minLeftWidth}px` }}
+        >
+          {leftPanel}
+        </div>
+      )}
 
-      {/* 左侧拖拽条 */}
-      <DragHandle onMouseDown={() => handleMouseDown('left')} />
+      {/* 左侧拖拽条 - 条件渲染 */}
+      {!isLeftCollapsed && <DragHandle onMouseDown={() => handleMouseDown('left')} />}
 
-      {/* 中间面板 */}
+      {/* 中间面板 - 使用 React.cloneElement 注入 props */}
       <div
         className="flex-1 h-full overflow-hidden"
         style={minCenterWidth > 0 ? { minWidth: `${minCenterWidth}px` } : undefined}
       >
-        {centerPanel}
+        {React.cloneElement(
+          centerPanel as ReactElement,
+          {
+            onToggleLeft: toggleLeftPanel,
+            onToggleRight: toggleRightPanel,
+            isLeftCollapsed,
+            isRightCollapsed
+          } as any
+        )}
       </div>
 
-      {/* 右侧拖拽条 */}
-      <DragHandle onMouseDown={() => handleMouseDown('right')} />
+      {/* 右侧拖拽条 - 条件渲染 */}
+      {!isRightCollapsed && <DragHandle onMouseDown={() => handleMouseDown('right')} />}
 
-      {/* 右侧面板 */}
-      <div
-        className="h-full overflow-hidden"
-        style={{ width: `${rightWidth}px`, minWidth: `${minRightWidth}px` }}
-      >
-        {rightPanel}
-      </div>
+      {/* 右侧面板 - 条件渲染 */}
+      {!isRightCollapsed && (
+        <div
+          className="h-full overflow-hidden"
+          style={{ width: `${rightWidth}px`, minWidth: `${minRightWidth}px` }}
+        >
+          {rightPanel}
+        </div>
+      )}
     </div>
   )
 }
