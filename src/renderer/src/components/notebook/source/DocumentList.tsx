@@ -79,21 +79,24 @@ function DocumentItem({ document, onDelete, onSelect }: DocumentItemProps): Reac
   return (
     <div
       onClick={() => onSelect(document)}
-      className="group relative p-3 pr-12 rounded-lg transition-colors cursor-pointer select-none hover:bg-muted"
+      className="group grid grid-cols-[auto_1fr_auto] gap-2 items-start p-3 rounded-lg transition-colors cursor-pointer select-none hover:bg-muted"
     >
-      <div className="flex items-start gap-2 min-w-0">
-        {getTypeIcon()}
-        <div className="flex-1 min-w-0 flex flex-col gap-1">
-          <h3 className="text-sm font-medium truncate">{document.title}</h3>
-          <p className="text-xs text-muted-foreground">{document.chunkCount} chunks</p>
-          {document.status === 'processing' && (
-            <p className="text-xs text-yellow-600 flex items-center gap-1">
-              <Loader2 className="w-3 h-3 animate-spin" />
-              {t('indexing')}
-            </p>
-          )}
-        </div>
+      {/* 图标列 - 固定宽度 */}
+      {getTypeIcon()}
+
+      {/* 内容列 - 可被压缩 */}
+      <div className="min-w-0 flex flex-col gap-1">
+        <h3 className="text-sm font-medium truncate">{document.title}</h3>
+        <p className="text-xs text-muted-foreground">{document.chunkCount} chunks</p>
+        {document.status === 'processing' && (
+          <p className="text-xs text-yellow-600 flex items-center gap-1">
+            <Loader2 className="w-3 h-3 animate-spin" />
+            {t('indexing')}
+          </p>
+        )}
       </div>
+
+      {/* 删除按钮列 - 固定宽度 */}
       <Button
         onClick={(e) => {
           e.stopPropagation()
@@ -103,7 +106,7 @@ function DocumentItem({ document, onDelete, onSelect }: DocumentItemProps): Reac
         }}
         variant="ghost"
         size="icon"
-        className="absolute right-3 top-2.5 opacity-0 group-hover:opacity-100 w-8 h-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+        className="opacity-0 group-hover:opacity-100 w-8 h-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
         title={t('deleteDocument')}
       >
         <Trash2 className="w-4 h-4" />
