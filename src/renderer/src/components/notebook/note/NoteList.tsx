@@ -37,42 +37,43 @@ export default function NoteList({
         <div
           key={note.id}
           onClick={() => onSelectNote(note)}
-          className={`group p-3 rounded-lg transition-colors cursor-pointer ${
+          className={`group grid grid-cols-[auto_1fr_auto] gap-2 items-start p-3 rounded-lg transition-colors cursor-pointer ${
             currentNote?.id === note.id
               ? 'bg-primary/10 border border-primary/20'
               : 'hover:bg-muted'
           }`}
         >
-          <div className="flex items-start gap-2">
-            <div className="flex-1 min-w-0 flex items-start gap-2">
-              <FileText className="w-4 h-4 mt-0.5 shrink-0 text-muted-foreground" />
-              <div className="flex-1 min-w-0 flex flex-col gap-1">
-                <h3 className="text-sm font-medium truncate">{note.title}</h3>
-                <p className="text-xs text-muted-foreground line-clamp-2">
-                  {note.content.replace(/^#.*\n/, '').slice(0, 100)}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {new Date(note.updatedAt).toLocaleDateString(
-                    i18n.language === 'zh-CN' ? 'zh-CN' : 'en-US'
-                  )}
-                </p>
-              </div>
-            </div>
-            <Button
-              onClick={(e) => {
-                e.stopPropagation()
-                if (confirm(t('confirmDeleteNote'))) {
-                  onDeleteNote(note.id)
-                }
-              }}
-              variant="ghost"
-              size="icon"
-              className="opacity-0 group-hover:opacity-100 w-8 h-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
-              title={t('deleteNote')}
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
+          {/* 图标列 - 固定宽度 */}
+          <FileText className="w-4 h-4 mt-0.5 text-muted-foreground" />
+
+          {/* 内容列 - 可被压缩 */}
+          <div className="min-w-0 flex flex-col gap-1">
+            <h3 className="text-sm font-medium truncate">{note.title}</h3>
+            <p className="text-xs text-muted-foreground line-clamp-2">
+              {note.content.replace(/^#.*\n/, '').slice(0, 100)}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {new Date(note.updatedAt).toLocaleDateString(
+                i18n.language === 'zh-CN' ? 'zh-CN' : 'en-US'
+              )}
+            </p>
           </div>
+
+          {/* 删除按钮列 - 固定宽度 */}
+          <Button
+            onClick={(e) => {
+              e.stopPropagation()
+              if (confirm(t('confirmDeleteNote'))) {
+                onDeleteNote(note.id)
+              }
+            }}
+            variant="ghost"
+            size="icon"
+            className="opacity-0 group-hover:opacity-100 w-8 h-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+            title={t('deleteNote')}
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
         </div>
       ))}
     </div>
