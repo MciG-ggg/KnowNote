@@ -1,8 +1,9 @@
 import type { LLMProvider } from './types'
 import { OpenAIProvider } from './OpenAIProvider'
-import { OllamaProvider } from './OllamaProvider'
 import { DeepSeekProvider } from './DeepSeekProvider'
 import { SiliconFlowProvider } from './SiliconFlowProvider'
+import { QwenProvider } from './QwenProvider'
+import { KimiProvider } from './KimiProvider'
 import { settingsManager, providersManager } from '../config'
 import Logger from '../../shared/utils/logger'
 
@@ -17,9 +18,10 @@ export class ProviderManager {
   constructor() {
     // Register all providers
     this.registerProvider(new OpenAIProvider())
-    this.registerProvider(new OllamaProvider())
     this.registerProvider(new DeepSeekProvider())
     this.registerProvider(new SiliconFlowProvider())
+    this.registerProvider(new QwenProvider())
+    this.registerProvider(new KimiProvider())
 
     Logger.info('ProviderManager', `Registered ${this.providers.size} providers`)
   }

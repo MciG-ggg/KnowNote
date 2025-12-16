@@ -71,6 +71,10 @@ export function registerProviderHandlers(providerManager: ProviderManager) {
           url = 'https://api.deepseek.com/models'
         } else if (args.providerName === 'siliconflow') {
           url = 'https://api.siliconflow.cn/v1/models'
+        } else if (args.providerName === 'qwen') {
+          url = 'https://dashscope.aliyuncs.com/compatible-mode/v1/models'
+        } else if (args.providerName === 'kimi') {
+          url = 'https://api.moonshot.cn/v1/models'
         } else {
           // 自定义供应商：从配置中获取 apiUrl
           const providerConfig = await providersManager.getProviderConfig(args.providerName)
@@ -81,12 +85,14 @@ export function registerProviderHandlers(providerManager: ProviderManager) {
           url = apiUrl.endsWith('/') ? `${apiUrl}models` : `${apiUrl}/models`
         }
 
+        const headers: Record<string, string> = {
+          Accept: 'application/json',
+          Authorization: `Bearer ${args.apiKey}`
+        }
+
         const response = await fetch(url, {
           method: 'GET',
-          headers: {
-            Authorization: `Bearer ${args.apiKey}`,
-            Accept: 'application/json'
-          }
+          headers
         })
 
         if (!response.ok) {

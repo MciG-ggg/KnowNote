@@ -42,10 +42,19 @@ export default function ProvidersSettings({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [providerToDelete, setProviderToDelete] = useState<string>('')
 
+  // 定义每个提供商的默认 baseUrl
+  const defaultBaseUrls: Record<string, string> = {
+    openai: 'https://api.openai.com/v1',
+    deepseek: 'https://api.deepseek.com',
+    siliconflow: 'https://api.siliconflow.cn/v1',
+    qwen: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+    kimi: 'https://api.moonshot.cn/v1'
+  }
+
   // 加载已缓存的模型列表
   useEffect(() => {
     const loadCachedModels = async () => {
-      const providerList = ['deepseek', 'openai', 'siliconflow']
+      const providerList = ['deepseek', 'openai', 'siliconflow', 'qwen', 'kimi']
       const loadedModels: Record<string, Model[]> = {}
 
       for (const providerName of providerList) {
@@ -65,14 +74,32 @@ export default function ProvidersSettings({
 
   // Get specific provider configuration
   const getProviderConfig = (providerName: string) => {
-    return (
-      providers.find((p) => p.providerName === providerName) || {
-        providerName,
-        config: {},
-        enabled: false,
-        updatedAt: 0
+    const existingProvider = providers.find((p) => p.providerName === providerName)
+
+    if (existingProvider) {
+      // 如果提供商存在，但没有设置 baseUrl，则添加默认值
+      return {
+        ...existingProvider,
+        config: {
+          ...existingProvider.config,
+          baseUrl: existingProvider.config.baseUrl || defaultBaseUrls[providerName] || ''
+        }
       }
-    )
+    }
+
+    // 如果提供商不存在，创建一个带有默认配置的对象
+    return {
+      providerName,
+      config: {
+        baseUrl: defaultBaseUrls[providerName] || '',
+        apiKey: '',
+        models: [],
+        apiUrl: '',
+        displayName: providerName
+      },
+      enabled: false,
+      updatedAt: 0
+    }
   }
 
   // Update provider configuration
@@ -108,6 +135,7 @@ export default function ProvidersSettings({
     const provider = getProviderConfig(providerName)
     const apiKey = provider.config.apiKey
 
+    // 检查是否有API Key
     if (!apiKey) {
       alert(t('enterApiKey'))
       return
@@ -137,6 +165,8 @@ export default function ProvidersSettings({
   const openaiProvider = getProviderConfig('openai')
   const deepseekProvider = getProviderConfig('deepseek')
   const siliconflowProvider = getProviderConfig('siliconflow')
+  const qwenProvider = getProviderConfig('qwen')
+  const kimiProvider = getProviderConfig('kimi')
 
   const providerList = [
     {
@@ -159,12 +189,26 @@ export default function ProvidersSettings({
       description: t('siliconflowDesc'),
       platformUrl: 'https://siliconflow.cn',
       enabled: siliconflowProvider.enabled
+    },
+    {
+      id: 'qwen',
+      name: t('qwenName'),
+      description: t('qwenDesc'),
+      platformUrl: 'https://dashscope.aliyun.com',
+      enabled: qwenProvider.enabled
+    },
+    {
+      id: 'kimi',
+      name: t('kimiName'),
+      description: t('kimiDesc'),
+      platformUrl: 'https://platform.moonshot.cn',
+      enabled: kimiProvider.enabled
     }
   ]
 
   // 获取自定义供应商列表
   const getCustomProviders = () => {
-    const builtInProviders = ['deepseek', 'openai', 'siliconflow']
+    const builtInProviders = ['deepseek', 'openai', 'siliconflow', 'qwen', 'kimi']
     return providers
       .filter((p) => !builtInProviders.includes(p.providerName))
       .map((p) => ({
@@ -367,6 +411,7 @@ export default function ProvidersSettings({
             onConfigChange={(config) => updateProviderConfig('deepseek', { config })}
             onEnabledChange={(enabled) => updateProviderConfig('deepseek', { enabled })}
             onFetchModels={() => fetchModels('deepseek')}
+            defaultBaseUrl={defaultBaseUrls.deepseek}
           />
         )}
 
@@ -381,6 +426,7 @@ export default function ProvidersSettings({
             onConfigChange={(config) => updateProviderConfig('openai', { config })}
             onEnabledChange={(enabled) => updateProviderConfig('openai', { enabled })}
             onFetchModels={() => fetchModels('openai')}
+            defaultBaseUrl={defaultBaseUrls.openai}
           />
         )}
 
@@ -395,11 +441,42 @@ export default function ProvidersSettings({
             onConfigChange={(config) => updateProviderConfig('siliconflow', { config })}
             onEnabledChange={(enabled) => updateProviderConfig('siliconflow', { enabled })}
             onFetchModels={() => fetchModels('siliconflow')}
+            defaultBaseUrl={defaultBaseUrls.siliconflow}
+          />
+        )}
+
+        {activeProvider === 'qwen' && (
+          <ProviderConfigPanel
+            displayName={t('qwenName')}
+            description={t('qwenDesc')}
+            platformUrl="https://dashscope.aliyun.com"
+            provider={qwenProvider}
+            models={models.qwen || []}
+            isFetching={fetchingModels.qwen || false}
+            onConfigChange={(config) => updateProviderConfig('qwen', { config })}
+            onEnabledChange={(enabled) => updateProviderConfig('qwen', { enabled })}
+            onFetchModels={() => fetchModels('qwen')}
+            defaultBaseUrl={defaultBaseUrls.qwen}
+          />
+        )}
+
+        {activeProvider === 'kimi' && (
+          <ProviderConfigPanel
+            displayName={t('kimiName')}
+            description={t('kimiDesc')}
+            platformUrl="https://platform.moonshot.cn"
+            provider={kimiProvider}
+            models={models.kimi || []}
+            isFetching={fetchingModels.kimi || false}
+            onConfigChange={(config) => updateProviderConfig('kimi', { config })}
+            onEnabledChange={(enabled) => updateProviderConfig('kimi', { enabled })}
+            onFetchModels={() => fetchModels('kimi')}
+            defaultBaseUrl={defaultBaseUrls.kimi}
           />
         )}
 
         {/* 自定义供应商配置 */}
-        {!['deepseek', 'openai', 'siliconflow'].includes(activeProvider) &&
+        {!['deepseek', 'openai', 'siliconflow', 'qwen', 'kimi'].includes(activeProvider) &&
           (() => {
             const customProvider = getProviderConfig(activeProvider)
             return customProvider && customProvider.providerName ? (

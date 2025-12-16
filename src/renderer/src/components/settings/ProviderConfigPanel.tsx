@@ -26,6 +26,7 @@ interface ProviderConfigPanelProps {
   onEnabledChange: (enabled: boolean) => void
   onFetchModels: () => void
   onDelete?: () => void // 可选：删除供应商回调（仅自定义供应商）
+  defaultBaseUrl?: string // 可选：默认 Base URL（用于恢复默认）
 }
 
 export default function ProviderConfigPanel({
@@ -38,7 +39,8 @@ export default function ProviderConfigPanel({
   onConfigChange,
   onEnabledChange,
   onFetchModels,
-  onDelete
+  onDelete,
+  defaultBaseUrl
 }: ProviderConfigPanelProps): ReactElement {
   const { t } = useTranslation('settings')
   const [showApiKey, setShowApiKey] = useState(false)
@@ -59,6 +61,23 @@ export default function ProviderConfigPanel({
       setApiUrlError('')
     }
     onConfigChange({ ...provider.config, apiUrl })
+  }
+
+  const handleBaseUrlChange = (baseUrl: string) => {
+    // 检查是否包含非 ASCII 字符
+    // eslint-disable-next-line no-control-regex
+    if (baseUrl && /[^\x00-\x7F]/.test(baseUrl)) {
+      setApiUrlError(t('apiUrlInvalid'))
+    } else {
+      setApiUrlError('')
+    }
+    onConfigChange({ ...provider.config, baseUrl })
+  }
+
+  const handleResetBaseUrl = () => {
+    if (defaultBaseUrl) {
+      handleBaseUrlChange(defaultBaseUrl)
+    }
   }
 
   const handleModelToggle = (modelId: string, checked: boolean) => {
@@ -153,6 +172,29 @@ export default function ProviderConfigPanel({
             <ExternalLink className="w-3 h-3" />
           </a>
         </div>
+      </div>
+
+      {/* Base URL - 所有供应商都显示 */}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-medium text-foreground">{t('baseUrl')}</h3>
+          {defaultBaseUrl && provider.config.baseUrl !== defaultBaseUrl && (
+            <Button onClick={handleResetBaseUrl} variant="ghost" size="sm" className="h-7 text-xs">
+              {t('resetToDefault')}
+            </Button>
+          )}
+        </div>
+        <Input
+          value={provider.config.baseUrl || ''}
+          onChange={(e) => handleBaseUrlChange(e.target.value)}
+          placeholder="https://api.example.com/v1"
+          className={apiUrlError ? 'border-destructive' : ''}
+        />
+        {apiUrlError ? (
+          <p className="text-sm text-destructive">{apiUrlError}</p>
+        ) : (
+          <p className="text-xs text-muted-foreground">{t('baseUrlHint')}</p>
+        )}
       </div>
 
       {/* API URL - 仅自定义供应商显示 */}
