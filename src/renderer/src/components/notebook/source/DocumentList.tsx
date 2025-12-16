@@ -55,7 +55,7 @@ function DocumentItem({ document, onDelete, onSelect }: DocumentItemProps): Reac
   const hasShownErrorRef = useRef(false)
 
   const getTypeIcon = () => {
-    const iconClass = 'w-4 h-4 mt-0.5 flex-shrink-0 text-muted-foreground'
+    const iconClass = 'w-4 h-4 mt-0.5 text-muted-foreground'
     switch (document.type) {
       case 'file':
         return <FileUp className={iconClass} />
@@ -106,7 +106,7 @@ function DocumentItem({ document, onDelete, onSelect }: DocumentItemProps): Reac
         }}
         variant="ghost"
         size="icon"
-        className="opacity-0 group-hover:opacity-100 w-8 h-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+        className="opacity-0 group-hover:opacity-100 w-8 h-8 mt-0.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
         title={t('deleteDocument')}
       >
         <Trash2 className="w-4 h-4" />

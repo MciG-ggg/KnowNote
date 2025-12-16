@@ -37,10 +37,10 @@ export default function NoteList({
         <div
           key={note.id}
           onClick={() => onSelectNote(note)}
-          className={`group grid grid-cols-[auto_1fr_auto] gap-2 items-start p-3 rounded-lg transition-colors cursor-pointer ${
+          className={`group grid grid-cols-[auto_1fr_auto] gap-2 items-start p-3 rounded-lg border transition-colors cursor-pointer ${
             currentNote?.id === note.id
-              ? 'bg-primary/10 border border-primary/20'
-              : 'hover:bg-muted'
+              ? 'bg-primary/10 border-primary/20'
+              : 'border-transparent hover:bg-muted'
           }`}
         >
           {/* 图标列 - 固定宽度 */}
@@ -69,7 +69,7 @@ export default function NoteList({
             }}
             variant="ghost"
             size="icon"
-            className="opacity-0 group-hover:opacity-100 w-8 h-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+            className="opacity-0 group-hover:opacity-100 w-8 h-8 mt-0.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
             title={t('deleteNote')}
           >
             <Trash2 className="w-4 h-4" />
