@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import {
   initDatabase,
@@ -83,6 +83,17 @@ app.whenReady().then(() => {
   // Handle get app version request
   ipcMain.handle('get-app-version', () => {
     return app.getVersion()
+  })
+
+  // Handle open external URL request
+  ipcMain.handle('open-external-url', async (_event, url: string) => {
+    try {
+      await shell.openExternal(url)
+      return { success: true }
+    } catch (error: any) {
+      Logger.error('Main', 'Failed to open external URL:', error)
+      return { success: false, error: error.message }
+    }
   })
 
   // Create main window

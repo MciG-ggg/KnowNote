@@ -38,6 +38,9 @@ declare global {
       // 获取应用版本号
       getAppVersion: () => Promise<string>
 
+      // 在默认浏览器中打开外部链接
+      openExternalUrl: (url: string) => Promise<{ success: boolean; error?: string }>
+
       // 应用设置相关
       settings: {
         getAll: () => Promise<AppSettings>

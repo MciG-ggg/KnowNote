@@ -41,7 +41,8 @@ export class MarkdownLoader implements IDocumentLoader {
       // 解析 Markdown AST
       // 处理 ESM/CommonJS 兼容性：在运行时获取正确的函数
       const remarkFn = typeof remark === 'function' ? remark : (remark as any).remark
-      const remarkGfmPlugin = typeof remarkGfm === 'function' ? remarkGfm : (remarkGfm as any).default
+      const remarkGfmPlugin =
+        typeof remarkGfm === 'function' ? remarkGfm : (remarkGfm as any).default
       const processor = remarkFn().use(remarkGfmPlugin)
       const ast = processor.parse(content) as Root
 

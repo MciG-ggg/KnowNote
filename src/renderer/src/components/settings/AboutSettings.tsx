@@ -35,12 +35,12 @@ export default function AboutSettings(): ReactElement {
     return unsubscribe
   }, [])
 
-  const handleOpenWebsite = () => {
-    window.open('https://github.com/MrSibe/KnowNote', '_blank')
+  const handleOpenWebsite = async () => {
+    await window.api.openExternalUrl('https://github.com/MrSibe/KnowNote')
   }
 
-  const handleFeedback = () => {
-    window.open('https://github.com/MrSibe/KnowNote/issues', '_blank')
+  const handleFeedback = async () => {
+    await window.api.openExternalUrl('https://github.com/MrSibe/KnowNote/issues')
   }
 
   const handleCheckUpdates = async () => {
