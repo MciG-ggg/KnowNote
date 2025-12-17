@@ -99,7 +99,7 @@ ${conversationText}
 Please provide summary:`
 
     // Call AI to generate summary
-    const provider = await this.providerManager.getActiveProvider()
+    const provider = await this.providerManager.getActiveChatProvider()
     if (!provider) {
       // If no provider configured, return a basic summary
       return `This conversation contains ${messages.length} messages.`

@@ -12,7 +12,7 @@ async function generateNoteTitle(
   content: string
 ): Promise<string> {
   try {
-    const provider = await providerManager.getActiveProvider()
+    const provider = await providerManager.getActiveChatProvider()
     if (!provider) {
       return 'Untitled Note'
     }
