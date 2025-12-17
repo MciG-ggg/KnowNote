@@ -11,7 +11,17 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos-latest, windows-latest]
+        os: [macos-latest, windows-latest, ubuntu-latest]
+        ELECTRON_ARCH: [x64]
+        include:
+          - os: ubuntu-latest
+            ELECTRON_ARCH: arm64
+            DEBIAN_ARCH: arm64
+        exclude:
+          - os: macos-latest
+            ELECTRON_ARCH: arm64
+          - os: windows-latest
+            ELECTRON_ARCH: arm64
 
     steps:
       - name: Checkout code
@@ -32,6 +42,34 @@ jobs:
 
       - name: Build application
         run: pnpm build
+
+      # Linux 系统依赖安装
+      - name: Install Linux dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            libsqlite3-dev \
+            pkg-config \
+            python3 \
+            python3-distutils \
+            libnss3-dev \
+            libatk-bridge2.0-dev \
+            libdrm2 \
+            libxkbcommon-dev \
+            libxcomposite-dev \
+            libxdamage-dev \
+            libxrandr-dev \
+            libgbm-dev \
+            libasound2-dev
+
+      # Linux 原生模块重建
+      - name: Rebuild native modules (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          pnpm rebuild better-sqlite3
+          pnpm rebuild sqlite-vec
 
       # macOS 代码签名（可选）
       - name: Import Code Signing Certificate (macOS)
@@ -76,3 +114,13 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm build:win --publish always
+
+      - name: Build & Release (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        timeout-minutes: 45
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # 构建指定架构的Linux版本
+          pnpm build:linux --linux --${{ matrix.ELECTRON_ARCH }} \
+            --publish always
