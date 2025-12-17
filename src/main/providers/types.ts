@@ -1,102 +1,97 @@
 /**
- * AI Provider 接口定义
- * 所有 AI Provider 必须实现此接口
+ * AI Provider 类型定义
+ * 基于能力组合模式的新架构
  */
 
 import type { APIMessage, StreamChunk } from '../../shared/types/chat'
 
-// 重新导出共享类型，方便其他地方使用
+// ==================== 导出共享类型 ====================
 export type { APIMessage as ChatMessage, StreamChunk }
 
-/**
- * Provider 配置
- */
-export interface LLMProviderConfig {
-  apiKey?: string
-  baseUrl?: string
-  model?: string
-  temperature?: number
-  maxTokens?: number
-  [key: string]: any
-}
+// ==================== 导出新的能力接口 ====================
+export type { BaseProvider, LLMProviderConfig } from './capabilities/BaseProvider'
+export type { ChatCapability } from './capabilities/ChatCapability'
+export type {
+  EmbeddingCapability,
+  EmbeddingConfig,
+  EmbeddingResult
+} from './capabilities/EmbeddingCapability'
+export type {
+  RerankCapability,
+  RerankConfig,
+  RerankDocument,
+  RerankResult
+} from './capabilities/RerankCapability'
+export type {
+  ImageGenerationCapability,
+  ImageGenerationConfig,
+  ImageGenerationResult
+} from './capabilities/ImageGenerationCapability'
+
+// ==================== Provider 组合类型 ====================
+import type { BaseProvider } from './capabilities/BaseProvider'
+import type { ChatCapability } from './capabilities/ChatCapability'
+import type { EmbeddingCapability } from './capabilities/EmbeddingCapability'
+import type { RerankCapability } from './capabilities/RerankCapability'
+import type { ImageGenerationCapability } from './capabilities/ImageGenerationCapability'
 
 /**
- * Embedding 配置
+ * 对话 Provider
+ * 支持对话功能的 Provider
  */
-export interface EmbeddingConfig {
-  model?: string // embedding 模型名称
-  dimensions?: number // 向量维度（部分模型支持）
-}
+export type ChatProvider = BaseProvider & ChatCapability
 
 /**
- * Embedding 结果
+ * 嵌入 Provider
+ * 支持嵌入功能的 Provider
  */
-export interface EmbeddingResult {
-  embedding: Float32Array // 向量数据
-  model: string // 使用的模型
-  dimensions: number // 向量维度
-  tokensUsed: number // 消耗的 token 数
-}
+export type EmbeddingProvider = BaseProvider & EmbeddingCapability
 
 /**
- * AI Provider 接口
+ * 完整功能 Provider
+ * 同时支持对话和嵌入功能的 Provider
+ */
+export type FullFeaturedProvider = BaseProvider & ChatCapability & EmbeddingCapability
+
+/**
+ * 重排序 Provider (未来扩展)
+ * 支持重排序功能的 Provider
+ */
+export type RerankProvider = BaseProvider & RerankCapability
+
+/**
+ * 图像生成 Provider (未来扩展)
+ * 支持图像生成功能的 Provider
+ */
+export type ImageProvider = BaseProvider & ImageGenerationCapability
+
+/**
+ * 多模态 Provider (未来扩展)
+ * 支持多种能力的 Provider
+ */
+export type MultimodalProvider = BaseProvider &
+  ChatCapability &
+  EmbeddingCapability &
+  ImageGenerationCapability
+
+// ==================== 旧接口(向后兼容,已废弃) ====================
+
+/**
+ * @deprecated 请使用新的能力组合类型: ChatProvider, EmbeddingProvider, FullFeaturedProvider
+ * 旧的 LLMProvider 接口,保留用于向后兼容
  */
 export interface LLMProvider {
-  /**
-   * Provider 名称
-   */
   readonly name: string
-
-  /**
-   * 配置 Provider
-   * @param config - Provider 配置项
-   */
-  configure(config: LLMProviderConfig): void
-
-  /**
-   * 流式发送消息
-   * @param messages - 聊天消息历史
-   * @param onChunk - 接收到新 chunk 时的回调
-   * @param onError - 发生错误时的回调
-   * @param onComplete - 完成时的回调
-   * @returns Promise<AbortController> - 用于中断请求的 AbortController
-   */
+  configure(config: any): void
   sendMessageStream(
     messages: APIMessage[],
     onChunk: (chunk: StreamChunk) => void,
     onError: (error: Error) => void,
     onComplete: () => void
   ): Promise<AbortController>
-
-  /**
-   * 验证配置是否有效（可选）
-   * @param config - 需要验证的配置
-   * @returns Promise<boolean> - 配置是否有效
-   */
-  validateConfig?(config: LLMProviderConfig): Promise<boolean>
-
-  /**
-   * 检查是否支持 Embedding（可选）
-   * @returns boolean - 是否支持 Embedding
-   */
+  validateConfig?(config: any): Promise<boolean>
   supportsEmbedding?(): boolean
-
-  /**
-   * 生成单个文本的 Embedding（可选）
-   * @param text - 输入文本
-   * @param config - Embedding 配置
-   */
-  createEmbedding?(text: string, config?: EmbeddingConfig): Promise<EmbeddingResult>
-
-  /**
-   * 批量生成 Embedding（可选）
-   * @param texts - 输入文本数组
-   * @param config - Embedding 配置
-   */
-  createEmbeddings?(texts: string[], config?: EmbeddingConfig): Promise<EmbeddingResult[]>
-
-  /**
-   * 获取默认 Embedding 模型（可选）
-   */
+  createEmbedding?(text: string, config?: any): Promise<any>
+  createEmbeddings?(texts: string[], config?: any): Promise<any[]>
   getDefaultEmbeddingModel?(): string
 }

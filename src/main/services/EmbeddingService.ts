@@ -39,17 +39,13 @@ export class EmbeddingService {
    * 生成单个文本的嵌入向量
    */
   async embed(text: string, config?: EmbeddingConfig): Promise<EmbeddingResult> {
-    const provider = await this.providerManager.getEmbeddingProvider()
+    const provider = await this.providerManager.getActiveEmbeddingProvider()
 
     if (!provider) {
       throw new Error('No embedding provider available')
     }
 
-    if (!provider.supportsEmbedding?.()) {
-      throw new Error(`Provider ${provider.name} does not support embedding`)
-    }
-
-    return await this.withRetry(() => provider.createEmbedding!(text, config))
+    return await this.withRetry(() => provider.createEmbedding(text, config))
   }
 
   /**
@@ -65,14 +61,10 @@ export class EmbeddingService {
       return []
     }
 
-    const provider = await this.providerManager.getEmbeddingProvider()
+    const provider = await this.providerManager.getActiveEmbeddingProvider()
 
     if (!provider) {
       throw new Error('No embedding provider available')
-    }
-
-    if (!provider.supportsEmbedding?.()) {
-      throw new Error(`Provider ${provider.name} does not support embedding`)
     }
 
     const results: EmbeddingResult[] = []
@@ -84,7 +76,7 @@ export class EmbeddingService {
       const batch = batches[i]
 
       try {
-        const batchResults = await this.withRetry(() => provider.createEmbeddings!(batch, config))
+        const batchResults = await this.withRetry(() => provider.createEmbeddings(batch, config))
         results.push(...batchResults)
 
         if (onProgress) {
@@ -110,16 +102,16 @@ export class EmbeddingService {
    * 获取当前 Embedding Provider 的默认 Embedding 模型
    */
   async getDefaultModel(): Promise<string | undefined> {
-    const provider = await this.providerManager.getEmbeddingProvider()
-    return provider?.getDefaultEmbeddingModel?.()
+    const provider = await this.providerManager.getActiveEmbeddingProvider()
+    return provider?.getDefaultEmbeddingModel()
   }
 
   /**
    * 检查当前 Embedding Provider 是否支持 Embedding
    */
   async isAvailable(): Promise<boolean> {
-    const provider = await this.providerManager.getEmbeddingProvider()
-    return provider?.supportsEmbedding?.() ?? false
+    const provider = await this.providerManager.getActiveEmbeddingProvider()
+    return provider !== null
   }
 
   /**

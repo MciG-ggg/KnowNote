@@ -48,13 +48,14 @@ export default function ProvidersSettings({
     deepseek: 'https://api.deepseek.com',
     siliconflow: 'https://api.siliconflow.cn/v1',
     qwen: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
-    kimi: 'https://api.moonshot.cn/v1'
+    kimi: 'https://api.moonshot.cn/v1',
+    ollama: 'http://localhost:11434/v1'
   }
 
   // 加载已缓存的模型列表
   useEffect(() => {
     const loadCachedModels = async () => {
-      const providerList = ['deepseek', 'openai', 'siliconflow', 'qwen', 'kimi']
+      const providerList = ['deepseek', 'openai', 'siliconflow', 'qwen', 'kimi', 'ollama']
       const loadedModels: Record<string, Model[]> = {}
 
       for (const providerName of providerList) {
@@ -94,7 +95,6 @@ export default function ProvidersSettings({
         baseUrl: defaultBaseUrls[providerName] || '',
         apiKey: '',
         models: [],
-        apiUrl: '',
         displayName: providerName
       },
       enabled: false,
@@ -167,6 +167,7 @@ export default function ProvidersSettings({
   const siliconflowProvider = getProviderConfig('siliconflow')
   const qwenProvider = getProviderConfig('qwen')
   const kimiProvider = getProviderConfig('kimi')
+  const ollamaProvider = getProviderConfig('ollama')
 
   const providerList = [
     {
@@ -203,12 +204,19 @@ export default function ProvidersSettings({
       description: t('kimiDesc'),
       platformUrl: 'https://platform.moonshot.cn',
       enabled: kimiProvider.enabled
+    },
+    {
+      id: 'ollama',
+      name: 'Ollama',
+      description: 'Local LLM runner',
+      platformUrl: 'https://ollama.com',
+      enabled: ollamaProvider.enabled
     }
   ]
 
   // 获取自定义供应商列表
   const getCustomProviders = () => {
-    const builtInProviders = ['deepseek', 'openai', 'siliconflow', 'qwen', 'kimi']
+    const builtInProviders = ['deepseek', 'openai', 'siliconflow', 'qwen', 'kimi', 'ollama']
     return providers
       .filter((p) => !builtInProviders.includes(p.providerName))
       .map((p) => ({
@@ -224,13 +232,13 @@ export default function ProvidersSettings({
   const handleAddProvider = async (data: {
     providerName: string
     apiKey: string
-    apiUrl: string
+    baseUrl: string
   }) => {
     const newProvider: ProviderConfig = {
       providerName: data.providerName,
       config: {
         apiKey: data.apiKey,
-        apiUrl: data.apiUrl,
+        baseUrl: data.baseUrl,
         displayName: data.providerName,
         models: []
       },
@@ -274,21 +282,21 @@ export default function ProvidersSettings({
   const fetchCustomProviderModels = async (providerName: string) => {
     const provider = getProviderConfig(providerName)
     const apiKey = provider.config.apiKey
-    const apiUrl = provider.config.apiUrl
+    const baseUrl = provider.config.baseUrl
 
     if (!apiKey) {
       alert(t('enterApiKey'))
       return
     }
 
-    if (!apiUrl) {
+    if (!baseUrl) {
       alert(t('enterApiKeyAndUrl'))
       return
     }
 
     // 检查 URL 是否包含非 ASCII 字符
     // eslint-disable-next-line no-control-regex
-    if (/[^\x00-\x7F]/.test(apiUrl)) {
+    if (/[^\x00-\x7F]/.test(baseUrl)) {
       alert(t('apiUrlInvalid'))
       return
     }
@@ -296,7 +304,7 @@ export default function ProvidersSettings({
     setFetchingModels((prev) => ({ ...prev, [providerName]: true }))
 
     try {
-      // 先将当前配置保存到后端，确保后端能读取到 apiUrl
+      // 先将当前配置保存到后端，确保后端能读取到 baseUrl
       await window.api.saveProviderConfig({
         providerName,
         config: provider.config,
@@ -304,7 +312,7 @@ export default function ProvidersSettings({
         updatedAt: Date.now()
       })
 
-      // 使用后端 API，后端会从配置中读取 apiUrl
+      // 使用后端 API，后端会从配置中读取 baseUrl
       const modelList = await window.api.fetchModels(providerName, apiKey)
       setModels((prev) => ({ ...prev, [providerName]: modelList }))
 
@@ -475,15 +483,32 @@ export default function ProvidersSettings({
           />
         )}
 
+        {activeProvider === 'ollama' && (
+          <ProviderConfigPanel
+            displayName="Ollama"
+            description="Local LLM runner"
+            platformUrl="https://ollama.com"
+            provider={ollamaProvider}
+            models={models.ollama || []}
+            isFetching={fetchingModels.ollama || false}
+            onConfigChange={(config) => updateProviderConfig('ollama', { config })}
+            onEnabledChange={(enabled) => updateProviderConfig('ollama', { enabled })}
+            onFetchModels={() => fetchModels('ollama')}
+            defaultBaseUrl={defaultBaseUrls.ollama}
+          />
+        )}
+
         {/* 自定义供应商配置 */}
-        {!['deepseek', 'openai', 'siliconflow', 'qwen', 'kimi'].includes(activeProvider) &&
+        {!['deepseek', 'openai', 'siliconflow', 'qwen', 'kimi', 'ollama'].includes(
+          activeProvider
+        ) &&
           (() => {
             const customProvider = getProviderConfig(activeProvider)
             return customProvider && customProvider.providerName ? (
               <ProviderConfigPanel
                 displayName={customProvider.config.displayName || activeProvider}
                 description={t('customProviderDesc')}
-                platformUrl={customProvider.config.apiUrl || ''}
+                platformUrl={customProvider.config.baseUrl || ''}
                 provider={customProvider}
                 models={models[activeProvider] || []}
                 isFetching={fetchingModels[activeProvider] || false}

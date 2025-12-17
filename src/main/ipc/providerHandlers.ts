@@ -13,6 +13,22 @@ export function registerProviderHandlers(providerManager: ProviderManager) {
     'save-provider-config',
     validate(ProviderSchemas.saveProviderConfig, async (args) => {
       await providersManager.saveProviderConfig(args.providerName, args.config, args.enabled)
+
+      // 如果是自定义供应商且刚被启用,注册到 ProviderManager
+      if (args.enabled && !providerManager.getDescriptor(args.providerName)) {
+        // 这是一个新的自定义供应商,需要注册
+        const customConfig = {
+          providerName: args.providerName,
+          displayName: args.config.displayName || args.providerName,
+          baseUrl: args.config.baseUrl || '',
+          apiKey: args.config.apiKey || ''
+        }
+
+        if (customConfig.baseUrl) {
+          await providerManager.registerCustomProvider(customConfig)
+        }
+      }
+
       // 广播 Provider 配置变更事件到所有窗口
       BrowserWindow.getAllWindows().forEach((win) => {
         win.webContents.send('provider-config-changed')
@@ -75,14 +91,19 @@ export function registerProviderHandlers(providerManager: ProviderManager) {
           url = 'https://dashscope.aliyuncs.com/compatible-mode/v1/models'
         } else if (args.providerName === 'kimi') {
           url = 'https://api.moonshot.cn/v1/models'
-        } else {
-          // 自定义供应商：从配置中获取 apiUrl
+        } else if (args.providerName === 'ollama') {
+          // Ollama: 从配置获取 baseUrl，支持自定义服务器地址
           const providerConfig = await providersManager.getProviderConfig(args.providerName)
-          if (!providerConfig || !providerConfig.config.apiUrl) {
-            throw new Error(`Custom provider ${args.providerName} has no apiUrl configured`)
+          const baseUrl = providerConfig?.config.baseUrl || 'http://localhost:11434/v1'
+          url = baseUrl.endsWith('/') ? `${baseUrl}models` : `${baseUrl}/models`
+        } else {
+          // 自定义供应商：从配置中获取 baseUrl
+          const providerConfig = await providersManager.getProviderConfig(args.providerName)
+          if (!providerConfig || !providerConfig.config.baseUrl) {
+            throw new Error(`Custom provider ${args.providerName} has no baseUrl configured`)
           }
-          const apiUrl = providerConfig.config.apiUrl
-          url = apiUrl.endsWith('/') ? `${apiUrl}models` : `${apiUrl}/models`
+          const baseUrl = providerConfig.config.baseUrl
+          url = baseUrl.endsWith('/') ? `${baseUrl}models` : `${baseUrl}/models`
         }
 
         const headers: Record<string, string> = {
