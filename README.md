@@ -271,8 +271,24 @@ KnowNote/
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=MrSibe/KnowNote&type=date&legend=top-left)](https://www.star-history.com/#MrSibe/KnowNote&type=date&legend=top-left)
-
+<picture>
+  <source
+    media="(prefers-color-scheme: dark)"
+    srcset="
+      https://api.star-history.com/svg?repos=MrSibe/KnowNote&type=date&legend=top-left&theme=dark
+    "
+  />
+  <source
+    media="(prefers-color-scheme: light)"
+    srcset="
+      https://api.star-history.com/svg?repos=MrSibe/KnowNote&type=date&legend=top-left
+    "
+  />
+  <img
+    alt="Star History Chart"
+    src="https://api.star-history.com/svg?repos=MrSibe/KnowNote&type=date&legend=top-left"
+  />
+</picture>
 <div align="center">
   <p>由 <a href="https://github.com/MrSibe">@MrSibe</a> 用心打造</p>
   <p>如果这个项目对你有帮助，请给它一个 ⭐ Star！</p>
