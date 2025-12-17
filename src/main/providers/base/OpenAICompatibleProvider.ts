@@ -1,186 +1,74 @@
-import type {
-  LLMProvider,
-  ChatMessage,
-  StreamChunk,
-  LLMProviderConfig,
-  EmbeddingConfig,
-  EmbeddingResult
-} from '../types'
+/**
+ * OpenAI Compatible Provider
+ * 基于组合模式的统一 Provider 实现
+ * 支持所有 OpenAI 兼容的 API(OpenAI, DeepSeek, Qwen, Kimi, SiliconFlow 等)
+ */
+
+import type { BaseProvider, LLMProviderConfig } from '../capabilities/BaseProvider'
+import type { ChatCapability } from '../capabilities/ChatCapability'
+import type { EmbeddingCapability } from '../capabilities/EmbeddingCapability'
+import type { APIMessage, StreamChunk } from '../../../shared/types/chat'
+import type { EmbeddingConfig, EmbeddingResult } from '../capabilities/EmbeddingCapability'
+import type { ProviderDescriptor } from '../registry/ProviderDescriptor'
+import { OpenAIChatHandler } from '../handlers/OpenAIChatHandler'
+import { OpenAIEmbeddingHandler } from '../handlers/OpenAIEmbeddingHandler'
 import Logger from '../../../shared/utils/logger'
 
 /**
- * OpenAI Compatible API Provider Abstract Base Class
- * Used for all providers compatible with OpenAI API format (e.g., OpenAI, DeepSeek, Kimi, etc.)
- *
- * Subclasses only need to define the following properties:
- * - name: Provider name
- * - getDefaultBaseUrl(): Default API base URL
- * - getDefaultModel(): Default model name
+ * OpenAICompatibleProvider
+ * 统一的 OpenAI 兼容 Provider 实现
+ * 根据 ProviderDescriptor 的能力配置动态组合功能
  */
-export abstract class OpenAICompatibleProvider implements LLMProvider {
-  abstract readonly name: string
+export class OpenAICompatibleProvider implements BaseProvider {
+  readonly name: string
+  private descriptor: ProviderDescriptor
+  protected config: LLMProviderConfig
 
-  protected config: LLMProviderConfig = {
-    baseUrl: this.getDefaultBaseUrl(),
-    model: this.getDefaultModel(),
-    temperature: 0.7,
-    maxTokens: 2048
-  }
+  // 能力 Handler(根据 descriptor.capabilities 初始化)
+  private chatHandler?: OpenAIChatHandler
+  private embeddingHandler?: OpenAIEmbeddingHandler
 
-  /**
-   * Get default API base URL
-   */
-  protected abstract getDefaultBaseUrl(): string
+  constructor(descriptor: ProviderDescriptor) {
+    this.name = descriptor.name
+    this.descriptor = descriptor
 
-  /**
-   * Get default model name
-   */
-  protected abstract getDefaultModel(): string
-
-  configure(config: LLMProviderConfig): void {
-    this.config = { ...this.config, ...config }
-  }
-
-  async sendMessageStream(
-    messages: ChatMessage[],
-    onChunk: (chunk: StreamChunk) => void,
-    onError: (error: Error) => void,
-    onComplete: () => void
-  ): Promise<AbortController> {
-    const { apiKey, baseUrl, model, temperature, maxTokens } = this.config
-
-    // 创建 AbortController
-    const abortController = new AbortController()
-
-    if (!apiKey) {
-      onError(new Error(`${this.name} API Key not configured`))
-      abortController.abort()
-      return abortController
+    // 初始化默认配置
+    this.config = {
+      baseUrl: descriptor.defaultBaseUrl,
+      model: descriptor.defaultChatModel || descriptor.defaultEmbeddingModel,
+      temperature: 0.7,
+      maxTokens: 2048
     }
 
-    // 异步执行流读取,不阻塞返回
-    ;(async () => {
-      try {
-        const response = await fetch(`${baseUrl}/chat/completions`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${apiKey}`
-          },
-          body: JSON.stringify({
-            model,
-            messages,
-            temperature,
-            max_tokens: maxTokens,
-            stream: true
-          }),
-          signal: abortController.signal // 关键: 传递 abort signal
-        })
+    // 根据能力初始化对应的 handler
+    if (descriptor.capabilities.chat) {
+      this.chatHandler = new OpenAIChatHandler(this.name, this.config)
+      Logger.debug('OpenAICompatibleProvider', `Initialized chat handler for ${this.name}`)
+    }
 
-        if (!response.ok) {
-          const errorText = await response.text()
-          throw new Error(`${this.name} API Error: ${response.status} - ${errorText}`)
-        }
+    if (descriptor.capabilities.embedding) {
+      this.embeddingHandler = new OpenAIEmbeddingHandler(this.name, this.config)
+      Logger.debug('OpenAICompatibleProvider', `Initialized embedding handler for ${this.name}`)
+    }
 
-        const reader = response.body?.getReader()
-        if (!reader) {
-          throw new Error('Unable to read response stream')
-        }
-
-        const decoder = new TextDecoder()
-        let buffer = ''
-        let hasReceivedReasoning = false // Track if reasoning content has been received
-        let reasoningComplete = false // Track if reasoning is complete
-
-        while (true) {
-          const { done, value } = await reader.read()
-
-          if (done) break
-
-          // Decode bytes to text and append to buffer
-          buffer += decoder.decode(value, { stream: true })
-          const lines = buffer.split('\n')
-
-          // Keep the last incomplete line
-          buffer = lines.pop() || ''
-
-          for (const line of lines) {
-            const trimmed = line.trim()
-
-            // Skip empty lines and comments
-            if (!trimmed || trimmed === 'data: [DONE]') continue
-
-            // Parse SSE data
-            if (trimmed.startsWith('data: ')) {
-              try {
-                const json = JSON.parse(trimmed.slice(6))
-                const delta = json.choices?.[0]?.delta
-                const finishReason = json.choices?.[0]?.finish_reason
-
-                // Track reasoning content status
-                if (delta?.reasoning_content) {
-                  hasReceivedReasoning = true
-                } else if (hasReceivedReasoning && !reasoningComplete) {
-                  // Had reasoning content before, now none, means reasoning phase is over
-                  reasoningComplete = true
-                }
-
-                // Send content chunk (including reasoning content)
-                if (delta?.content || delta?.reasoning_content) {
-                  onChunk({
-                    content: delta.content || '',
-                    reasoningContent: delta.reasoning_content,
-                    done: false,
-                    reasoningDone: reasoningComplete
-                  })
-                }
-
-                // Completion marker
-                if (finishReason) {
-                  onChunk({
-                    content: '',
-                    reasoningContent: undefined,
-                    done: true,
-                    reasoningDone: true,
-                    metadata: {
-                      model: json.model,
-                      finishReason,
-                      usage: json.usage
-                        ? {
-                            promptTokens: json.usage.prompt_tokens,
-                            completionTokens: json.usage.completion_tokens,
-                            totalTokens: json.usage.total_tokens
-                          }
-                        : undefined
-                    }
-                  })
-                }
-              } catch (e) {
-                Logger.error(`${this.name}Provider`, 'Failed to parse SSE data:', e)
-              }
-            }
-          }
-        }
-
-        onComplete()
-      } catch (error: any) {
-        // 区分 AbortError 和其他错误
-        if (error.name === 'AbortError') {
-          Logger.info(`${this.name}Provider`, 'Stream aborted by user')
-          // 用户中断时仍然调用 onComplete,确保流程完整
-          onComplete()
-        } else {
-          onError(error)
-        }
-      }
-    })()
-
-    // 立即返回 AbortController
-    return abortController
+    Logger.info('OpenAICompatibleProvider', `Provider ${this.name} initialized`)
   }
 
   /**
-   * Validate if API Key is valid
+   * 配置 Provider
+   */
+  configure(config: LLMProviderConfig): void {
+    this.config = { ...this.config, ...config }
+
+    // 更新 handlers 的配置
+    this.chatHandler?.updateConfig(this.config)
+    this.embeddingHandler?.updateConfig(this.config)
+
+    Logger.debug('OpenAICompatibleProvider', `Provider ${this.name} configured`)
+  }
+
+  /**
+   * 验证配置是否有效
    */
   async validateConfig(config: LLMProviderConfig): Promise<boolean> {
     try {
@@ -195,127 +83,100 @@ export abstract class OpenAICompatibleProvider implements LLMProvider {
     }
   }
 
-  // ==================== Embedding API ====================
+  // ==================== 能力检查方法 ====================
 
   /**
-   * 获取默认 Embedding 模型
-   * 子类可以覆盖此方法以使用不同的默认模型
+   * 检查是否支持对话能力
+   * TypeScript 类型守卫
    */
-  getDefaultEmbeddingModel(): string {
-    return 'text-embedding-3-small'
+  hasChatCapability(): this is BaseProvider & ChatCapability {
+    return this.chatHandler !== undefined
   }
 
   /**
-   * 检查是否支持 Embedding
-   * 默认所有 OpenAI 兼容的 Provider 都支持
+   * 检查是否支持嵌入能力
+   * TypeScript 类型守卫
    */
-  supportsEmbedding(): boolean {
-    return true
+  hasEmbeddingCapability(): this is BaseProvider & EmbeddingCapability {
+    return this.embeddingHandler !== undefined
   }
+
+  // ==================== 对话能力方法 ====================
+
+  /**
+   * 流式发送消息
+   * 如果不支持对话能力会抛出错误
+   */
+  async sendMessageStream(
+    messages: APIMessage[],
+    onChunk: (chunk: StreamChunk) => void,
+    onError: (error: Error) => void,
+    onComplete: () => void
+  ): Promise<AbortController> {
+    if (!this.chatHandler) {
+      const error = new Error(`Provider ${this.name} does not support chat capability`)
+      onError(error)
+      const abortController = new AbortController()
+      abortController.abort()
+      return abortController
+    }
+
+    return this.chatHandler.sendMessageStream(messages, onChunk, onError, onComplete)
+  }
+
+  /**
+   * 获取默认对话模型
+   */
+  getDefaultChatModel(): string {
+    if (!this.chatHandler) {
+      throw new Error(`Provider ${this.name} does not support chat capability`)
+    }
+    return this.descriptor.defaultChatModel || this.chatHandler.getDefaultChatModel()
+  }
+
+  // ==================== 嵌入能力方法 ====================
 
   /**
    * 生成单个文本的 Embedding
+   * 如果不支持嵌入能力会抛出错误
    */
   async createEmbedding(text: string, config?: EmbeddingConfig): Promise<EmbeddingResult> {
-    const { apiKey, baseUrl } = this.config
-    const model = config?.model || this.config.model || this.getDefaultEmbeddingModel()
-
-    if (!apiKey) {
-      throw new Error(`${this.name} API Key not configured`)
+    if (!this.embeddingHandler) {
+      throw new Error(`Provider ${this.name} does not support embedding capability`)
     }
 
-    try {
-      const requestBody: Record<string, unknown> = {
-        model,
-        input: text
-      }
-
-      // 部分模型支持指定维度
-      if (config?.dimensions) {
-        requestBody.dimensions = config.dimensions
-      }
-
-      const response = await fetch(`${baseUrl}/embeddings`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`
-        },
-        body: JSON.stringify(requestBody)
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`${this.name} Embedding API Error: ${response.status} - ${errorText}`)
-      }
-
-      const data = await response.json()
-      const embeddingData = data.data[0].embedding as number[]
-
-      return {
-        embedding: new Float32Array(embeddingData),
-        model: data.model,
-        dimensions: embeddingData.length,
-        tokensUsed: data.usage?.total_tokens || 0
-      }
-    } catch (error) {
-      Logger.error(`${this.name}Provider`, 'Failed to create embedding:', error)
-      throw error
-    }
+    return this.embeddingHandler.createEmbedding(text, config)
   }
 
   /**
    * 批量生成 Embedding
+   * 如果不支持嵌入能力会抛出错误
    */
   async createEmbeddings(texts: string[], config?: EmbeddingConfig): Promise<EmbeddingResult[]> {
-    const { apiKey, baseUrl } = this.config
-    const model = config?.model || this.config.model || this.getDefaultEmbeddingModel()
-
-    if (!apiKey) {
-      throw new Error(`${this.name} API Key not configured`)
+    if (!this.embeddingHandler) {
+      throw new Error(`Provider ${this.name} does not support embedding capability`)
     }
 
-    if (texts.length === 0) {
-      return []
+    return this.embeddingHandler.createEmbeddings(texts, config)
+  }
+
+  /**
+   * 获取默认 Embedding 模型
+   */
+  getDefaultEmbeddingModel(): string {
+    if (!this.embeddingHandler) {
+      throw new Error(`Provider ${this.name} does not support embedding capability`)
     }
+    return this.descriptor.defaultEmbeddingModel || this.embeddingHandler.getDefaultEmbeddingModel()
+  }
 
-    try {
-      const requestBody: Record<string, unknown> = {
-        model,
-        input: texts
-      }
+  // ==================== 向后兼容方法(已废弃) ====================
 
-      // 部分模型支持指定维度
-      if (config?.dimensions) {
-        requestBody.dimensions = config.dimensions
-      }
-
-      const response = await fetch(`${baseUrl}/embeddings`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`
-        },
-        body: JSON.stringify(requestBody)
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`${this.name} Embedding API Error: ${response.status} - ${errorText}`)
-      }
-
-      const data = await response.json()
-      const tokensPerText = Math.ceil((data.usage?.total_tokens || 0) / texts.length)
-
-      return data.data.map((item: { embedding: number[]; index: number }) => ({
-        embedding: new Float32Array(item.embedding),
-        model: data.model,
-        dimensions: item.embedding.length,
-        tokensUsed: tokensPerText
-      }))
-    } catch (error) {
-      Logger.error(`${this.name}Provider`, 'Failed to create embeddings:', error)
-      throw error
-    }
+  /**
+   * @deprecated 使用 hasChatCapability() 或 hasEmbeddingCapability() 替代
+   * 检查是否支持 Embedding
+   */
+  supportsEmbedding(): boolean {
+    return this.hasEmbeddingCapability()
   }
 }

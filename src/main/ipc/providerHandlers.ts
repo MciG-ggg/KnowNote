@@ -13,6 +13,22 @@ export function registerProviderHandlers(providerManager: ProviderManager) {
     'save-provider-config',
     validate(ProviderSchemas.saveProviderConfig, async (args) => {
       await providersManager.saveProviderConfig(args.providerName, args.config, args.enabled)
+
+      // 如果是自定义供应商且刚被启用,注册到 ProviderManager
+      if (args.enabled && !providerManager.getDescriptor(args.providerName)) {
+        // 这是一个新的自定义供应商,需要注册
+        const customConfig = {
+          providerName: args.providerName,
+          displayName: args.config.displayName || args.providerName,
+          apiUrl: args.config.apiUrl || args.config.baseUrl || '',
+          apiKey: args.config.apiKey || ''
+        }
+
+        if (customConfig.apiUrl) {
+          await providerManager.registerCustomProvider(customConfig)
+        }
+      }
+
       // 广播 Provider 配置变更事件到所有窗口
       BrowserWindow.getAllWindows().forEach((win) => {
         win.webContents.send('provider-config-changed')

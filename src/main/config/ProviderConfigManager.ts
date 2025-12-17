@@ -11,7 +11,7 @@ import Logger from '../../shared/utils/logger'
 /**
  * 提供商配置管理器
  */
-export class ProvidersManager {
+export class ProviderConfigManager {
   private getStore: () => Promise<Store<any>>
 
   constructor(getStore: () => Promise<Store<any>>) {
@@ -33,10 +33,10 @@ export class ProvidersManager {
     let encryptedConfig = config
     if (isEncryptionAvailable()) {
       encryptedConfig = encryptProviderConfig(config)
-      Logger.info('ProvidersManager', `Config encrypted for ${providerName}`)
+      Logger.info('ProviderConfigManager', `Config encrypted for ${providerName}`)
     } else {
       Logger.warn(
-        'ProvidersManager',
+        'ProviderConfigManager',
         `Encryption not available, storing config in plain text for ${providerName}`
       )
     }
@@ -141,7 +141,9 @@ export class ProvidersManager {
     const hasTypeField = models.length > 0 && models.some((m) => m.type)
 
     if (!hasTypeField && models.length > 0) {
-      console.log(`[ProvidersManager] Migrating models for ${providerName} - adding type field`)
+      console.log(
+        `[ProviderConfigManager] Migrating models for ${providerName} - adding type field`
+      )
       models = enrichModelsWithType(models)
       // 更新存储
       await this.saveProviderModels(providerName, models)
